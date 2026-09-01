@@ -32,3 +32,13 @@
 .politico-rule-x {
   @apply border-b border-gray-200;
 }
+
+/* Hide scrollbar while keeping scrollable */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

@@ -196,6 +196,23 @@ export default function Header() {
         </div>
       )}
 
+      {/* Mobile/Tablet Responsive Category Nav */}
+      <nav className="lg:hidden bg-white border-b border-gray-200">
+        <div className="px-4 py-2 overflow-x-auto whitespace-nowrap scrollbar-hide">
+          <div className="flex items-center gap-4 text-[12px] font-bold text-gray-800">
+            {mainCategories.map((cat) => (
+              <a
+                key={cat.name}
+                href={cat.href}
+                className="hover:text-[#ce1126] transition-colors flex-shrink-0"
+              >
+                {cat.name}
+              </a>
+            ))}
+          </div>
+        </div>
+      </nav>
+
       {/* Main Secondary Category Sub-Nav */}
       <nav className={`hidden lg:block bg-white border-b border-gray-200 transition-all duration-300 ease-out ${isCompact ? "shadow-sm" : ""}`}>
         <div
