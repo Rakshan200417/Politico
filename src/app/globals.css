@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-white text-politico-black font-sans antialiased selection:bg-politico-red selection:text-white;
+  }
+}
+
+/* Custom Editorial Styling Utilities */
+.politico-header-border {
+  border-bottom: 3px solid #111111;
+}
+
+.politico-section-title {
+  @apply font-bold text-xs tracking-wider uppercase text-politico-red flex items-center gap-1.5 mb-3;
+}
+
+.politico-headline {
+  @apply font-bold text-politico-black hover:text-politico-red transition-colors duration-150 leading-tight font-sans tracking-tight;
+}
+
+.politico-byline {
+  @apply text-[11px] font-bold text-gray-500 uppercase tracking-wider mt-1.5;
+}
+
+.politico-rule-y {
+  @apply border-r border-gray-200;
+}
+
+.politico-rule-x {
+  @apply border-b border-gray-200;
+}
