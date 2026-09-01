@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const magazineArticles = [
@@ -103,45 +103,152 @@ const magazineArticles = [
     image:
       "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=600&q=80",
   },
+  {
+    id: "12",
+    tag: "COLUMN",
+    title: "Inside the Battle for Swing State Voters' Hearts",
+    deck: "Political operatives are doubling down on micro-targeting strategies that could reshape the electoral map.",
+    author: "BY ALEX BURNS",
+    image:
+      "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: "13",
+    tag: "MAGAZINE",
+    title: "The Tech Executive Who Could Change How Congress Works",
+    deck: "Meet the Silicon Valley insider advising lawmakers on artificial intelligence regulation and crypto policy.",
+    author: "BY NANCY SCOLA",
+    image:
+      "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: "14",
+    tag: "COLUMN",
+    title: "The DNC's New Blueprint for Winning the Electoral College",
+    deck: "Democratic strategists are rolling out a data-driven approach to target college-educated suburban voters.",
+    author: "BY MICHAEL STRATFORD",
+    image:
+      "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: "15",
+    tag: "MAGAZINE",
+    title: "How Federal Judges Are Reshaping the Immigration Debate",
+    deck: "A wave of court decisions is undoing decades of precedent on refugee policy and border enforcement.",
+    author: "BY JOSH GERSTEIN",
+    image:
+      "https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: "16",
+    tag: "COLUMN",
+    title: "The Secret Behind Biden's Surprisingly Strong Approval Among Latinos",
+    deck: "Economic messaging and local organizing efforts are paying dividends with a crucial voting bloc.",
+    author: "BY ZAINEB D'SOUZA",
+    image:
+      "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: "17",
+    tag: "MAGAZINE",
+    title: "Corporate America's New Political Tightrope",
+    deck: "Fortune 500 executives are navigating increasingly polarized politics while protecting their bottom lines.",
+    author: "BY LAUREN GARDNER",
+    image:
+      "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: "18",
+    tag: "COLUMN",
+    title: "The Unexpected Coalition Shaking Up Senate Republicans",
+    deck: "A bloc of moderates is pushing back against hardline demands and reshaping GOP priorities.",
+    author: "BY BURGESS EVERETT",
+    image:
+      "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=600&q=80",
+  },
 ];
 
 export default function MagazineCarousel() {
   const [startIndex, setStartIndex] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(3);
   const wheelCooldownRef = useRef(0);
-  const visibleCount = 3;
+  
   const cardWidth = 280;
   const gap = 16;
-  const maxIndex = Math.max(0, magazineArticles.length - visibleCount);
-  const offset = startIndex * (cardWidth + gap);
+
+  // Get responsive visible count based on screen width
+  const getResponsiveVisibleCount = () => {
+    if (typeof window === "undefined") return 3;
+    const width = window.innerWidth;
+    if (width < 640) return 1;    // Mobile
+    if (width < 1024) return 2;   // Tablet
+    return 3;                     // Desktop
+  };
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      const newVisibleCount = getResponsiveVisibleCount();
+      setVisibleCount(newVisibleCount);
+      setStartIndex(0); // Reset scroll position on resize
+    };
+
+    // Set initial value
+    const initialCount = getResponsiveVisibleCount();
+    setVisibleCount(initialCount);
+
+    window.addEventListener("resize", handleResize, { passive: true });
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Total cards = 1 (POLITICO MAGAZINE header) + articleCount
+  const totalCards = magazineArticles.length + 1;
+  // maxIndex calculation: allow scrolling until the last card is in view
+  const maxIndex = Math.max(0, totalCards - visibleCount);
+  
+  // Clamp startIndex to prevent over-scrolling
+  const clampedStartIndex = Math.min(Math.max(0, startIndex), maxIndex);
+  
+  // Calculate the actual visible scroll width for the viewport
+  const viewportWidth = visibleCount * (cardWidth + gap);
+  const totalScrollWidth = totalCards * (cardWidth + gap);
+  // Use clamped index for offset to prevent over-scrolling
+  const offset = clampedStartIndex * (cardWidth + gap);
 
   return (
     <section className="w-full my-10 font-sans">
       <div
         className="overflow-hidden"
-        style={{ touchAction: "pan-y" }}
+        style={{ 
+          touchAction: "pan-y",
+          width: "100%",
+          maxWidth: "100%"
+        }}
         onWheel={(e) => {
           const now = Date.now();
           if (now < wheelCooldownRef.current) return;
           const ev = e as React.WheelEvent;
           const deltaX = ev.deltaX;
           const deltaY = ev.deltaY;
-          const threshold = 30; // require a significant horizontal wheel
-          // Only handle when horizontal movement dominates vertical movement
+          const threshold = 30;
           if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > threshold) {
-            if (deltaX > 0) {
-              // two-finger swipe left/right mapping: positive deltaX -> next
-              setStartIndex((prev) => Math.min(prev + 1, maxIndex));
-            } else {
-              // negative deltaX -> previous
-              setStartIndex((prev) => Math.max(prev - 1, 0));
-            }
+            const newIndex = deltaX > 0 
+              ? Math.min(clampedStartIndex + 4, maxIndex)
+              : Math.max(clampedStartIndex - 4, 0);
+            setStartIndex(newIndex);
             wheelCooldownRef.current = now + 300;
             ev.preventDefault();
             ev.stopPropagation();
           }
         }}
       >
-        <div className="flex gap-4 transition-transform duration-300 ease-out" style={{ transform: `translateX(-${offset}px)` }}>
+        <div 
+          className="flex gap-4 transition-transform duration-300 ease-out" 
+          style={{ 
+            transform: `translateX(-${offset}px)`,
+            willChange: "transform"
+          }}
+        >
           <div className="flex-shrink-0 bg-[#f7f7f7] p-8 flex flex-col items-center justify-center text-center relative w-[280px] h-[420px] border border-transparent">
             <div className="absolute top-0 left-1/2 -translate-x-1/2">
               <div className="w-16 h-5 bg-[#ce1126]" style={{ clipPath: "polygon(0 0, 100% 0, 85% 100%, 15% 100%)" }}></div>
@@ -188,23 +295,26 @@ export default function MagazineCarousel() {
       <div className="flex items-center space-x-4 mt-6 pt-2">
         <button
           onClick={() => setStartIndex((prev) => Math.max(prev - 1, 0))}
-          disabled={startIndex === 0}
+          disabled={clampedStartIndex === 0}
           className="text-gray-400 hover:text-black transition p-1 disabled:opacity-40"
           aria-label="Previous slide"
         >
           <ChevronLeft size={18} />
         </button>
 
-        <div className="flex-1 h-[2px] bg-gray-200 relative overflow-hidden">
+        <div className="h-[2px] bg-gray-200 relative overflow-hidden" style={{ width: `${totalScrollWidth - gap}px` }}>
           <div
             className="h-[2px] bg-gray-900 absolute left-0 top-0 transition-all duration-300"
-            style={{ width: `${((visibleCount / magazineArticles.length) * 100)}%`, transform: `translateX(${(startIndex / maxIndex) * 100}%)` }}
+            style={{ 
+              width: `${((visibleCount / totalCards) * 100)}%`, 
+              transform: `translateX(${maxIndex > 0 ? (clampedStartIndex / maxIndex) * 100 : 0}%)`
+            }}
           />
         </div>
 
         <button
           onClick={() => setStartIndex((prev) => Math.min(prev + 1, maxIndex))}
-          disabled={startIndex >= maxIndex}
+          disabled={clampedStartIndex >= maxIndex}
           className="text-gray-400 hover:text-black transition p-1 disabled:opacity-40"
           aria-label="Next slide"
         >
