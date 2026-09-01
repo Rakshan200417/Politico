@@ -232,9 +232,14 @@ export default function MagazineCarousel() {
           const deltaY = ev.deltaY;
           const threshold = 30;
           if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > threshold) {
+            // Mobile: scroll 1, Tablet: scroll 3, Desktop: scroll 4
+            let scrollAmount = 4;
+            if (visibleCount === 1) scrollAmount = 1;      // Mobile
+            else if (visibleCount === 2) scrollAmount = 3; // Tablet
+            
             const newIndex = deltaX > 0 
-              ? Math.min(clampedStartIndex + 4, maxIndex)
-              : Math.max(clampedStartIndex - 4, 0);
+              ? Math.min(clampedStartIndex + scrollAmount, maxIndex)
+              : Math.max(clampedStartIndex - scrollAmount, 0);
             setStartIndex(newIndex);
             wheelCooldownRef.current = now + 300;
             ev.preventDefault();
