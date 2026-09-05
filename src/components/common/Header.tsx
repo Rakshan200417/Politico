@@ -20,26 +20,26 @@ export default function Header() {
   }, []);
 
   const mainCategories = [
-    { name: "Congress", href: "#" },
-    { name: "White House", href: "#" },
-    { name: "Canada", href: "#" },
-    { name: "Defense", href: "#" },
-    { name: "Elections", href: "#" },
-    { name: "Energy", href: "#" },
-    { name: "Health Care", href: "#" },
-    { name: "Legal", href: "#" },
-    { name: "Tech", href: "#" },
-    { name: "California", href: "#" },
-    { name: "New York", href: "#" },
+    { name: "Congress", href: "/category/congress" },
+    { name: "White House", href: "/category/white-house" },
+    { name: "Canada", href: "/category/canada" },
+    { name: "Defense", href: "/category/defense" },
+    { name: "Elections", href: "/category/elections" },
+    { name: "Energy", href: "/category/energy" },
+    { name: "Health Care", href: "/category/health-care" },
+    { name: "Legal", href: "/category/legal" },
+    { name: "Tech", href: "/category/tech" },
+    { name: "California", href: "/category/california" },
+    { name: "New York", href: "/category/new-york" },
   ];
 
   const subCategories = [
-    { name: "Playbook", href: "#" },
-    { name: "Columns", href: "#" },
-    { name: "Newsletters", href: "#" },
-    { name: "Magazine", href: "#" },
-    { name: "Podcasts", href: "#" },
-    { name: "Polling", href: "#" },
+    { name: "Playbook", href: "/category/playbook" },
+    { name: "Columns", href: "/category/columns" },
+    { name: "Newsletters", href: "/category/newsletters" },
+    { name: "Magazine", href: "/category/magazine" },
+    { name: "Podcasts", href: "/category/podcasts" },
+    { name: "Polling", href: "/category/polling" },
   ];
 
   const megaMenuData = {
