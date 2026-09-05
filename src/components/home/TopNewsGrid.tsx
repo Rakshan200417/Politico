@@ -3,9 +3,9 @@ import React from "react";
 export default function TopNewsGrid() {
   return (
     <div className="w-full font-sans">
-      <div className="flex items-center gap-2 pb-2 mb-4 border-b-2 border-black">
+      <div className="flex items-center gap-2 pb-2 mb-4 border-b border-[#d9d9d9]">
         <span className="w-2.5 h-2.5 rounded-full border-2 border-[#d32f2f] bg-transparent inline-block" />
-        <h2 className="text-xs font-black tracking-[0.16em] text-[#111111] uppercase font-sans">
+        <h2 className="text-[9px] font-bold tracking-[0.12em] text-[#222222] uppercase font-sans">
           TOP NEWS
         </h2>
       </div>
@@ -13,13 +13,13 @@ export default function TopNewsGrid() {
       <div className="grid grid-cols-1 xl:grid-cols-[1.6fr_1fr] gap-6 items-start">
         <article className="group cursor-pointer">
           <a href="#" className="block">
-            <h1 className="text-[42px] sm:text-[52px] lg:text-[62px] font-black leading-[0.9] tracking-[-0.06em] text-[#1f9fe3] group-hover:text-[#0f6db1] transition-colors duration-150 mb-3 font-sans">
+            <h1 className="text-[34px] sm:text-[38px] lg:text-[42px] font-bold leading-[0.96] tracking-[-0.02em] text-[#111111] group-hover:text-[#333333] transition-colors duration-150 mb-2 font-sans">
               Republicans are losing
               <span className="block">patience with Trump&apos;s Iran</span>
               <span className="block">whiplash</span>
             </h1>
 
-            <p className="text-[17px] lg:text-[18px] text-[#111111] font-sans leading-[1.4] mb-4">
+            <p className="text-[13px] lg:text-[14px] text-[#555555] font-sans leading-[1.3] mb-3">
               Just days after Treasury Secretary Scott Bessent announced a new “economic D-Day” to choke Iran, the U.S. carried out its first known attack on Iran since July.
             </p>
 
@@ -48,7 +48,7 @@ export default function TopNewsGrid() {
                 />
               </div>
 
-              <h3 className="text-[20px] lg:text-[22px] font-black leading-[1] tracking-[-0.05em] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans">
+              <h3 className="text-[16px] lg:text-[17px] font-bold leading-[1.02] tracking-[-0.02em] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans">
                 Supreme Court allows Trump&apos;s ballroom construction, but Roberts says project is &lsquo;likely unlawful&rsquo;
               </h3>
 
@@ -58,7 +58,7 @@ export default function TopNewsGrid() {
             </a>
           </article>
 
-          <article className="group cursor-pointer border-t border-gray-200 pt-4">
+          <article className="group cursor-pointer border-t border-[#e3e3e3] pt-4">
             <a href="#" className="block space-y-2.5">
               <div className="aspect-[16/10] overflow-hidden bg-gray-100">
                 <img
@@ -68,7 +68,7 @@ export default function TopNewsGrid() {
                 />
               </div>
 
-              <h3 className="text-[20px] lg:text-[22px] font-black leading-[1] tracking-[-0.05em] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans">
+              <h3 className="text-[16px] lg:text-[17px] font-bold leading-[1.02] tracking-[-0.02em] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans">
                 Trump welcomes Russia back to the G20. Europe isn&apos;t having it.
               </h3>
 

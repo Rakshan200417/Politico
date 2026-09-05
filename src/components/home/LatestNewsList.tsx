@@ -62,26 +62,26 @@ export default function LatestNewsList() {
   return (
     <aside className="w-full pr-0 lg:pr-3 font-sans">
       {/* Section Header with Red Circle Indicator */}
-      <div className="flex items-center gap-2 pb-2 mb-3 border-b-2 border-black">
+      <div className="flex items-center gap-2 pb-2 mb-3 border-b border-[#d9d9d9]">
         <span className="w-2.5 h-2.5 rounded-full border-2 border-[#d32f2f] bg-transparent inline-block"></span>
-        <h2 className="text-xs font-black tracking-widest text-[#111111] uppercase font-sans">
+        <h2 className="text-[9px] font-bold tracking-[0.12em] text-[#222222] uppercase font-sans">
           LATEST NEWS
         </h2>
       </div>
 
       {/* News List */}
-      <div className="divide-y divide-gray-200">
+      <div className="divide-y divide-[#e5e5e5]">
         {latestNews.map((item) => (
-          <article key={item.id} className="py-3.5 group cursor-pointer">
+          <article key={item.id} className="py-2.5 group cursor-pointer">
             <a href="#" className="flex items-start gap-3">
               <span
-                className={`text-[11px] font-bold shrink-0 min-w-[28px] pt-0.5 ${
+                className={`text-[8px] font-bold shrink-0 min-w-[24px] pt-0.5 ${
                   item.isRedTime ? "text-[#d32f2f]" : "text-gray-500"
                 }`}
               >
                 {item.time}
               </span>
-              <h3 className="text-[13px] font-extrabold leading-snug text-gray-900 group-hover:text-[#d32f2f] transition-colors duration-150 font-sans">
+              <h3 className="text-[11px] font-bold leading-[1.18] text-[#222222] group-hover:text-[#d32f2f] transition-colors duration-150 font-sans">
                 {item.title}
               </h3>
             </a>

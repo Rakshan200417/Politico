@@ -29,7 +29,7 @@ export default function TopSidebarWidgets() {
             />
           </div>
 
-          <h3 className="mt-3 text-[20px] font-black leading-[0.98] tracking-[-0.05em] text-[#111111] group-hover:text-[#d32f2f] transition-colors">
+          <h3 className="mt-3 text-[16px] font-bold leading-[1.02] tracking-[-0.02em] text-[#111111] group-hover:text-[#d32f2f] transition-colors">
             Supreme Court allows Trump&apos;s ballroom construction, but Roberts says project is &lsquo;likely unlawful&rsquo;
           </h3>
 
@@ -38,16 +38,16 @@ export default function TopSidebarWidgets() {
           </p>
         </article>
 
-        <div className="space-y-4 border-t border-gray-200 pt-4">
+        <div className="space-y-4 border-t border-[#e3e3e3] pt-4">
           {stories.map((story, index) => (
-            <article key={index} className="group cursor-pointer border-b border-gray-200 pb-4 last:border-b-0 last:pb-0">
+            <article key={index} className="group cursor-pointer border-b border-[#e3e3e3] pb-4 last:border-b-0 last:pb-0">
               {story.tag && (
                 <div className="mb-2 text-[9px] font-black uppercase tracking-[0.18em] text-[#111111]">
                   {story.tag}
                 </div>
               )}
 
-              <h4 className="text-[17px] font-black leading-[1.06] tracking-[-0.04em] text-[#111111] group-hover:text-[#d32f2f] transition-colors">
+              <h4 className="text-[14px] font-bold leading-[1.08] tracking-[-0.02em] text-[#111111] group-hover:text-[#d32f2f] transition-colors">
                 {story.title}
               </h4>
 

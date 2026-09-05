@@ -113,23 +113,23 @@ export default function Header() {
     <header className="w-full bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm font-sans transition-all duration-300 ease-out">
       {/* Top Header Bar */}
       <div
-        className={`max-w-[1440px] mx-auto px-6 flex items-center justify-between relative border-b border-gray-200 transition-all duration-300 ease-out ${
-          isCompact ? "py-2" : "py-3 sm:py-4"
+        className={`w-full px-3 flex items-center justify-between relative border-b border-gray-200 transition-all duration-300 ease-out ${
+          isCompact ? "h-12" : "h-20 min-[1280px]:h-[124px]"
         }`}
       >
         {/* Left Menu Toggle Button pinned to the far left */}
-        <div className="flex items-center justify-start w-[80px] flex-shrink-0">
+        <div className="flex items-center justify-start w-[100px] max-[1279px]:w-[76px] min-[1024px]:max-[1279px]:w-[90px] min-[1280px]:w-[120px] flex-shrink-0">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className={`border border-gray-300 hover:border-gray-400 p-2 text-gray-800 transition-all duration-300 ease-out focus:outline-none flex items-center justify-center ${
-              isCompact ? "w-8 h-8" : "w-10 h-10"
+            className={`p-1 max-[1279px]:p-0.5 text-gray-800 transition-all duration-300 ease-out focus:outline-none flex items-center justify-center ${
+              isCompact ? "w-6 h-6" : "w-7 h-7"
             }`}
             aria-label="Toggle navigation menu"
           >
             {isMenuOpen ? (
-              <X size={isCompact ? 18 : 20} className="text-gray-800" />
+              <X size={isCompact ? 13 : 14} className="text-gray-800 max-[1279px]:!w-3 max-[1279px]:!h-3 min-[1024px]:max-[1279px]:!w-4 min-[1024px]:max-[1279px]:!h-4" />
             ) : (
-              <Menu size={isCompact ? 18 : 20} className="text-gray-800" />
+              <Menu size={isCompact ? 13 : 14} className="text-gray-800 max-[1279px]:!w-3 max-[1279px]:!h-3 min-[1024px]:max-[1279px]:!w-4 min-[1024px]:max-[1279px]:!h-4" />
             )}
           </button>
         </div>
@@ -138,10 +138,10 @@ export default function Header() {
         <div className="text-center flex-1 min-w-0">
           <a href="/" className="inline-block">
             <span
-              className={`font-black tracking-tight text-[#ce1126] uppercase font-sans leading-none transition-all duration-300 ease-out ${
-                isCompact
-                  ? "text-[28px] sm:text-[34px] lg:text-[42px]"
-                  : "text-4xl sm:text-5xl lg:text-[52px]"
+              className={`font-medium tracking-[-0.03em] text-[#d71920] uppercase font-sans leading-none transition-all duration-300 ease-out ${
+                  isCompact
+                    ? "text-[45px]"
+                    : "text-[56px] min-[1280px]:text-[80px]"
               }`}
             >
               POLITICO
@@ -150,7 +150,7 @@ export default function Header() {
         </div>
 
         {/* Right Actions: Europe | PRO | Search Icon */}
-        <div className="flex items-center justify-end gap-4 sm:gap-5 w-[80px] sm:w-[140px] text-xs font-bold uppercase tracking-wider text-gray-800 flex-shrink-0">
+        <div className="flex items-center justify-end gap-3 max-[1279px]:gap-2 min-[1024px]:max-[1279px]:gap-3 w-[100px] max-[1279px]:w-[76px] min-[1024px]:max-[1279px]:w-[90px] min-[1280px]:w-[120px] text-[8px] max-[1279px]:text-[7px] min-[1024px]:max-[1279px]:text-[9px] min-[1280px]:text-[10px] font-bold uppercase tracking-wide text-gray-800 flex-shrink-0">
           <a
             href="#"
             className={`transition-all duration-300 ease-out hover:text-[#ce1126] ${
@@ -169,10 +169,10 @@ export default function Header() {
           </a>
           <button
             onClick={() => setSearchOpen(!searchOpen)}
-            className="p-1 text-gray-800 hover:text-[#ce1126] transition-colors"
+            className="p-1 max-[1279px]:p-0.5 text-gray-800 hover:text-[#ce1126] transition-colors"
             aria-label="Search POLITICO"
           >
-            <Search size={isCompact ? 20 : 22} />
+            <Search size={14} strokeWidth={1.5} className="max-[1279px]:!w-3 max-[1279px]:!h-3 min-[1024px]:max-[1279px]:!w-4 min-[1024px]:max-[1279px]:!h-4 min-[1280px]:!w-5 min-[1280px]:!h-5" />
           </button>
         </div>
       </div>
@@ -216,9 +216,9 @@ export default function Header() {
       {/* Main Secondary Category Sub-Nav */}
       <nav className={`hidden lg:block bg-white border-b border-gray-200 transition-all duration-300 ease-out ${isCompact ? "shadow-sm" : ""}`}>
         <div
-          className={`max-w-[1440px] mx-auto px-6 flex items-center justify-center overflow-x-auto whitespace-nowrap transition-all duration-300 ease-out ${
-            isCompact ? "py-2 text-[12px]" : "py-3 text-[13px]"
-          } font-bold text-[#1e1e1e] tracking-normal space-x-4`}
+          className={`max-w-[1440px] mx-auto px-3 flex items-center justify-center overflow-x-auto whitespace-nowrap transition-all duration-300 ease-out ${
+            isCompact ? "py-2 text-[10px]" : "py-3 text-[12px] min-[1280px]:py-4 min-[1280px]:text-[16px]"
+          } font-bold text-[#1e1e1e] tracking-normal space-x-2`}
         >
           <div className="flex items-center space-x-4">
             {mainCategories.map((cat) => (
@@ -232,7 +232,7 @@ export default function Header() {
             ))}
           </div>
 
-          <div className="h-4 w-[1px] bg-gray-300 mx-3 inline-block"></div>
+          <div className="h-3 w-px bg-gray-300 mx-1 inline-block"></div>
 
           <div className="flex items-center space-x-4">
             {subCategories.map((cat) => (

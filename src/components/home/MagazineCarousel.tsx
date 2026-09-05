@@ -171,9 +171,8 @@ const magazineArticles = [
 export default function MagazineCarousel() {
   const [startIndex, setStartIndex] = useState(0);
   const [visibleCount, setVisibleCount] = useState(3);
+  const [cardWidth, setCardWidth] = useState(280);
   const wheelCooldownRef = useRef(0);
-  
-  const cardWidth = 280;
   const gap = 16;
 
   // Get responsive visible count based on screen width
@@ -182,7 +181,14 @@ export default function MagazineCarousel() {
     const width = window.innerWidth;
     if (width < 640) return 1;    // Mobile
     if (width < 1024) return 2;   // Tablet
-    return 3;                     // Desktop
+    return 4;                     // Laptop and desktop
+  };
+
+  const getResponsiveCardWidth = () => {
+    if (typeof window === "undefined") return 280;
+    const width = Math.min(window.innerWidth, 1440);
+    const count = getResponsiveVisibleCount();
+    return count >= 4 ? (width - gap * (count - 1)) / count : 280;
   };
 
   // Handle window resize
@@ -190,12 +196,14 @@ export default function MagazineCarousel() {
     const handleResize = () => {
       const newVisibleCount = getResponsiveVisibleCount();
       setVisibleCount(newVisibleCount);
+      setCardWidth(getResponsiveCardWidth());
       setStartIndex(0); // Reset scroll position on resize
     };
 
     // Set initial value
     const initialCount = getResponsiveVisibleCount();
     setVisibleCount(initialCount);
+    setCardWidth(getResponsiveCardWidth());
 
     window.addEventListener("resize", handleResize, { passive: true });
     return () => window.removeEventListener("resize", handleResize);
@@ -210,10 +218,18 @@ export default function MagazineCarousel() {
   const clampedStartIndex = Math.min(Math.max(0, startIndex), maxIndex);
   
   // Calculate the actual visible scroll width for the viewport
-  const viewportWidth = visibleCount * (cardWidth + gap);
   const totalScrollWidth = totalCards * (cardWidth + gap);
   // Use clamped index for offset to prevent over-scrolling
   const offset = clampedStartIndex * (cardWidth + gap);
+  const pageStep = visibleCount >= 4 ? 4 : visibleCount;
+  const pageStarts = Array.from(
+    new Set([
+      ...Array.from({ length: Math.ceil(totalCards / pageStep) }, (_, index) => index * pageStep),
+      maxIndex,
+    ])
+  ).filter((index) => index <= maxIndex);
+  const currentPage = Math.max(0, pageStarts.findIndex((index) => index === clampedStartIndex));
+  const progressWidth = `${100 / pageStarts.length}%`;
 
   return (
     <section className="w-full my-10 font-sans">
@@ -232,10 +248,10 @@ export default function MagazineCarousel() {
           const deltaY = ev.deltaY;
           const threshold = 30;
           if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > threshold) {
-            // Mobile: scroll 1, Tablet: scroll 3, Desktop: scroll 4
+            // Mobile: scroll 1, Tablet: scroll 2, Laptop/desktop: scroll 4
             let scrollAmount = 4;
             if (visibleCount === 1) scrollAmount = 1;      // Mobile
-            else if (visibleCount === 2) scrollAmount = 3; // Tablet
+            else if (visibleCount === 2) scrollAmount = 2; // Tablet
             
             const newIndex = deltaX > 0 
               ? Math.min(clampedStartIndex + scrollAmount, maxIndex)
@@ -254,7 +270,7 @@ export default function MagazineCarousel() {
             willChange: "transform"
           }}
         >
-          <div className="flex-shrink-0 bg-[#f7f7f7] p-8 flex flex-col items-center justify-center text-center relative w-[280px] h-[420px] border border-transparent">
+          <div className="flex-shrink-0 bg-[#f7f7f7] p-8 flex flex-col items-center justify-center text-center relative h-[420px] border border-transparent" style={{ width: `${cardWidth}px` }}>
             <div className="absolute top-0 left-1/2 -translate-x-1/2">
               <div className="w-16 h-5 bg-[#ce1126]" style={{ clipPath: "polygon(0 0, 100% 0, 85% 100%, 15% 100%)" }}></div>
             </div>
@@ -269,7 +285,8 @@ export default function MagazineCarousel() {
           {magazineArticles.map((article) => (
             <article
               key={article.id}
-              className="flex-shrink-0 w-[280px] bg-[#f7f7f7] p-4 flex flex-col justify-between group cursor-pointer hover:shadow-md transition-shadow border border-transparent"
+              className="flex-shrink-0 bg-[#f7f7f7] p-4 flex flex-col justify-between group cursor-pointer hover:shadow-md transition-shadow border border-transparent"
+              style={{ width: `${cardWidth}px` }}
             >
               <div>
                 <div className="aspect-[16/10] bg-gray-200 overflow-hidden mb-4">
@@ -297,33 +314,39 @@ export default function MagazineCarousel() {
         </div>
       </div>
 
-      <div className="flex items-center space-x-4 mt-6 pt-2">
+      <div className="flex items-center gap-4 mt-6 pt-2">
         <button
-          onClick={() => setStartIndex((prev) => Math.max(prev - 1, 0))}
+          onClick={() => setStartIndex(pageStarts[Math.max(currentPage - 1, 0)])}
           disabled={clampedStartIndex === 0}
-          className="text-gray-400 hover:text-black transition p-1 disabled:opacity-40"
+          className="flex h-14 w-14 flex-shrink-0 items-center justify-center border border-[#e2e2e2] bg-white text-[#315b8c] transition-colors duration-200 hover:border-[#315b8c] hover:bg-[#315b8c] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
           aria-label="Previous slide"
         >
-          <ChevronLeft size={18} />
+          <ChevronLeft size={22} strokeWidth={1.5} />
         </button>
 
-        <div className="h-[2px] bg-gray-200 relative overflow-hidden" style={{ width: `${totalScrollWidth - gap}px` }}>
+        <div
+          className="relative h-[2px] flex-1 bg-[#dedede]"
+          style={{
+            backgroundImage: `repeating-linear-gradient(to right, transparent 0, transparent calc(${100 / pageStarts.length}% - 1px), #cfcfcf calc(${100 / pageStarts.length}% - 1px), #cfcfcf ${100 / pageStarts.length}%)`,
+          }}
+          aria-label={`${pageStarts.length} magazine pages`}
+        >
           <div
-            className="h-[2px] bg-gray-900 absolute left-0 top-0 transition-all duration-300"
+            className="absolute left-0 top-0 h-[3px] bg-[#171b2e] transition-all duration-300"
             style={{ 
-              width: `${((visibleCount / totalCards) * 100)}%`, 
-              transform: `translateX(${maxIndex > 0 ? (clampedStartIndex / maxIndex) * 100 : 0}%)`
+              width: progressWidth,
+              transform: `translateX(${currentPage * 100}%)`,
             }}
           />
         </div>
 
         <button
-          onClick={() => setStartIndex((prev) => Math.min(prev + 1, maxIndex))}
+          onClick={() => setStartIndex(pageStarts[Math.min(currentPage + 1, pageStarts.length - 1)])}
           disabled={clampedStartIndex >= maxIndex}
-          className="text-gray-400 hover:text-black transition p-1 disabled:opacity-40"
+          className="flex h-14 w-14 flex-shrink-0 items-center justify-center border border-[#e2e2e2] bg-white text-[#315b8c] transition-colors duration-200 hover:border-[#315b8c] hover:bg-[#315b8c] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
           aria-label="Next slide"
         >
-          <ChevronRight size={18} />
+          <ChevronRight size={22} strokeWidth={1.5} />
         </button>
       </div>
     </section>

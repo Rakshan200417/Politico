@@ -19,17 +19,17 @@ export default function Home() {
     <div className="min-h-screen bg-white flex flex-col font-sans">
       <Header />
 
-      <main className="flex-1 max-w-[1440px] w-full mx-auto px-4 py-4 space-y-8">
+      <main className="flex-1 max-w-[1440px] w-full mx-auto px-4 lg:px-0 pt-32 lg:pt-36 pb-4 space-y-6">
 
         {/* ── TOP FOLD: Latest News | Top News + More Top Headlines | Podcasts/Newsletters ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 divide-y lg:divide-y-0 lg:divide-x divide-gray-200 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)_320px] gap-4 divide-y lg:divide-y-0 lg:divide-x divide-gray-200 items-start">
           {/* Left: Latest News Sidebar */}
-          <div className="lg:col-span-2 xl:col-span-3 pt-4 lg:pt-0 lg:sticky lg:top-4 lg:self-start">
+          <div className="order-2 lg:order-1 pt-4 lg:pt-0 lg:sticky lg:top-4 lg:self-start">
             <LatestNewsList />
           </div>
 
           {/* Center: Top News + More Top Headlines stacked */}
-          <div className="lg:col-span-7 xl:col-span-6 pt-4 lg:pt-0 lg:px-3">
+          <div className="order-1 lg:order-2 pt-4 lg:pt-0 lg:px-3">
             <TopNewsGrid />
             <div className="mt-8">
               <MoreTopHeadlines />
@@ -37,7 +37,7 @@ export default function Home() {
           </div>
 
           {/* Right: aligned sidebar stack matching the top headline row */}
-          <div className="lg:col-span-3 pt-4 lg:pt-0 lg:mt-0 lg:self-start">
+          <div className="order-3 pt-4 lg:pt-0 lg:mt-0 lg:self-start">
             <TopSidebarWidgets />
             <div className="mt-6">
               <MoreTopSidebar />

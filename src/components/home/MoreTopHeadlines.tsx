@@ -23,10 +23,10 @@ const secondaryStories = [
 
 export default function MoreTopHeadlines() {
   return (
-    <div className="w-full font-sans border-t-2 border-black pt-6">
-      <div className="flex items-center gap-2 pb-2 mb-4 border-b-2 border-black">
+    <div className="w-full font-sans border-t border-[#d9d9d9] pt-4">
+      <div className="flex items-center gap-2 pb-2 mb-4 border-b border-[#d9d9d9]">
         <span className="w-2.5 h-2.5 rounded-full border-2 border-[#d32f2f] bg-transparent inline-block" />
-        <h2 className="text-xs font-black tracking-widest text-[#111111] uppercase font-sans">
+        <h2 className="text-[9px] font-bold tracking-[0.12em] text-[#222222] uppercase font-sans">
           MORE TOP HEADLINES
         </h2>
       </div>
@@ -41,7 +41,7 @@ export default function MoreTopHeadlines() {
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
             </div>
-            <h3 className="text-[20px] lg:text-[22px] font-extrabold leading-snug text-gray-900 group-hover:text-[#d32f2f] transition-colors tracking-tight font-sans">
+            <h3 className="text-[16px] lg:text-[18px] font-bold leading-[1.05] text-[#222222] group-hover:text-[#d32f2f] transition-colors tracking-tight font-sans">
               Treasury offers Chalmers an AI productivity prize — with strings attached
             </h3>
             <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider font-sans">
@@ -59,7 +59,7 @@ export default function MoreTopHeadlines() {
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
             </div>
-            <h3 className="text-[20px] lg:text-[22px] font-extrabold leading-snug text-[#1a6bbf] group-hover:text-[#0d4f9e] transition-colors tracking-tight font-sans">
+            <h3 className="text-[16px] lg:text-[18px] font-bold leading-[1.05] text-[#222222] group-hover:text-[#333333] transition-colors tracking-tight font-sans">
               Bessent&apos;s G20 pitch collides with anxieties over US debt and Iran war
             </h3>
             <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider font-sans">
