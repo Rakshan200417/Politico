@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Search, Menu, X } from "lucide-react";
+import { Search, Menu, X, User } from "lucide-react";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [isCompact, setIsCompact] = useState(false);
+  const [user, setUser] = useState<{ role: string; email: string } | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,93 +20,77 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const mainCategories = [
-    { name: "Congress", href: "/category/congress" },
-    { name: "White House", href: "/category/white-house" },
-    { name: "Canada", href: "/category/canada" },
-    { name: "Defense", href: "/category/defense" },
-    { name: "Elections", href: "/category/elections" },
-    { name: "Energy", href: "/category/energy" },
-    { name: "Health Care", href: "/category/health-care" },
-    { name: "Legal", href: "/category/legal" },
-    { name: "Tech", href: "/category/tech" },
-    { name: "California", href: "/category/california" },
-    { name: "New York", href: "/category/new-york" },
-  ];
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
 
-  const subCategories = [
-    { name: "Playbook", href: "/category/playbook" },
-    { name: "Columns", href: "/category/columns" },
-    { name: "Newsletters", href: "/category/newsletters" },
-    { name: "Magazine", href: "/category/magazine" },
-    { name: "Podcasts", href: "/category/podcasts" },
-    { name: "Polling", href: "/category/polling" },
+  const handleLogout = (e: React.MouseEvent) => {
+    e.preventDefault();
+    localStorage.removeItem("user");
+    setUser(null);
+    window.location.href = "/login";
+  };
+
+  const mainCategories = [
+    { name: "Breaking News", href: "/category/breaking-news" },
+    { name: "Companies", href: "/category/companies" },
+    { name: "Startups", href: "/category/startups" },
+    { name: "Markets", href: "/category/markets" },
+    { name: "Economy", href: "/category/economy" },
+    { name: "Finance", href: "/category/finance" },
+    { name: "Technology", href: "/category/technology" },
+    { name: "Industries", href: "/category/industries" },
+    { name: "Global", href: "/category/global" },
+    { name: "Leaders", href: "/category/leaders" },
   ];
 
   const megaMenuData = {
-    washingtonPolitics: [
-      { name: "Congress", href: "#" },
-      { name: "White House", href: "#" },
-      { name: "Supreme Court and Legal Issues", href: "#" },
-      { name: "Magazine", href: "#" },
-      { name: "2026 Elections", href: "#" },
-      { name: "Latest on POLITICO", href: "#" },
+    companies: [
+      { name: "Corporate Announcements", href: "#" },
+      { name: "Mergers & Acquisitions", href: "#" },
+      { name: "Leadership Changes", href: "#" },
     ],
-    statePolitics: [
-      { name: "California", href: "#" },
-      { name: "Florida", href: "#" },
-      { name: "New Jersey", href: "#" },
-      { name: "New York", href: "#" },
+    startups: [
+      { name: "Funding & Investment", href: "#" },
+      { name: "Founder Stories", href: "#" },
+      { name: "Venture Capital", href: "#" },
+      { name: "Startup Failures", href: "#" },
     ],
-    globalPolitics: [
-      { name: "Brussels", href: "#" },
-      { name: "Canada", href: "#" },
-      { name: "United Kingdom", href: "#" },
-      { name: "France", href: "#" },
-      { name: "Germany", href: "#" },
-      { name: "Australia", href: "#" },
+    markets: [
+      { name: "Stock Market", href: "#" },
+      { name: "Bonds", href: "#" },
+      { name: "Mutual Funds", href: "#" },
     ],
-    policyNews: [
-      { name: "Food and Agriculture", href: "#" },
-      { name: "Cybersecurity", href: "#" },
-      { name: "Defense", href: "#" },
-      { name: "Education", href: "#" },
-      { name: "Energy and Climate", href: "#" },
-      { name: "Tax, Finance and the Economy", href: "#" },
-      { name: "Health Care", href: "#" },
-      { name: "Labor", href: "#" },
-      { name: "Tech", href: "#" },
-      { name: "Trade", href: "#" },
-      { name: "Transportation", href: "#" },
+    economy: [
+      { name: "GDP & Economic Growth", href: "#" },
+      { name: "Employment", href: "#" },
+      { name: "Government Economic Policies", href: "#" },
     ],
-    newsletters: [
-      { name: "Playbook", href: "#" },
-      { name: "West Wing Playbook", href: "#" },
-      { name: "Inside Congress", href: "#" },
-      { name: "POLITICO Forecast", href: "#" },
-      { name: "POLITICO Magazine", href: "#" },
-      { name: "All Newsletters", href: "#" },
+    finance: [
+      { name: "Digital Banking", href: "#" },
+      { name: "FinTech", href: "#" },
+      { name: "Banking Industry", href: "#" },
+      { name: "Loans & Lending", href: "#" },
     ],
-    columnists: [
-      { name: "Alex Burns", href: "#" },
-      { name: "Victoria Guida", href: "#" },
-      { name: "John Harris", href: "#" },
-      { name: "Debra Kahn", href: "#" },
-      { name: "Jonathan Martin", href: "#" },
-      { name: "Nahal Toosi", href: "#" },
-      { name: "All Columnists", href: "#" },
+    industries: [
+      { name: "Manufacturing", href: "#" },
+      { name: "Energy", href: "#" },
+      { name: "Pharmaceuticals", href: "#" },
+      { name: "Automobile", href: "#" },
+      { name: "Agriculture Business", href: "#" },
+      { name: "Construction", href: "#" },
+      { name: "Design", href: "#" },
+      { name: "Textiles", href: "#" },
+      { name: "Entertainment", href: "#" },
     ],
-    seriesAndMore: [
-      { name: "Inside Congress Live", href: "#" },
-      { name: "Breaking News Alerts", href: "#" },
-      { name: "Podcasts", href: "#" },
-      { name: "Video", href: "#" },
-      { name: "Matt Wuerker Cartoons", href: "#" },
-      { name: "Cartoon Carousel", href: "#" },
-      { name: "The POLITICO Poll", href: "#" },
-    ],
-    politicoLive: [
-      { name: "Events", href: "#" },
+    globalLeaders: [
+      { name: "Business Leaders", href: "#" },
+      { name: "CEO Interviews", href: "#" },
+      { name: "Executive Appointments", href: "#" },
+      { name: "Leadership Strategies", href: "#" },
     ],
   };
 
@@ -114,34 +99,32 @@ export default function Header() {
       {/* Top Header Bar */}
       <div
         className={`w-full px-3 flex items-center justify-between relative border-b border-gray-200 transition-all duration-300 ease-out ${
-          isCompact ? "h-12" : "h-20 min-[1280px]:h-[124px]"
+          isCompact ? "h-10 min-[1280px]:h-12" : "h-20 min-[1280px]:h-[90px]"
         }`}
       >
         {/* Left Menu Toggle Button pinned to the far left */}
-        <div className="flex items-center justify-start w-[100px] max-[1279px]:w-[76px] min-[1024px]:max-[1279px]:w-[90px] min-[1280px]:w-[120px] flex-shrink-0">
+        <div className="flex items-center justify-start flex-1 flex-shrink-0">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className={`p-1 max-[1279px]:p-0.5 text-gray-800 transition-all duration-300 ease-out focus:outline-none flex items-center justify-center ${
-              isCompact ? "w-6 h-6" : "w-7 h-7"
-            }`}
+            className={`p-1 text-gray-800 transition-all duration-300 ease-out focus:outline-none flex items-center justify-center`}
             aria-label="Toggle navigation menu"
           >
             {isMenuOpen ? (
-              <X size={isCompact ? 13 : 14} className="text-gray-800 max-[1279px]:!w-3 max-[1279px]:!h-3 min-[1024px]:max-[1279px]:!w-4 min-[1024px]:max-[1279px]:!h-4" />
+              <X className="text-gray-800 w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7" strokeWidth={2} />
             ) : (
-              <Menu size={isCompact ? 13 : 14} className="text-gray-800 max-[1279px]:!w-3 max-[1279px]:!h-3 min-[1024px]:max-[1279px]:!w-4 min-[1024px]:max-[1279px]:!h-4" />
+              <Menu className="text-gray-800 w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7" strokeWidth={2} />
             )}
           </button>
         </div>
 
         {/* Center POLITICO Brand Logo */}
-        <div className="text-center flex-1 min-w-0">
-          <a href="/" className="inline-block">
+        <div className="flex-1 flex justify-center items-center pointer-events-none absolute left-0 right-0">
+          <a href="/" className="pointer-events-auto">
             <span
-              className={`font-medium tracking-[-0.03em] text-[#d71920] uppercase font-sans leading-none transition-all duration-300 ease-out ${
-                  isCompact
-                    ? "text-[45px]"
-                    : "text-[56px] min-[1280px]:text-[80px]"
+              className={`font-black tracking-[-0.04em] text-[#d71920] uppercase leading-none transition-all duration-300 ease-out ${
+                isCompact
+                  ? "text-[28px] font-medium"
+                  : "text-[40px] min-[1280px]:text-[56px] font-bold"
               }`}
             >
               POLITICO
@@ -149,30 +132,41 @@ export default function Header() {
           </a>
         </div>
 
-        {/* Right Actions: Europe | PRO | Search Icon */}
-        <div className="flex items-center justify-end gap-3 max-[1279px]:gap-2 min-[1024px]:max-[1279px]:gap-3 w-[100px] max-[1279px]:w-[76px] min-[1024px]:max-[1279px]:w-[90px] min-[1280px]:w-[120px] text-[8px] max-[1279px]:text-[7px] min-[1024px]:max-[1279px]:text-[9px] min-[1280px]:text-[10px] font-bold uppercase tracking-wide text-gray-800 flex-shrink-0">
+        {/* Right Actions: NEWSLETTER SIGNUP | Login Icon | Search Icon */}
+        <div className="flex items-center justify-end gap-4 text-[10px] font-bold uppercase tracking-wide text-gray-800 flex-1 flex-shrink-0 min-w-max relative z-10">
           <a
-            href="#"
-            className={`transition-all duration-300 ease-out hover:text-[#ce1126] ${
-              isCompact ? "hidden" : "hidden sm:inline"
+            href="/newsletters"
+            className={`transition-all duration-300 ease-out bg-[#ce1126] text-white px-4 py-2 hover:bg-[#a00c1c] hidden sm:inline whitespace-nowrap ${
+              isCompact ? "opacity-0 pointer-events-none" : "opacity-100"
             }`}
           >
-            EUROPE
+            NEWSLETTER SIGNUP
           </a>
-          <a
-            href="#"
-            className={`transition-all duration-300 ease-out hover:text-[#ce1126] ${
-              isCompact ? "hidden" : "hidden sm:inline"
-            }`}
-          >
-            PRO
-          </a>
+          {user ? (
+            <button
+              onClick={handleLogout}
+              className={`transition-all duration-300 ease-out text-gray-800 hover:text-[#ce1126] hidden sm:inline ${
+                isCompact ? "opacity-0 pointer-events-none" : "opacity-100"
+              }`}
+            >
+              LOGOUT
+            </button>
+          ) : (
+            <a
+              href="/login"
+              className={`transition-all duration-300 ease-out text-gray-800 hover:text-[#ce1126] hidden sm:inline ${
+                isCompact ? "opacity-0 pointer-events-none" : "opacity-100"
+              }`}
+            >
+              <User className="w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7" strokeWidth={2} />
+            </a>
+          )}
           <button
             onClick={() => setSearchOpen(!searchOpen)}
-            className="p-1 max-[1279px]:p-0.5 text-gray-800 hover:text-[#ce1126] transition-colors"
+            className="p-1 text-gray-800 hover:text-[#ce1126] transition-colors"
             aria-label="Search POLITICO"
           >
-            <Search size={14} strokeWidth={1.5} className="max-[1279px]:!w-3 max-[1279px]:!h-3 min-[1024px]:max-[1279px]:!w-4 min-[1024px]:max-[1279px]:!h-4 min-[1280px]:!w-5 min-[1280px]:!h-5" />
+            <Search className="w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7" strokeWidth={2} />
           </button>
         </div>
       </div>
@@ -204,7 +198,11 @@ export default function Header() {
               <a
                 key={cat.name}
                 href={cat.href}
-                className="hover:text-[#ce1126] transition-colors flex-shrink-0"
+                className={`transition-colors flex-shrink-0 ${
+                  cat.name === "Breaking News"
+                    ? "text-[#ce1126] hover:text-[#a00c1c]"
+                    : "hover:text-[#ce1126]"
+                }`}
               >
                 {cat.name}
               </a>
@@ -216,30 +214,18 @@ export default function Header() {
       {/* Main Secondary Category Sub-Nav */}
       <nav className={`hidden lg:block bg-white border-b border-gray-200 transition-all duration-300 ease-out ${isCompact ? "shadow-sm" : ""}`}>
         <div
-          className={`max-w-[1440px] mx-auto px-3 flex items-center justify-center overflow-x-auto whitespace-nowrap transition-all duration-300 ease-out ${
-            isCompact ? "py-2 text-[10px]" : "py-3 text-[12px] min-[1280px]:py-4 min-[1280px]:text-[16px]"
-          } font-bold text-[#1e1e1e] tracking-normal space-x-2`}
+          className={`max-w-[1440px] mx-auto px-3 flex items-center justify-center overflow-x-auto whitespace-nowrap transition-all duration-300 ease-out py-3 text-[12px] min-[1280px]:py-4 min-[1280px]:text-[16px] font-bold text-[#1e1e1e] tracking-normal space-x-2`}
         >
           <div className="flex items-center space-x-4">
             {mainCategories.map((cat) => (
               <a
                 key={cat.name}
                 href={cat.href}
-                className="hover:text-[#ce1126] transition-colors"
-              >
-                {cat.name}
-              </a>
-            ))}
-          </div>
-
-          <div className="h-3 w-px bg-gray-300 mx-1 inline-block"></div>
-
-          <div className="flex items-center space-x-4">
-            {subCategories.map((cat) => (
-              <a
-                key={cat.name}
-                href={cat.href}
-                className="hover:text-[#ce1126] transition-colors"
+                className={`transition-colors ${
+                  cat.name === "Breaking News"
+                    ? "text-[#ce1126] hover:text-[#a00c1c]"
+                    : "hover:text-[#ce1126]"
+                }`}
               >
                 {cat.name}
               </a>
@@ -254,13 +240,13 @@ export default function Header() {
           <div className="max-w-[1440px] mx-auto px-8 py-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
               
-              {/* Column 1: Washington & Politics */}
+              {/* Column 1: Companies */}
               <div>
                 <h3 className="text-[12px] font-black tracking-wider text-[#ce1126] uppercase mb-3">
-                  WASHINGTON & POLITICS
+                  COMPANIES
                 </h3>
-                <ul className="space-y-2.5 text-[13px] font-bold text-gray-900">
-                  {megaMenuData.washingtonPolitics.map((item) => (
+                <ul className="space-y-2 text-[14px] font-medium text-gray-900">
+                  {megaMenuData.companies.map((item) => (
                     <li key={item.name}>
                       <a href={item.href} className="hover:text-[#ce1126] transition-colors block">
                         {item.name}
@@ -270,14 +256,30 @@ export default function Header() {
                 </ul>
               </div>
 
-              {/* Column 2: State Politics & Policy + Global Politics & Policy */}
+              {/* Column 2: Startups */}
+              <div>
+                <h3 className="text-[12px] font-black tracking-wider text-[#ce1126] uppercase mb-3">
+                  STARTUPS
+                </h3>
+                <ul className="space-y-2 text-[14px] font-medium text-gray-900">
+                  {megaMenuData.startups.map((item) => (
+                    <li key={item.name}>
+                      <a href={item.href} className="hover:text-[#ce1126] transition-colors block">
+                        {item.name}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Column 3: Markets & Economy */}
               <div className="space-y-8">
                 <div>
                   <h3 className="text-[12px] font-black tracking-wider text-[#ce1126] uppercase mb-3">
-                    STATE POLITICS & POLICY
+                    MARKETS
                   </h3>
-                  <ul className="space-y-2.5 text-[13px] font-bold text-gray-900">
-                    {megaMenuData.statePolitics.map((item) => (
+                  <ul className="space-y-2 text-[14px] font-medium text-gray-900">
+                    {megaMenuData.markets.map((item) => (
                       <li key={item.name}>
                         <a href={item.href} className="hover:text-[#ce1126] transition-colors block">
                           {item.name}
@@ -289,10 +291,10 @@ export default function Header() {
 
                 <div>
                   <h3 className="text-[12px] font-black tracking-wider text-[#ce1126] uppercase mb-3">
-                    GLOBAL POLITICS & POLICY
+                    ECONOMY
                   </h3>
-                  <ul className="space-y-2.5 text-[13px] font-bold text-gray-900">
-                    {megaMenuData.globalPolitics.map((item) => (
+                  <ul className="space-y-2 text-[14px] font-medium text-gray-900">
+                    {megaMenuData.economy.map((item) => (
                       <li key={item.name}>
                         <a href={item.href} className="hover:text-[#ce1126] transition-colors block">
                           {item.name}
@@ -303,13 +305,13 @@ export default function Header() {
                 </div>
               </div>
 
-              {/* Column 3: Policy News */}
+              {/* Column 4: Finance */}
               <div>
                 <h3 className="text-[12px] font-black tracking-wider text-[#ce1126] uppercase mb-3">
-                  POLICY NEWS
+                  FINANCE
                 </h3>
-                <ul className="space-y-2.5 text-[13px] font-bold text-gray-900">
-                  {megaMenuData.policyNews.map((item) => (
+                <ul className="space-y-2 text-[14px] font-medium text-gray-900">
+                  {megaMenuData.finance.map((item) => (
                     <li key={item.name}>
                       <a href={item.href} className="hover:text-[#ce1126] transition-colors block">
                         {item.name}
@@ -319,13 +321,13 @@ export default function Header() {
                 </ul>
               </div>
 
-              {/* Column 4: Newsletters */}
+              {/* Column 5: Industries */}
               <div>
                 <h3 className="text-[12px] font-black tracking-wider text-[#ce1126] uppercase mb-3">
-                  NEWSLETTERS
+                  INDUSTRIES
                 </h3>
-                <ul className="space-y-2.5 text-[13px] font-bold text-gray-900">
-                  {megaMenuData.newsletters.map((item) => (
+                <ul className="space-y-2 text-[14px] font-medium text-gray-900">
+                  {megaMenuData.industries.map((item) => (
                     <li key={item.name}>
                       <a href={item.href} className="hover:text-[#ce1126] transition-colors block">
                         {item.name}
@@ -335,13 +337,13 @@ export default function Header() {
                 </ul>
               </div>
 
-              {/* Column 5: Columnists */}
+              {/* Column 6: Global Leaders */}
               <div>
                 <h3 className="text-[12px] font-black tracking-wider text-[#ce1126] uppercase mb-3">
-                  COLUMNISTS
+                  GLOBAL LEADERS
                 </h3>
-                <ul className="space-y-2.5 text-[13px] font-bold text-gray-900">
-                  {megaMenuData.columnists.map((item) => (
+                <ul className="space-y-2 text-[14px] font-medium text-gray-900">
+                  {megaMenuData.globalLeaders.map((item) => (
                     <li key={item.name}>
                       <a href={item.href} className="hover:text-[#ce1126] transition-colors block">
                         {item.name}
@@ -349,39 +351,6 @@ export default function Header() {
                     </li>
                   ))}
                 </ul>
-              </div>
-
-              {/* Column 6: Series & More + Politico Live */}
-              <div className="space-y-8">
-                <div>
-                  <h3 className="text-[12px] font-black tracking-wider text-[#ce1126] uppercase mb-3">
-                    SERIES & MORE
-                  </h3>
-                  <ul className="space-y-2.5 text-[13px] font-bold text-gray-900">
-                    {megaMenuData.seriesAndMore.map((item) => (
-                      <li key={item.name}>
-                        <a href={item.href} className="hover:text-[#ce1126] transition-colors block">
-                          {item.name}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div>
-                  <h3 className="text-[12px] font-black tracking-wider text-[#ce1126] uppercase mb-3">
-                    POLITICO LIVE
-                  </h3>
-                  <ul className="space-y-2.5 text-[13px] font-bold text-gray-900">
-                    {megaMenuData.politicoLive.map((item) => (
-                      <li key={item.name}>
-                        <a href={item.href} className="hover:text-[#ce1126] transition-colors block">
-                          {item.name}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
               </div>
 
             </div>
@@ -410,9 +379,15 @@ export default function Header() {
                 <a href="#" className="hover:text-[#ce1126]">
                   My Account
                 </a>
-                <a href="#" className="hover:text-[#ce1126]">
-                  Log In
-                </a>
+                {user ? (
+                  <button onClick={handleLogout} className="hover:text-[#ce1126] uppercase">
+                    Log Out
+                  </button>
+                ) : (
+                  <a href="/login" className="hover:text-[#ce1126]">
+                    Log In
+                  </a>
+                )}
               </div>
             </div>
 

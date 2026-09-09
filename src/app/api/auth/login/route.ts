@@ -1,0 +1,61 @@
+import { NextResponse } from 'next/server';
+import pool from '@/lib/db';
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const { email, password, role } = body;
+
+    // Validate inputs
+    if (!email || !password || !role) {
+      return NextResponse.json(
+        { error: 'Email, password, and role are required' },
+        { status: 400 }
+      );
+    }
+
+    // Connect to XAMPP MySQL and query the user
+    const [rows]: any = await pool.execute(
+      'SELECT * FROM users WHERE email = ? AND role = ? LIMIT 1',
+      [email, role]
+    );
+
+    if (rows.length === 0) {
+      return NextResponse.json(
+        { error: 'Invalid email, role, or password' },
+        { status: 401 }
+      );
+    }
+
+    const user = rows[0];
+
+    // In a production app, you MUST use a library like bcrypt to hash and compare passwords.
+    // e.g. const isValid = await bcrypt.compare(password, user.password_hash);
+    // For this XAMPP test setup, if you inserted plain text passwords, this compares directly:
+    const isValid = password === user.password_hash; 
+
+    if (!isValid) {
+      return NextResponse.json(
+        { error: 'Invalid email, role, or password' },
+        { status: 401 }
+      );
+    }
+
+    // Success! Return user info (excluding password)
+    return NextResponse.json({
+      message: 'Login successful',
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      }
+    }, { status: 200 });
+
+  } catch (error) {
+    console.error('Login Error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error connecting to the database' },
+      { status: 500 }
+    );
+  }
+}

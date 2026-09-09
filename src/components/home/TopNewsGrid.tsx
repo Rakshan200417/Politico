@@ -10,75 +10,75 @@ export default function TopNewsGrid() {
         </h2>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-[1.6fr_1fr] gap-6 items-start">
+      <div className="flex flex-col gap-4">
+        {/* Main Article */}
         <article className="group cursor-pointer">
           <a href="#" className="block">
-            <h1 className="text-[34px] sm:text-[38px] lg:text-[42px] font-bold leading-[0.96] tracking-[-0.02em] text-[#111111] group-hover:text-[#333333] transition-colors duration-150 mb-2 font-sans">
-              Republicans are losing
-              <span className="block">patience with Trump&apos;s Iran</span>
-              <span className="block">whiplash</span>
+            <h1 className="text-[44px] sm:text-[52px] lg:text-[60px] font-bold leading-[0.95] tracking-[-0.03em] text-[#111111] group-hover:text-[#333333] transition-colors duration-150 mb-3 font-sans">
+              ‘Don’t take this one for granted’: New Hampshire Democrats brace for a tough Senate race
             </h1>
-
-            <p className="text-[13px] lg:text-[14px] text-[#555555] font-sans leading-[1.3] mb-3">
-              Just days after Treasury Secretary Scott Bessent announced a new “economic D-Day” to choke Iran, the U.S. carried out its first known attack on Iran since July.
-            </p>
-
+            
             <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.18em] mb-4 font-sans">
-              BY MEGAN MESSERLY AND ALEX GANGITANO
+              BY LISA KASHINSKY
             </p>
 
-            <div className="relative w-full aspect-[16/10] overflow-hidden bg-gray-100">
+            <div className="relative w-full aspect-[16/10] overflow-hidden bg-gray-100 mb-4">
               <img
                 src="https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1400&q=80"
-                alt="Trump portrait"
+                alt="Main story"
                 className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
               />
             </div>
           </a>
         </article>
 
-        <div className="space-y-5 pt-1">
+        {/* Medium headline */}
+        <article className="group cursor-pointer border-t border-[#e3e3e3] pt-4 mb-2">
+          <a href="#" className="block">
+            <h3 className="text-[22px] lg:text-[24px] font-bold leading-[1.05] tracking-[-0.02em] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mb-1">
+              Susan Collins says the White House has ‘underestimated’ impact of Canada tariffs
+            </h3>
+            <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.18em] font-sans">
+              BY JESSICA PIPER
+            </p>
+          </a>
+        </article>
+
+        {/* Two smaller stories side-by-side */}
+        <div className="grid grid-cols-2 gap-4 border-t border-[#e3e3e3] pt-4">
           <article className="group cursor-pointer">
-            <a href="#" className="block space-y-2.5">
+            <a href="#" className="block space-y-2">
               <div className="aspect-[16/10] overflow-hidden bg-gray-100">
                 <img
                   src="https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=1200&q=80"
-                  alt="White House building"
+                  alt="Story 1"
                   className="h-full w-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
                 />
               </div>
-
-              <h3 className="text-[16px] lg:text-[17px] font-bold leading-[1.02] tracking-[-0.02em] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans">
-                Supreme Court allows Trump&apos;s ballroom construction, but Roberts says project is &lsquo;likely unlawful&rsquo;
+              <h3 className="text-[14px] lg:text-[15px] font-bold leading-[1.1] tracking-[-0.01em] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans">
+                Trump hits back at Canada with import bans, more tariff hikes
               </h3>
-
-              <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.18em] font-sans">
-                BY JOSH GERSTEIN
-              </p>
             </a>
           </article>
 
-          <article className="group cursor-pointer border-t border-[#e3e3e3] pt-4">
-            <a href="#" className="block space-y-2.5">
+          <article className="group cursor-pointer">
+            <a href="#" className="block space-y-2">
               <div className="aspect-[16/10] overflow-hidden bg-gray-100">
                 <img
                   src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1200&q=80"
-                  alt="Podium and politics"
+                  alt="Story 2"
                   className="h-full w-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
                 />
               </div>
-
-              <h3 className="text-[16px] lg:text-[17px] font-bold leading-[1.02] tracking-[-0.02em] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans">
-                Trump welcomes Russia back to the G20. Europe isn&apos;t having it.
+              <h3 className="text-[14px] lg:text-[15px] font-bold leading-[1.1] tracking-[-0.01em] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans">
+                ‘Very Hard to See How This Ends’
               </h3>
-
-              <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.18em] font-sans">
-                BY MICHAEL STRATFORD AND RASMUS BUCHHAVE
-              </p>
             </a>
           </article>
         </div>
+
       </div>
     </div>
   );
 }
+

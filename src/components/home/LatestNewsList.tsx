@@ -64,7 +64,7 @@ export default function LatestNewsList() {
       {/* Section Header with Red Circle Indicator */}
       <div className="flex items-center gap-2 pb-2 mb-3 border-b border-[#d9d9d9]">
         <span className="w-2.5 h-2.5 rounded-full border-2 border-[#d32f2f] bg-transparent inline-block"></span>
-        <h2 className="text-[9px] font-bold tracking-[0.12em] text-[#222222] uppercase font-sans">
+        <h2 className="text-[10px] font-extrabold tracking-[0.12em] text-[#222222] uppercase font-sans">
           LATEST NEWS
         </h2>
       </div>
@@ -72,16 +72,16 @@ export default function LatestNewsList() {
       {/* News List */}
       <div className="divide-y divide-[#e5e5e5]">
         {latestNews.map((item) => (
-          <article key={item.id} className="py-2.5 group cursor-pointer">
-            <a href="#" className="flex items-start gap-3">
+          <article key={item.id} className="py-3 group cursor-pointer">
+            <a href="#" className="flex items-start gap-4">
               <span
-                className={`text-[8px] font-bold shrink-0 min-w-[24px] pt-0.5 ${
+                className={`text-[11px] font-extrabold shrink-0 min-w-[24px] pt-1 ${
                   item.isRedTime ? "text-[#d32f2f]" : "text-gray-500"
                 }`}
               >
                 {item.time}
               </span>
-              <h3 className="text-[11px] font-bold leading-[1.18] text-[#222222] group-hover:text-[#d32f2f] transition-colors duration-150 font-sans">
+              <h3 className="text-[14px] font-extrabold leading-[1.3] text-[#222222] group-hover:text-[#d32f2f] transition-colors duration-150 font-sans">
                 {item.title}
               </h3>
             </a>

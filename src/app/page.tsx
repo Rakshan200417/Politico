@@ -13,15 +13,24 @@ import StatesSection from "@/components/home/StatesSection";
 import ElectionsSection from "@/components/home/ElectionsSection";
 import ForeignAffairsSection from "@/components/home/ForeignAffairsSection";
 import EarlierSection from "@/components/home/EarlierSection";
+import ThreeColumnSection from "@/components/home/ThreeColumnSection";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white flex flex-col font-sans">
+    <div className="min-h-screen flex flex-col font-sans">
       <Header />
 
-      <main className="flex-1 max-w-[1440px] w-full mx-auto px-4 lg:px-0 pt-32 lg:pt-36 pb-4 space-y-6">
-
-        {/* ── TOP FOLD: Latest News | Top News + More Top Headlines | Podcasts/Newsletters ── */}
+      <div 
+        className="w-full flex-1 relative flex flex-col items-center"
+        style={{
+          backgroundImage: 'url("https://images.unsplash.com/photo-1584308666744-24d5e4a7a8d2?auto=format&fit=crop&w=1920&q=80")',
+          backgroundSize: 'cover',
+          backgroundAttachment: 'fixed',
+          backgroundPosition: 'center'
+        }}
+      >
+        <main className="flex-1 max-w-[1440px] w-[98%] xl:w-[95%] 2xl:w-[1440px] mx-auto mt-10 lg:mt-24 px-4 lg:px-8 pt-6 lg:pt-8 pb-0 space-y-6 bg-white shadow-2xl">
+          {/* ── TOP FOLD: Latest News | Top News + More Top Headlines | Podcasts/Newsletters ── */}
         <div className="grid grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)_320px] gap-4 divide-y lg:divide-y-0 lg:divide-x divide-gray-200 items-start">
           {/* Left: Latest News Sidebar */}
           <div className="order-2 lg:order-1 pt-4 lg:pt-0 lg:sticky lg:top-4 lg:self-start">
@@ -56,11 +65,11 @@ export default function Home() {
         </div>
 
         {/* ── WHITE HOUSE Section ── */}
-        <div className="w-full border-b border-gray-200 pb-8">
+        <div className="w-full border-b border-gray-200 pb-4">
           <WhiteHouseSection />
         </div>
 
-        <div className="w-full border-b border-gray-200 pb-8">
+        <div className="w-full border-b border-gray-200 pb-8 -mt-4">
           <LegalSection />
         </div>
 
@@ -76,11 +85,16 @@ export default function Home() {
           <ForeignAffairsSection />
         </div>
 
-        <div className="w-full pb-2">
+        <div className="w-full border-b border-gray-200 pb-8">
+          <ThreeColumnSection />
+        </div>
+
+        <div className="w-full pb-0">
           <EarlierSection />
         </div>
 
       </main>
+      </div>
 
       <Footer />
     </div>
