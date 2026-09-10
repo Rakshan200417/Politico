@@ -4,47 +4,147 @@ import React, { useState } from "react";
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
 
-const newsletters = [
-  { id: 'us', title: 'US', freq: 'Weekday mornings', desc: 'The biggest national headlines, policy shifts and stories shaping America — delivered before your first coffee.' },
-  { id: 'world', title: 'World', freq: 'Daily', desc: 'Global affairs, conflicts, diplomacy and the international stories that move markets and minds.' },
-  { id: 'politics', title: 'Politics', freq: 'Weekday mornings', desc: 'Sharp coverage of Washington, elections, legislation and the power plays behind the headlines.' },
-  { id: 'economy', title: 'Economy & Markets', freq: 'Weekday mornings', desc: 'Markets, macro trends, Fed watch and the numbers that matter — explained clearly, every trading day.' },
-  { id: 'business', title: 'Business', freq: 'Daily', desc: 'Corporate earnings, deals, leadership moves and the strategies driving the world of business.' },
-  { id: 'crypto', title: 'Crypto', freq: 'Weekday Morning', desc: 'Up-to-date, breaking crypto news about the latest Bitcoin, Ethereum, Blockchain, NFTs, and Altcoin trends and events.' },
-  { id: 'technology', title: 'Technology', freq: 'Daily', desc: 'AI, big tech, startups and the innovations rewriting how we live and work.' },
-  { id: 'travel', title: 'Travel', freq: 'Once a week', desc: 'Destinations, industry trends and smart travel intelligence for the modern globetrotter.' },
-  { id: 'opinion', title: 'Opinion', freq: 'Twice a week', desc: 'Provocative columns and expert commentary on the debates that define our time.' },
-  { id: 'ceo', title: 'CEO Spotlight', freq: 'Once a week', desc: 'Exclusive profiles and insights from the executives and visionaries leading global business.' },
-  { id: 'sports', title: 'Sports', freq: 'Daily', desc: 'Scores, storylines and the business of sports — from the field to the boardroom.' },
-  { id: 'health', title: 'Health', freq: 'Once a week', desc: 'The latest health news, scientific trends and medical information, covered in a way that helps you make sense of the complex and constantly changing field of medical knowledge.' }
+const mainCategories = [
+  { id: "breakingNews", name: "Breaking News" },
+  { id: "companies", name: "Companies" },
+  { id: "startups", name: "Startups" },
+  { id: "markets", name: "Markets" },
+  { id: "economy", name: "Economy" },
+  { id: "finance", name: "Finance" },
+  { id: "technology", name: "Technology" },
+  { id: "industries", name: "Industries" },
+  { id: "global", name: "Global" },
+  { id: "leaders", name: "Leaders" },
 ];
+
+const megaMenuData: Record<string, { name: string; id: string }[]> = {
+  companies: [
+    { name: "Corporate Announcements", id: "corporate-announcements" },
+    { name: "Mergers & Acquisitions", id: "mergers-acquisitions" },
+    { name: "Leadership Changes", id: "leadership-changes" },
+  ],
+  startups: [
+    { name: "Funding & Investment", id: "funding-investment" },
+    { name: "Founder Stories", id: "founder-stories" },
+    { name: "Venture Capital", id: "venture-capital" },
+    { name: "Startup Failures", id: "startup-failures" },
+  ],
+  markets: [
+    { name: "Stock Market", id: "stock-market" },
+    { name: "Bonds", id: "bonds" },
+    { name: "Mutual Funds", id: "mutual-funds" },
+  ],
+  economy: [
+    { name: "GDP & Economic Growth", id: "gdp-economic-growth" },
+    { name: "Employment", id: "employment" },
+    { name: "Government Economic Policies", id: "government-economic-policies" },
+  ],
+  finance: [
+    { name: "Digital Banking", id: "digital-banking" },
+    { name: "FinTech", id: "fintech" },
+    { name: "Banking Industry", id: "banking-industry" },
+    { name: "Loans & Lending", id: "loans-lending" },
+  ],
+  industries: [
+    { name: "Manufacturing", id: "manufacturing" },
+    { name: "Energy", id: "energy" },
+    { name: "Pharmaceuticals", id: "pharmaceuticals" },
+    { name: "Automobile", id: "automobile" },
+    { name: "Agriculture Business", id: "agriculture-business" },
+    { name: "Construction", id: "construction" },
+    { name: "Design", id: "design" },
+    { name: "Textiles", id: "textiles" },
+    { name: "Entertainment", id: "entertainment" },
+  ],
+  leaders: [
+    { name: "Business Leaders", id: "business-leaders" },
+    { name: "CEO Interviews", id: "ceo-interviews" },
+    { name: "Executive Appointments", id: "executive-appointments" },
+    { name: "Leadership Strategies", id: "leadership-strategies" },
+  ],
+};
 
 export default function NewslettersPage() {
   const [selected, setSelected] = useState<Record<string, boolean>>({});
 
-  const handleToggle = (id: string) => {
-    setSelected((prev) => ({ ...prev, [id]: !prev[id] }));
+  const handleToggleCategory = (catId: string) => {
+    setSelected((prev) => {
+      const isNowSelected = !prev[catId];
+      const newState = { ...prev, [catId]: isNowSelected };
+      
+      const subCats = megaMenuData[catId];
+      if (subCats) {
+        subCats.forEach(sub => {
+          newState[sub.id] = isNowSelected;
+        });
+      }
+      return newState;
+    });
+  };
+
+  const handleToggleSub = (subId: string, parentId: string) => {
+    setSelected((prev) => {
+      const isNowSelected = !prev[subId];
+      const newState = { ...prev, [subId]: isNowSelected };
+      
+      const subCats = megaMenuData[parentId];
+      if (subCats) {
+        const allSubSelected = subCats.every(sub => newState[sub.id]);
+        newState[parentId] = allSubSelected;
+      }
+      return newState;
+    });
+  };
+
+  const getAllSelectableIds = () => {
+    const ids: string[] = [];
+    mainCategories.forEach(cat => {
+      ids.push(cat.id);
+      if (megaMenuData[cat.id]) {
+        megaMenuData[cat.id].forEach(sub => ids.push(sub.id));
+      }
+    });
+    return ids;
   };
 
   const handleSelectAll = () => {
-    const allSelected = newsletters.every((n) => selected[n.id]);
+    const allIds = getAllSelectableIds();
+    const allSelected = allIds.every(id => selected[id]);
+    
     const newState: Record<string, boolean> = {};
     if (!allSelected) {
-      newsletters.forEach((n) => {
-        newState[n.id] = true;
+      allIds.forEach(id => {
+        newState[id] = true;
       });
     }
     setSelected(newState);
   };
 
-  const allSelected = newsletters.every((n) => selected[n.id]);
+  const allSelected = getAllSelectableIds().every(id => selected[id]);
+
+  const [email, setEmail] = useState("");
+
+  const handleSignUp = () => {
+    const hasSelection = Object.values(selected).some((val) => val === true);
+    
+    if (!hasSelection) {
+      alert("Please select at least one newsletter to sign up.");
+      return;
+    }
+
+    if (email.trim() === "") {
+      alert("Please enter your email to sign up.");
+      return;
+    }
+    // Redirect to success page
+    window.location.href = "/newsletters/success";
+  };
 
   return (
     <div className="min-h-screen flex flex-col font-sans">
       <Header />
 
       <main className="flex-1 bg-white text-gray-900 pb-20">
-        {/* Top Banner Section */}
         <div className="bg-[#faf9f6] py-16 px-4 flex flex-col items-center text-center border-b border-gray-200">
           <h1 className="text-4xl md:text-5xl font-serif tracking-widest text-[#ce1126] mb-4">
             NEWSLETTERS
@@ -54,9 +154,7 @@ export default function NewslettersPage() {
           </p>
         </div>
 
-        {/* Main Content Area */}
         <div className="max-w-4xl mx-auto px-4 lg:px-8 mt-12">
-          {/* Intro Text */}
           <div className="text-center mb-12">
             <h2 className="text-2xl md:text-3xl font-serif font-medium text-[#111827] mb-6 leading-relaxed">
               Let the best of POLITICO news come to you.
@@ -73,31 +171,47 @@ export default function NewslettersPage() {
             </button>
           </div>
 
-          {/* Newsletter Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
-            {newsletters.map((nl) => (
-              <div key={nl.id} className="flex items-start gap-4 cursor-pointer group" onClick={() => handleToggle(nl.id)}>
-                <div className="pt-1">
-                  <div className={`w-4 h-4 border ${selected[nl.id] ? 'bg-[#ce1126] border-[#ce1126]' : 'border-gray-300'} flex items-center justify-center rounded-sm transition-colors group-hover:border-[#ce1126]`}>
-                    {selected[nl.id] && (
-                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            {mainCategories.map((cat) => (
+              <div key={cat.id} className="flex flex-col">
+                <div 
+                  className="flex items-center gap-4 cursor-pointer group mb-3" 
+                  onClick={() => handleToggleCategory(cat.id)}
+                >
+                  <div className={`w-5 h-5 border ${selected[cat.id] ? 'bg-[#ce1126] border-[#ce1126]' : 'border-gray-400'} flex items-center justify-center rounded-sm transition-colors group-hover:border-[#ce1126]`}>
+                    {selected[cat.id] && (
+                      <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     )}
                   </div>
+                  <h3 className="text-[22px] font-serif text-gray-900 leading-none">{cat.name}</h3>
                 </div>
-                <div>
-                  <h3 className="text-[20px] font-serif text-gray-900 mb-1 leading-none">{nl.title}</h3>
-                  <p className="text-[12px] text-gray-500 italic mb-3">{nl.freq}</p>
-                  <p className="text-[13px] text-gray-700 leading-relaxed">
-                    {nl.desc}
-                  </p>
-                </div>
+
+                {megaMenuData[cat.id] && (
+                  <div className="ml-9 space-y-3 mt-1">
+                    {megaMenuData[cat.id].map(sub => (
+                      <div 
+                        key={sub.id} 
+                        className="flex items-center gap-3 cursor-pointer group"
+                        onClick={() => handleToggleSub(sub.id, cat.id)}
+                      >
+                        <div className={`w-4 h-4 border ${selected[sub.id] ? 'bg-[#ce1126] border-[#ce1126]' : 'border-gray-300'} flex items-center justify-center rounded-sm transition-colors group-hover:border-[#ce1126]`}>
+                          {selected[sub.id] && (
+                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                        </div>
+                        <span className="text-[15px] text-gray-700">{sub.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
 
-          {/* Bottom Signup Bar */}
           <div className="mt-20 pt-10 border-t border-gray-200">
             <div className="flex flex-col md:flex-row items-center justify-center max-w-xl mx-auto gap-0 shadow-sm border border-gray-300 rounded-sm overflow-hidden">
               <div className="flex items-center w-full bg-white px-4 py-3">
@@ -106,11 +220,16 @@ export default function NewslettersPage() {
                 </svg>
                 <input 
                   type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email" 
                   className="w-full text-[14px] outline-none text-gray-700 placeholder-gray-400"
                 />
               </div>
-              <button className="w-full md:w-auto bg-[#ce1126] hover:bg-[#a00c1c] text-white font-bold text-[13px] px-8 py-3.5 tracking-wider whitespace-nowrap transition-colors">
+              <button 
+                onClick={handleSignUp}
+                className="w-full md:w-auto bg-[#ce1126] hover:bg-[#a00c1c] text-white font-bold text-[13px] px-8 py-3.5 tracking-wider whitespace-nowrap transition-colors"
+              >
                 SIGN UP NOW
               </button>
             </div>

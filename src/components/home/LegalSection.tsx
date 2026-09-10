@@ -14,7 +14,7 @@ export default function LegalSection() {
             <a href="#" className="block space-y-2">
               <div className="aspect-[4/3] overflow-hidden bg-gray-100">
                 <img
-                  src="https://images.unsplash.com/photo-1544256718-3bcf237f3974?auto=format&fit=crop&w=600&q=80"
+                  src="https://loremflickr.com/600/400/law,protest"
                   alt="Protesters"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
@@ -32,7 +32,7 @@ export default function LegalSection() {
             <a href="#" className="block space-y-2">
               <div className="aspect-[4/3] overflow-hidden bg-gray-100">
                 <img
-                  src="https://images.unsplash.com/photo-1494172961521-33799ddd43a5?auto=format&fit=crop&w=600&q=80"
+                  src="https://loremflickr.com/600/400/election"
                   alt="Polls"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
@@ -61,7 +61,7 @@ export default function LegalSection() {
             <a href="#" className="block space-y-3">
               <div className="aspect-[16/9] bg-gray-100 overflow-hidden relative">
                 <img
-                  src="https://images.unsplash.com/photo-1541872703-74c5e4436120?auto=format&fit=crop&w=1000&q=80"
+                  src="https://loremflickr.com/1000/600/courthouse"
                   alt="Supreme Court"
                   className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
                 />
@@ -81,7 +81,7 @@ export default function LegalSection() {
               <a href="#" className="flex items-start gap-4">
                 <div className="w-28 sm:w-36 aspect-[4/3] bg-gray-100 shrink-0 overflow-hidden">
                   <img
-                    src="https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&w=600&q=80"
+                    src="https://loremflickr.com/600/400/judge"
                     alt="Court ruling"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -100,7 +100,7 @@ export default function LegalSection() {
               <a href="#" className="flex items-start gap-4">
                 <div className="w-28 sm:w-36 aspect-[4/3] bg-gray-100 shrink-0 overflow-hidden">
                   <img
-                    src="https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=600&q=80"
+                    src="https://loremflickr.com/600/400/military"
                     alt="Pentagon block"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -126,7 +126,7 @@ export default function LegalSection() {
             </span>
             <div className="w-[300px] h-[600px] bg-gray-100 flex items-center justify-center relative border border-gray-200">
               <img
-                src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=300&h=600&q=80"
+                src="https://loremflickr.com/300/600/medicine"
                 alt="Advertisement"
                 className="w-full h-full object-cover"
               />

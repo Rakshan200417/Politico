@@ -160,7 +160,36 @@ const definitions: Array<Omit<CategoryPageData, "moreStories">> = [
   },
 ];
 
-export const categoryPages: CategoryPageData[] = definitions.map((category) => ({
+const subcategoriesList = [
+  "Corporate Announcements", "Mergers & Acquisitions", "Leadership Changes",
+  "Funding & Investment", "Founder Stories", "Venture Capital", "Startup Failures",
+  "Stock Market", "Bonds", "Mutual Funds",
+  "GDP & Economic Growth", "Employment", "Government Economic Policies",
+  "Digital Banking", "FinTech", "Banking Industry", "Loans & Lending",
+  "Manufacturing", "Energy", "Pharmaceuticals", "Automobile", "Agriculture Business", "Construction", "Design", "Textiles", "Entertainment",
+  "Business Leaders", "CEO Interviews", "Executive Appointments", "Leadership Strategies"
+];
+
+const subcategoryDefinitions: Array<Omit<CategoryPageData, "moreStories">> = subcategoriesList.map(name => {
+  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  return {
+    slug,
+    name,
+    description: `News, analysis and updates for ${name}.`,
+    lead: {
+      title: `The Latest in ${name}`,
+      deck: `Key developments and trends shaping ${name} right now.`,
+      byline: "BY STAFF | RECENT UPDATE",
+      image: Object.values(images)[Math.floor(Math.random() * Object.values(images).length)],
+    },
+    sideStories: [
+      { title: `What to watch in ${name}`, deck: `Experts weigh in on the future of ${name}.`, byline: "BY STAFF", image: images.capitol },
+      { title: `New policies impacting ${name}`, deck: `How changes in Washington affect the landscape.`, byline: "BY STAFF", image: images.people },
+    ],
+  };
+});
+
+export const categoryPages: CategoryPageData[] = [...definitions, ...subcategoryDefinitions].map((category) => ({
   ...category,
   moreStories: sharedMoreStories(category.name),
 }));

@@ -4,25 +4,25 @@ import pool from '@/lib/db';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email, password, role } = body;
+    const { email, password } = body;
 
     // Validate inputs
-    if (!email || !password || !role) {
+    if (!email || !password) {
       return NextResponse.json(
-        { error: 'Email, password, and role are required' },
+        { error: 'Email and password are required' },
         { status: 400 }
       );
     }
 
     // Connect to XAMPP MySQL and query the user
     const [rows]: any = await pool.execute(
-      'SELECT * FROM users WHERE email = ? AND role = ? LIMIT 1',
-      [email, role]
+      'SELECT * FROM users WHERE email = ? LIMIT 1',
+      [email]
     );
 
     if (rows.length === 0) {
       return NextResponse.json(
-        { error: 'Invalid email, role, or password' },
+        { error: 'Invalid email or password' },
         { status: 401 }
       );
     }
@@ -30,13 +30,12 @@ export async function POST(request: Request) {
     const user = rows[0];
 
     // In a production app, you MUST use a library like bcrypt to hash and compare passwords.
-    // e.g. const isValid = await bcrypt.compare(password, user.password_hash);
-    // For this XAMPP test setup, if you inserted plain text passwords, this compares directly:
-    const isValid = password === user.password_hash; 
+    // For this XAMPP test setup, we compare directly to the 'password' column:
+    const isValid = password === user.password; 
 
     if (!isValid) {
       return NextResponse.json(
-        { error: 'Invalid email, role, or password' },
+        { error: 'Invalid email or password' },
         { status: 401 }
       );
     }

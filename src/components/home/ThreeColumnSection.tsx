@@ -4,7 +4,7 @@ import Image from "next/image";
 export default function ThreeColumnSection() {
   return (
     <div className="w-full">
-      <h2 className="text-[12px] font-black tracking-widest text-[#ce1126] uppercase mb-4 border-b border-black pb-1">
+      <h2 className="text-[12px] font-black tracking-widest text-[#ce1126] uppercase mb-4 border-b border-gray-300 pb-1 text-center">
         FEATURED NEWS
       </h2>
       <div className="grid grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)_320px] gap-6 divide-y lg:divide-y-0 lg:divide-x divide-gray-200">
@@ -42,7 +42,7 @@ export default function ThreeColumnSection() {
           <article className="group cursor-pointer">
             <div className="relative w-full h-[300px] mb-4 bg-gray-100">
               <img
-                src="https://images.unsplash.com/photo-1556761175-5973dc0f32d7?auto=format&fit=crop&w=900&q=80"
+                src="https://loremflickr.com/900/600/business"
                 alt="Business meeting"
                 className="w-full h-full object-cover group-hover:opacity-90 transition-opacity"
               />
@@ -63,7 +63,7 @@ export default function ThreeColumnSection() {
           <article>
             <div className="relative w-full h-[180px] mb-3 bg-gray-100">
               <img
-                src="https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=600&q=80"
+                src="https://loremflickr.com/600/400/economy"
                 alt="Finance graph"
                 className="w-full h-full object-cover"
               />
