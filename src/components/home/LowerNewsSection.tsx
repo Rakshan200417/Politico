@@ -1,6 +1,12 @@
 import React from "react";
+import { slugify } from "@/data/newsArticles";
 
 export default function LowerNewsSection() {
+  const leadTitle = "The House is back in session. Many Republicans hope it won't be for long.";
+  const sub1 = "USDA cyclosporiasis research projects shelved amid funding cuts and relocations";
+  const sub2 = "'There should be a Pillar 3 in AUKUS: Polar Security'";
+  const sub3 = "Key House races to watch as election season heats up";
+
   return (
     <div className="w-full space-y-8 font-sans">
       {/* Top Lead Story Section */}
@@ -14,9 +20,9 @@ export default function LowerNewsSection() {
 
         {/* Hero Lead Story */}
         <article className="group cursor-pointer mb-8">
-          <a href="#" className="block">
+          <a href={`/news/${slugify(leadTitle)}`} className="block">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold leading-tight text-gray-900 group-hover:text-[#d32f2f] transition-colors duration-150 tracking-tight font-sans mb-3">
-              The House is back in session. Many Republicans hope it won't be for long.
+              {leadTitle}
             </h1>
             <p className="text-gray-700 font-serif text-base sm:text-lg leading-relaxed mb-3">
               If lawmakers can pass a shutdown-averting stopgap, many are hoping to beat an early retreat to the campaign trail.
@@ -37,7 +43,7 @@ export default function LowerNewsSection() {
         {/* 3-Column Sub-Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 pt-6 border-t border-gray-200">
           <article className="group cursor-pointer">
-            <a href="#" className="block space-y-2">
+            <a href={`/news/${slugify(sub1)}`} className="block space-y-2">
               <div className="aspect-[4/3] bg-gray-100 overflow-hidden mb-2">
                 <img
                   src="https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=600&q=80"
@@ -46,7 +52,7 @@ export default function LowerNewsSection() {
                 />
               </div>
               <h3 className="text-sm font-extrabold leading-snug text-gray-900 group-hover:text-[#d32f2f] transition-colors">
-                USDA cyclosporiasis research projects shelved amid funding cuts and relocations
+                {sub1}
               </h3>
               <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider">
                 BY MARCIA BROWN AND RACHEL SHIN
@@ -55,7 +61,7 @@ export default function LowerNewsSection() {
           </article>
 
           <article className="group cursor-pointer">
-            <a href="#" className="block space-y-2">
+            <a href={`/news/${slugify(sub2)}`} className="block space-y-2">
               <div className="aspect-[4/3] bg-gray-100 overflow-hidden mb-2">
                 <img
                   src="https://images.unsplash.com/photo-1517411032315-54ef2cb783bb?auto=format&fit=crop&w=600&q=80"
@@ -64,7 +70,7 @@ export default function LowerNewsSection() {
                 />
               </div>
               <h3 className="text-sm font-extrabold leading-snug text-gray-900 group-hover:text-[#d32f2f] transition-colors">
-                'There should be a Pillar 3 in AUKUS: Polar Security'
+                {sub2}
               </h3>
               <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider">
                 BY RYAN HEATH
@@ -73,7 +79,7 @@ export default function LowerNewsSection() {
           </article>
 
           <article className="group cursor-pointer">
-            <a href="#" className="block space-y-2">
+            <a href={`/news/${slugify(sub3)}`} className="block space-y-2">
               <div className="aspect-[4/3] bg-gray-100 overflow-hidden mb-2">
                 <img
                   src="https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=600&q=80"
@@ -82,7 +88,7 @@ export default function LowerNewsSection() {
                 />
               </div>
               <h3 className="text-sm font-extrabold leading-snug text-gray-900 group-hover:text-[#d32f2f] transition-colors">
-                Key House races to watch as election season heats up
+                {sub3}
               </h3>
               <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider">
                 BY ALLISON WENZEL

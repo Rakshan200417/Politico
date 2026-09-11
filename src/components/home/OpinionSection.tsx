@@ -1,6 +1,5 @@
-"use client";
-
 import React from "react";
+import { slugify } from "@/data/newsArticles";
 
 export default function OpinionSection() {
   return (
@@ -17,7 +16,7 @@ export default function OpinionSection() {
           </div>
 
           <article className="group cursor-pointer">
-            <a href="#">
+            <a href={`/news/${slugify("Trump pollster says Abdul El-Sayed's polling lead is a 'fake narrative'")}`}>
               <div className="aspect-[16/9] bg-gray-100 overflow-hidden mb-4">
                 <img
                   src="https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=1200&q=80"
@@ -45,7 +44,7 @@ export default function OpinionSection() {
           </div>
 
           <article className="group cursor-pointer">
-            <a href="#">
+            <a href={`/news/${slugify("Judge declares Rubio's speech-based student deportations violate the Constitution")}`}>
               <div className="aspect-[16/9] bg-gray-100 overflow-hidden mb-4">
                 <img
                   src="https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=1200&q=80"
@@ -73,7 +72,7 @@ export default function OpinionSection() {
           </div>
 
           <article className="group cursor-pointer">
-            <a href="#">
+            <a href={`/news/${slugify("Mike Johnson planning to meet with Elon Musk in Texas")}`}>
               <div className="aspect-[16/9] bg-gray-100 overflow-hidden mb-4">
                 <img
                   src="https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=1200&q=80"

@@ -1,4 +1,8 @@
+import React from "react";
+import { slugify } from "@/data/newsArticles";
+
 export default function MoreTopSidebar() {
+  const podcastTitle = "CAN AMERICA'S OIL AND GAS INDUSTRY ACTUALLY POWER AI?";
   return (
     <aside className="w-full font-sans pl-0 xl:pl-2">
       <div className="space-y-5 border-l border-gray-200 pl-4">
@@ -12,21 +16,23 @@ export default function MoreTopSidebar() {
 
           <div className="space-y-3">
             <div className="space-y-2">
-              <div className="overflow-hidden bg-gray-200">
-                <img
-                  src="https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=1200&q=80"
-                  alt="Podcast feature"
-                  className="h-[170px] w-full object-cover"
-                />
-              </div>
+              <a href={`/news/${slugify(podcastTitle)}`} className="block group">
+                <div className="overflow-hidden bg-gray-200">
+                  <img
+                    src="https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=1200&q=80"
+                    alt="Podcast feature"
+                    className="h-[170px] w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
 
-              <div className="text-[11px] font-black uppercase tracking-[0.16em] text-[#111111] font-sans">
-                Aug. 31, 2026
-              </div>
+                <div className="text-[11px] font-black uppercase tracking-[0.16em] text-[#111111] font-sans mt-2">
+                  Aug. 31, 2026
+                </div>
 
-              <h3 className="text-[18px] font-black leading-[1.04] tracking-[-0.04em] text-[#111111] font-sans">
-                CAN AMERICA&apos;S OIL AND GAS INDUSTRY ACTUALLY POWER AI?
-              </h3>
+                <h3 className="text-[18px] font-black leading-[1.04] tracking-[-0.04em] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mt-1">
+                  CAN AMERICA&apos;S OIL AND GAS INDUSTRY ACTUALLY POWER AI?
+                </h3>
+              </a>
 
               <div className="flex items-center gap-3 rounded-md bg-[#f5f5f5] px-2 py-2">
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#6d73d9] text-base font-bold text-white">

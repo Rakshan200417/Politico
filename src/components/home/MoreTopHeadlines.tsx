@@ -1,4 +1,6 @@
 import React from "react";
+import { slugify } from "@/data/newsArticles";
+import SaveShareButtons from "@/components/common/SaveShareButtons";
 
 const secondaryStories = [
   {
@@ -22,6 +24,9 @@ const secondaryStories = [
 ];
 
 export default function MoreTopHeadlines() {
+  const top1 = "Treasury offers Chalmers an AI productivity prize — with strings attached";
+  const top2 = "Bessent's G20 pitch collides with anxieties over US debt and Iran war";
+
   return (
     <div className="w-full font-sans border-t border-[#d9d9d9] pt-4">
       <div className="flex items-center gap-2 pb-2 mb-4 border-b border-[#d9d9d9]">
@@ -33,7 +38,7 @@ export default function MoreTopHeadlines() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <article className="group cursor-pointer">
-          <a href="#" className="block space-y-2.5">
+          <a href={`/news/${slugify(top1)}`} className="block space-y-2.5">
             <div className="aspect-[16/10] bg-gray-100 overflow-hidden">
               <img
                 src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80"
@@ -42,16 +47,26 @@ export default function MoreTopHeadlines() {
               />
             </div>
             <h3 className="text-[16px] lg:text-[18px] font-bold leading-[1.05] text-[#222222] group-hover:text-[#d32f2f] transition-colors tracking-tight font-sans">
-              Treasury offers Chalmers an AI productivity prize — with strings attached
+              {top1}
             </h3>
-            <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider font-sans">
-              BY RYAN HEATH
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider font-sans">
+                BY RYAN HEATH
+              </p>
+              <SaveShareButtons
+                title={top1}
+                slug={slugify(top1)}
+                image="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80"
+                category="Economy"
+                byline="RYAN HEATH"
+                size="sm"
+              />
+            </div>
           </a>
         </article>
 
         <article className="group cursor-pointer">
-          <a href="#" className="block space-y-2.5">
+          <a href={`/news/${slugify(top2)}`} className="block space-y-2.5">
             <div className="aspect-[16/10] bg-gray-100 overflow-hidden">
               <img
                 src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80"
@@ -60,11 +75,21 @@ export default function MoreTopHeadlines() {
               />
             </div>
             <h3 className="text-[16px] lg:text-[18px] font-bold leading-[1.05] text-[#222222] group-hover:text-[#333333] transition-colors tracking-tight font-sans">
-              Bessent&apos;s G20 pitch collides with anxieties over US debt and Iran war
+              {top2}
             </h3>
-            <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider font-sans">
-              BY MICHAEL STRATFORD
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider font-sans">
+                BY MICHAEL STRATFORD
+              </p>
+              <SaveShareButtons
+                title={top2}
+                slug={slugify(top2)}
+                image="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80"
+                category="Finance"
+                byline="MICHAEL STRATFORD"
+                size="sm"
+              />
+            </div>
           </a>
         </article>
       </div>
@@ -72,7 +97,7 @@ export default function MoreTopHeadlines() {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 pb-2">
         {secondaryStories.map((story, index) => (
           <article key={index} className="group cursor-pointer border-t border-gray-200 pt-4">
-            <a href="#" className="block space-y-2.5">
+            <a href={`/news/${slugify(story.title)}`} className="block space-y-2.5">
               <div className="aspect-[16/10] bg-gray-100 overflow-hidden">
                 <img
                   src={story.image}

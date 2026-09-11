@@ -3,22 +3,25 @@
 import React, { useState } from "react";
 import { EyeOff, Eye, ArrowLeft } from "lucide-react";
 
-export default function LoginForm() {
+export default function SignupForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
+    fullName: "",
     email: "",
     password: "",
-    rememberMe: true,
+    confirmPassword: "",
+    agreeTerms: true,
   });
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -27,28 +30,39 @@ export default function LoginForm() {
     setError("");
     setSuccess(false);
 
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    if (!formData.agreeTerms) {
+      setError("You must agree to the terms of service");
+      return;
+    }
+
     try {
-      const res = await fetch("/api/auth/login", {
+      const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          email: formData.email,
+          password: formData.password,
+        }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Login failed");
+        setError(data.error || "Sign up failed");
       } else {
         setSuccess(true);
-        console.log("Logged in user:", data.user);
-
         // Save user session in localStorage
         localStorage.setItem("user", JSON.stringify(data.user));
 
-        // Redirect to home page with news
         setTimeout(() => {
           window.location.href = "/";
-        }, 1000);
+        }, 1200);
       }
     } catch (err) {
       setError("An error occurred. Make sure XAMPP MySQL is running.");
@@ -67,8 +81,8 @@ export default function LoginForm() {
       </a>
 
       {/* Main Split Authentication Card */}
-      <div className="w-full max-w-[860px] bg-white rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] overflow-hidden grid grid-cols-1 md:grid-cols-2 relative z-10 min-h-[540px]">
-        {/* Left Column: Signature Red Brand Panel with Logo */}
+      <div className="w-full max-w-[860px] bg-white rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] overflow-hidden grid grid-cols-1 md:grid-cols-2 relative z-10 min-h-[580px]">
+        {/* Left Column: Signature Red Brand Panel with P Logo */}
         <div className="bg-[#ce1126] flex flex-col items-center justify-center p-10 text-white relative select-none">
           <div className="flex flex-col items-center justify-center text-center">
             {/* P Letter Logo with Background */}
@@ -88,16 +102,16 @@ export default function LoginForm() {
           </div>
         </div>
 
-        {/* Right Column: Clean White Form */}
+        {/* Right Column: Clean White Sign Up Form */}
         <div className="p-8 sm:p-10 lg:p-12 flex flex-col justify-between bg-white">
           <div>
             {/* Header */}
-            <div className="text-center mb-6">
+            <div className="text-center mb-5">
               <h1 className="text-xl sm:text-2xl font-black text-[#ce1126] uppercase tracking-wider">
-                SIGN IN
+                SIGN UP
               </h1>
               <p className="text-gray-400 text-xs mt-1.5">
-                Sign in to your POLITICO account to access breaking news, analysis, and newsletters
+                Create an account to access breaking political news and newsletters
               </p>
             </div>
 
@@ -110,18 +124,31 @@ export default function LoginForm() {
 
             {success && (
               <div className="mb-4 bg-green-50 text-green-600 p-2.5 rounded text-xs border border-green-200 font-medium">
-                Login successful! Redirecting...
+                Account created successfully! Redirecting...
               </div>
             )}
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Email / Username Field */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Full Name Field */}
+              <div>
+                <input
+                  type="text"
+                  name="fullName"
+                  placeholder="Full name"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  className="w-full border-b border-gray-300 py-2 text-[13px] text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#ce1126] transition-colors bg-transparent"
+                  required
+                />
+              </div>
+
+              {/* Email Address Field */}
               <div>
                 <input
                   type="email"
                   name="email"
-                  placeholder="Email or username"
+                  placeholder="Email address"
                   value={formData.email}
                   onChange={handleChange}
                   className="w-full border-b border-gray-300 py-2 text-[13px] text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#ce1126] transition-colors bg-transparent"
@@ -150,17 +177,38 @@ export default function LoginForm() {
                 </button>
               </div>
 
-              {/* Terms / Remember Me Checkbox */}
+              {/* Confirm Password Field */}
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  placeholder="Confirm password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className="w-full border-b border-gray-300 py-2 text-[13px] text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#ce1126] transition-colors pr-8 bg-transparent"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none p-1"
+                  aria-label="Toggle confirm password visibility"
+                >
+                  {showConfirmPassword ? <Eye size={16} strokeWidth={1.7} /> : <EyeOff size={16} strokeWidth={1.7} />}
+                </button>
+              </div>
+
+              {/* Terms Checkbox */}
               <div className="flex items-center pt-1">
                 <input
                   type="checkbox"
-                  id="rememberMe"
-                  name="rememberMe"
-                  checked={formData.rememberMe}
+                  id="agreeTerms"
+                  name="agreeTerms"
+                  checked={formData.agreeTerms}
                   onChange={handleChange}
                   className="w-4 h-4 text-[#ce1126] border-gray-300 rounded focus:ring-[#ce1126] accent-[#ce1126] cursor-pointer"
                 />
-                <label htmlFor="rememberMe" className="ml-2 text-xs text-gray-600 cursor-pointer select-none">
+                <label htmlFor="agreeTerms" className="ml-2 text-xs text-gray-600 cursor-pointer select-none">
                   I agree all statements in{" "}
                   <a href="#" className="text-[#ce1126] hover:underline font-medium">
                     terms of service
@@ -168,23 +216,23 @@ export default function LoginForm() {
                 </label>
               </div>
 
-              {/* Sign In Primary Action Button */}
+              {/* Primary Sign Up Button */}
               <button
                 type="submit"
                 className="w-full bg-[#ce1126] hover:bg-[#b00d1f] text-white font-bold py-3 text-xs tracking-wider uppercase rounded-sm shadow-md transition-all duration-200 mt-2 active:scale-[0.99]"
               >
-                SIGN IN
+                SIGN UP
               </button>
             </form>
 
             {/* Divider */}
-            <div className="relative flex items-center my-4">
+            <div className="relative flex items-center my-3.5">
               <div className="flex-grow border-t border-gray-200"></div>
               <span className="flex-shrink-0 mx-3 text-gray-400 text-xs">or</span>
               <div className="flex-grow border-t border-gray-200"></div>
             </div>
 
-            {/* Google Sign In Button */}
+            {/* Google Sign Up Button */}
             <button
               type="button"
               className="w-full border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2.5 px-4 text-xs rounded-sm transition-colors flex items-center justify-center gap-2.5 shadow-sm"
@@ -196,22 +244,22 @@ export default function LoginForm() {
                 <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
                 <path fill="none" d="M0 0h48v48H0z" />
               </svg>
-              Log in with Google
+              Sign up with Google
             </button>
 
-            {/* Create Account Link under Google button */}
-            <div className="text-center mt-3.5 text-xs text-gray-600">
-              Don&apos;t have an account?{" "}
-              <a href="/signup" className="text-[#ce1126] font-bold hover:underline">
-                Create an account
+            {/* Link to Login */}
+            <div className="text-center mt-3 text-xs text-gray-600">
+              Already have an account?{" "}
+              <a href="/login" className="text-[#ce1126] font-bold hover:underline">
+                Sign In
               </a>
             </div>
           </div>
 
           {/* Bottom Card Footer */}
-          <div className="flex items-center justify-between text-[11px] text-gray-400 mt-6 pt-4 border-t border-gray-100">
+          <div className="flex items-center justify-between text-[11px] text-gray-400 mt-5 pt-3 border-t border-gray-100">
             <a href="#" className="hover:text-gray-700 transition-colors">
-              Reset password
+              Terms of Service
             </a>
             <a href="#" className="hover:text-gray-700 transition-colors">
               Help & Support

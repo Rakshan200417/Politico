@@ -1,4 +1,5 @@
 import React from "react";
+import { slugify } from "@/data/newsArticles";
 
 interface LatestNewsItem {
   id: string;
@@ -73,7 +74,7 @@ export default function LatestNewsList() {
       <div className="divide-y divide-[#e5e5e5]">
         {latestNews.map((item) => (
           <article key={item.id} className="py-3 group cursor-pointer">
-            <a href="#" className="flex items-start gap-4">
+            <a href={`/news/${slugify(item.title)}`} className="flex items-start gap-4">
               <span
                 className={`text-[11px] font-extrabold shrink-0 min-w-[24px] pt-1 ${
                   item.isRedTime ? "text-[#d32f2f]" : "text-gray-500"

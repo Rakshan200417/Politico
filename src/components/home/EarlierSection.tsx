@@ -1,6 +1,5 @@
-"use client";
-
 import React from "react";
+import { slugify } from "@/data/newsArticles";
 
 const stories = [
   {
@@ -119,7 +118,7 @@ export default function EarlierSection() {
           <div className="divide-y divide-gray-200">
             {stories.map((item) => (
               <article key={item.id} className="py-4 group cursor-pointer">
-                <a href="#" className="flex items-start gap-4">
+                <a href={`/news/${slugify(item.title)}`} className="flex items-start gap-4">
                   <div className="w-32 sm:w-40 aspect-[4/3] bg-gray-100 shrink-0 overflow-hidden">
                     <img
                       src={item.image}

@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { slugify } from "@/data/newsArticles";
 
 const magazineArticles = [
   {
@@ -283,9 +284,10 @@ export default function MagazineCarousel() {
           </div>
 
           {magazineArticles.map((article) => (
-            <article
+            <a
               key={article.id}
-              className="flex-shrink-0 bg-[#f7f7f7] p-4 flex flex-col justify-between group cursor-pointer hover:shadow-md transition-shadow border border-transparent"
+              href={`/news/${slugify(article.title)}`}
+              className="flex-shrink-0 bg-[#f7f7f7] p-4 flex flex-col justify-between group cursor-pointer hover:shadow-md transition-shadow border border-transparent block text-left"
               style={{ width: `${cardWidth}px` }}
             >
               <div>
@@ -309,7 +311,7 @@ export default function MagazineCarousel() {
               <p className="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider">
                 {article.author}
               </p>
-            </article>
+            </a>
           ))}
         </div>
       </div>

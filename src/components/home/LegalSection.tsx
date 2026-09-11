@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { slugify } from "@/data/newsArticles";
 
 export default function LegalSection() {
 
@@ -11,7 +12,7 @@ export default function LegalSection() {
         {/* Left Column (3 cols): Extra Feed */}
         <div className="hidden lg:flex lg:col-span-3 pr-4 flex-col gap-6">
           <article className="group cursor-pointer">
-            <a href="#" className="block space-y-2">
+            <a href={`/news/${slugify("A growing political reckoning is coming for data centers, POLITICO Poll shows")}`} className="block space-y-2">
               <div className="aspect-[4/3] overflow-hidden bg-gray-100">
                 <img
                   src="https://loremflickr.com/600/400/law,protest"
@@ -29,7 +30,7 @@ export default function LegalSection() {
           </article>
           
           <article className="group cursor-pointer border-t border-[#e3e3e3] pt-4 mt-4">
-            <a href="#" className="block space-y-2">
+            <a href={`/news/${slugify("Poll: Republicans and Democrats agree on 1 big election issue")}`} className="block space-y-2">
               <div className="aspect-[4/3] overflow-hidden bg-gray-100">
                 <img
                   src="https://loremflickr.com/600/400/election"
@@ -58,7 +59,7 @@ export default function LegalSection() {
 
           {/* Main Hero Lead Story for Legal */}
           <article className="group cursor-pointer">
-            <a href="#" className="block space-y-3">
+            <a href={`/news/${slugify("Trump again turns to SCOTUS to revive mail-in ballot restrictions")}`} className="block space-y-3">
               <div className="aspect-[16/9] bg-gray-100 overflow-hidden relative">
                 <img
                   src="https://loremflickr.com/1000/600/courthouse"
@@ -78,7 +79,7 @@ export default function LegalSection() {
           {/* Stacked Horizontal Story Items */}
           <div className="divide-y divide-gray-200 pt-2">
             <article className="py-4 first:pt-0 group cursor-pointer">
-              <a href="#" className="flex items-start gap-4">
+              <a href={`/news/${slugify("Missouri AG asks the Supreme Court to block map ruling that would likely stop Republicans from gaining a seat")}`} className="flex items-start gap-4">
                 <div className="w-28 sm:w-36 aspect-[4/3] bg-gray-100 shrink-0 overflow-hidden">
                   <img
                     src="https://loremflickr.com/600/400/judge"
@@ -97,7 +98,7 @@ export default function LegalSection() {
               </a>
             </article>
             <article className="py-4 first:pt-0 group cursor-pointer">
-              <a href="#" className="flex items-start gap-4">
+              <a href={`/news/${slugify("Judge refuses to block Pentagon from deleting military records")}`} className="flex items-start gap-4">
                 <div className="w-28 sm:w-36 aspect-[4/3] bg-gray-100 shrink-0 overflow-hidden">
                   <img
                     src="https://loremflickr.com/600/400/military"

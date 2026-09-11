@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { slugify } from "@/data/newsArticles";
 
 export default function ForeignAffairsSection() {
   const subStories = [
@@ -51,7 +52,7 @@ export default function ForeignAffairsSection() {
 
           {/* Hero Lead Story */}
           <article className="group cursor-pointer">
-            <a href="#" className="block space-y-3">
+            <a href={`/news/${slugify("Iceland's parliament will discuss withdrawing EU bid after failed referendum")}`} className="block space-y-3">
               <div className="aspect-[16/9] bg-gray-100 overflow-hidden relative">
                 <img
                   src="https://images.unsplash.com/photo-1521295121783-8a321d551ad2?auto=format&fit=crop&w=1000&q=80"
@@ -76,7 +77,7 @@ export default function ForeignAffairsSection() {
                 key={item.id}
                 className="py-4 first:pt-0 group cursor-pointer"
               >
-                <a href="#" className="flex items-start gap-4">
+                <a href={`/news/${slugify(item.title)}`} className="flex items-start gap-4">
                   <div className="w-28 sm:w-36 aspect-[4/3] bg-gray-100 shrink-0 overflow-hidden">
                     <img
                       src={item.image}

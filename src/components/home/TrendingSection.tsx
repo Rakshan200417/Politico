@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Play, Pause } from "lucide-react";
+import { slugify } from "@/data/newsArticles";
 
 export default function TrendingSection() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -38,11 +39,14 @@ export default function TrendingSection() {
     },
   ];
 
+  const pollTitle = "'We better not blow it': Both parties are fighting to win over working class voters";
+  const energyTitle = "Is electricity dimming oil's political power?";
+
   return (
     <aside className="w-full space-y-8 font-sans pl-0 lg:pl-4">
       {/* Featured Politico Poll Card */}
       <article className="group cursor-pointer border-b border-gray-200 pb-6">
-        <a href="#">
+        <a href={`/news/${slugify(pollTitle)}`}>
           <div className="aspect-[4/3] bg-gray-100 overflow-hidden mb-3 relative">
             <img
               src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=600&q=80"
@@ -64,7 +68,7 @@ export default function TrendingSection() {
 
       {/* Energy & Plugs Feature */}
       <article className="group cursor-pointer border-b border-gray-200 pb-6">
-        <a href="#">
+        <a href={`/news/${slugify(energyTitle)}`}>
           <div className="aspect-[4/3] bg-gray-100 overflow-hidden mb-3">
             <img
               src="https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=600&q=80"
@@ -182,7 +186,7 @@ export default function TrendingSection() {
               <span className="text-sm font-black text-[#d32f2f] font-sans pt-0.5">
                 {item.num}
               </span>
-              <a href="#" className="flex-1">
+              <a href={`/news/${slugify(item.title)}`} className="flex-1">
                 <h3 className="text-sm font-bold leading-tight text-gray-900 group-hover:text-[#d32f2f] transition-colors">
                   {item.title}
                 </h3>

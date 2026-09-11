@@ -1,6 +1,6 @@
-"use client";
-
 import React from "react";
+import { slugify } from "@/data/newsArticles";
+import SaveShareButtons from "@/components/common/SaveShareButtons";
 
 export default function CongressSection() {
   const congressSubStories = [
@@ -100,7 +100,7 @@ export default function CongressSection() {
             </div>
 
             <article className="group cursor-pointer space-y-2.5">
-              <a href="#" className="block">
+              <a href={`/news/${slugify("A politically impossible situation: New poll shows Trump voters losing patience with Iran war")}`} className="block">
                 <div className="aspect-[4/3] bg-gray-100 overflow-hidden mb-3 relative">
                   <img
                     src="https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80"
@@ -119,7 +119,7 @@ export default function CongressSection() {
 
             {/* Sub-Poll Article */}
             <article className="group cursor-pointer pt-4 border-t border-gray-200 space-y-2">
-              <a href="#" className="block">
+              <a href={`/news/${slugify("A growing political reckoning is coming for data centers, POLITICO Poll shows")}`} className="block">
                 <div className="aspect-[4/3] bg-gray-100 overflow-hidden mb-3">
                   <img
                     src="https://images.unsplash.com/photo-1517411032315-54ef2cb783bb?auto=format&fit=crop&w=600&q=80"
@@ -149,7 +149,7 @@ export default function CongressSection() {
 
           {/* Main Hero Lead Story for Congress */}
           <article className="group cursor-pointer">
-            <a href="#" className="block space-y-3">
+            <a href={`/news/${slugify("Trump pollster says Abdul El-Sayed's polling lead is a fake narrative")}`} className="block space-y-3">
               <div className="aspect-[16/9] bg-gray-100 overflow-hidden relative">
                 <img
                   src="https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=1000&q=80"
@@ -160,9 +160,12 @@ export default function CongressSection() {
               <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight text-gray-900 group-hover:text-[#d32f2f] transition-colors tracking-tight font-sans">
                 Trump pollster says Abdul El-Sayed's polling lead is a 'fake narrative'
               </h1>
-              <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider font-sans">
-                BY MEREDITH LEE HILL
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider font-sans">
+                  BY MEREDITH LEE HILL
+                </p>
+                <SaveShareButtons title="Trump pollster says Abdul El-Sayed's polling lead is a fake narrative" size="sm" />
+              </div>
             </a>
           </article>
 
@@ -170,7 +173,7 @@ export default function CongressSection() {
           <div className="divide-y divide-gray-200 pt-2">
             {congressSubStories.map((item) => (
               <article key={item.id} className="py-4 first:pt-0 group cursor-pointer">
-                <a href="#" className="flex items-start gap-4">
+                <a href={`/news/${slugify(item.title)}`} className="flex items-start gap-4">
                   <div className="w-28 sm:w-36 aspect-[4/3] bg-gray-100 shrink-0 overflow-hidden">
                     <img
                       src={item.image}
@@ -227,7 +230,7 @@ export default function CongressSection() {
                   <span className="text-sm font-black text-[#d32f2f] font-sans pt-0.5 min-w-[14px]">
                     {item.num}
                   </span>
-                  <a href="#" className="flex-1">
+                  <a href={`/news/${slugify(item.title)}`} className="flex-1">
                     <h3 className="text-xs sm:text-sm font-bold leading-tight text-gray-900 group-hover:text-[#d32f2f] transition-colors">
                       {item.title}
                     </h3>
@@ -248,7 +251,7 @@ export default function CongressSection() {
             <div className="space-y-4">
               {talkersStories.map((item) => (
                 <article key={item.id} className="group cursor-pointer">
-                  <a href="#" className="flex items-start gap-3">
+                  <a href={`/news/${slugify(item.title)}`} className="flex items-start gap-3">
                     <div className="w-20 aspect-[4/3] bg-gray-100 shrink-0 overflow-hidden">
                       <img
                         src={item.image}

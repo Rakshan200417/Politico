@@ -1,13 +1,17 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Search, Menu, X, User } from "lucide-react";
+import React, { useEffect, useState, useRef } from "react";
+import { Search, Menu, X, User, BookOpen, LogOut } from "lucide-react";
+import ProfileModal from "@/components/profile/ProfileModal";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [isCompact, setIsCompact] = useState(false);
-  const [user, setUser] = useState<{ role: string; email: string } | null>(null);
+  const [user, setUser] = useState<{ id?: number | string; name?: string; role: string; email: string; avatar_url?: string } | null>(null);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,18 +28,52 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
+  const loadUserData = () => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      const parsed = JSON.parse(storedUser);
+      setUser(parsed);
+
+      // Refresh with latest profile details including avatar_url from DB
+      fetch(`/api/profile?email=${encodeURIComponent(parsed.email)}`)
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.profile) {
+            const updated = {
+              ...parsed,
+              name: data.profile.full_name || parsed.name,
+              avatar_url: data.profile.avatar_url || parsed.avatar_url || '',
+            };
+            localStorage.setItem("user", JSON.stringify(updated));
+            setUser(updated);
+          }
+        })
+        .catch(() => {});
     }
+  };
+
+  useEffect(() => {
+    loadUserData();
+    window.addEventListener("userProfileUpdated", loadUserData);
+    return () => window.removeEventListener("userProfileUpdated", loadUserData);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setProfileMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleLogout = (e: React.MouseEvent) => {
     e.preventDefault();
     localStorage.removeItem("user");
     setUser(null);
-    window.location.href = "/login";
+    setProfileMenuOpen(false);
+    window.location.href = "/";
   };
 
   const mainCategories = [
@@ -45,10 +83,10 @@ export default function Header() {
     { id: "markets", name: "Markets", href: "/category/markets" },
     { id: "economy", name: "Economy", href: "/category/economy" },
     { id: "finance", name: "Finance", href: "/category/finance" },
-    { id: "technology", name: "Technology", href: "/category/technology" },
+    { id: "leaders", name: "Leaders", href: "/category/leaders" },
     { id: "industries", name: "Industries", href: "/category/industries" },
     { id: "global", name: "Global", href: "/category/global" },
-    { id: "leaders", name: "Leaders", href: "/category/leaders" },
+    { id: "technology", name: "Technology", href: "/category/technology" },
   ];
 
   const megaMenuData: Record<string, { name: string; href: string }[]> = {
@@ -99,10 +137,10 @@ export default function Header() {
   };
 
   return (
-    <header className="w-full bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm font-sans transition-all duration-300 ease-out">
+    <header className={`w-full bg-white ${isMenuOpen ? "border-b-0" : "border-b border-gray-200"} sticky top-0 z-50 shadow-sm font-sans transition-all duration-300 ease-out`}>
       {/* Top Header Bar */}
       <div
-        className={`w-full px-3 flex items-center justify-between relative border-b border-gray-200 transition-all duration-300 ease-out ${isCompact ? "h-10 min-[1280px]:h-12" : "h-20 min-[1280px]:h-[90px]"
+        className={`w-full px-3 flex items-center justify-between relative z-20 border-b border-gray-200 transition-all duration-300 ease-out ${isCompact ? "h-10 min-[1280px]:h-12" : "h-20 min-[1280px]:h-[90px]"
           }`}
       >
         {/* Left Menu Toggle Button pinned to the far left */}
@@ -144,13 +182,98 @@ export default function Header() {
             NEWSLETTER SIGNUP
           </a>
           {user ? (
-            <button
-              onClick={handleLogout}
-              className={`transition-all duration-300 ease-out text-gray-800 hover:text-[#ce1126] hidden sm:inline ${isCompact ? "opacity-0 pointer-events-none" : "opacity-100"
-                }`}
-            >
-              LOGOUT
-            </button>
+            <div className="relative" ref={profileRef}>
+              <button
+                type="button"
+                onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                className="relative flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full bg-[#b01753] hover:opacity-90 text-white font-bold text-xs md:text-sm shadow-sm transition-all focus:outline-none cursor-pointer select-none overflow-hidden"
+                aria-label="User profile menu"
+              >
+                {user.avatar_url ? (
+                  <img
+                    src={user.avatar_url}
+                    alt={user.name || "Profile"}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  (user.name?.[0] || user.email[0] || "U").toUpperCase()
+                )}
+                {/* Online status indicator green dot */}
+                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-[#10b981] rounded-full border-2 border-white ring-1 ring-white/50 z-10"></span>
+              </button>
+
+              {/* Profile Dropdown Popup (matching screenshot) */}
+              {profileMenuOpen && (
+                <div className="absolute right-0 top-full mt-2.5 w-64 bg-white rounded-lg shadow-[0_12px_32px_rgba(0,0,0,0.18)] border border-gray-100 z-50 py-2.5 normal-case">
+                  {/* User details header */}
+                  <div className="px-4 pb-2.5 border-b border-gray-100 flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-[#b01753] text-white font-bold text-sm flex items-center justify-center overflow-hidden flex-shrink-0">
+                      {user.avatar_url ? (
+                        <img src={user.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                      ) : (
+                        (user.name?.[0] || user.email[0] || "U").toUpperCase()
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-bold text-gray-900 text-sm leading-snug truncate">
+                        {user.name || user.email.split("@")[0]}
+                      </div>
+                      <div className="text-xs text-gray-500 font-mono mt-0.5 truncate lowercase">
+                        {user.email}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action items */}
+                  <div className="py-1">
+                    <a
+                      href={
+                        user.role === "admin"
+                          ? "/admin"
+                          : user.role === "writer"
+                          ? "/writer"
+                          : "/reader"
+                      }
+                      onClick={() => setProfileMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-xs md:text-sm font-semibold text-gray-800 hover:bg-gray-50 hover:text-[#ce1126] transition-colors"
+                    >
+                      <BookOpen className="w-4 h-4 text-emerald-600 flex-shrink-0" strokeWidth={2} />
+                      <span>
+                        {user.role === "admin"
+                          ? "Admin Dashboard"
+                          : user.role === "writer"
+                          ? "Writer Dashboard"
+                          : "Readers Dashboard"}
+                      </span>
+                    </a>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setProfileMenuOpen(false);
+                        setProfileModalOpen(true);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-xs md:text-sm font-semibold text-gray-800 hover:bg-gray-50 hover:text-[#ce1126] transition-colors text-left cursor-pointer"
+                    >
+                      <User className="w-4 h-4 text-slate-500 flex-shrink-0" strokeWidth={2} />
+                      <span>Profile Settings</span>
+                    </button>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="border-t border-gray-100 my-1"></div>
+
+                  {/* Sign Out Terminal */}
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-xs md:text-sm font-semibold text-gray-800 hover:bg-red-50 hover:text-[#ce1126] transition-colors text-left cursor-pointer"
+                  >
+                    <LogOut className="w-4 h-4 text-slate-500 flex-shrink-0" strokeWidth={2} />
+                    <span>Sign Out Terminal</span>
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             <a
               href="/login"
@@ -198,7 +321,7 @@ export default function Header() {
                 key={cat.name}
                 href={cat.href}
                 className={`transition-colors flex-shrink-0 ${cat.name === "Breaking News"
-                    ? "text-[#ce1126] hover:text-[#a00c1c]"
+                    ? "text-[#ce1126] hover:text-[#a00c1c] mr-4"
                     : "hover:text-[#ce1126]"
                   }`}
               >
@@ -210,13 +333,13 @@ export default function Header() {
       </nav>
 
       {/* Main Secondary Category Sub-Nav */}
-      <nav className={`hidden lg:block bg-white border-b border-gray-200 transition-all duration-300 ease-out relative ${isCompact ? "shadow-sm" : ""}`}>
+      <nav className={`hidden lg:block bg-white ${isMenuOpen ? "border-b-0" : "border-b border-gray-200"} transition-all duration-300 ease-out relative z-10 ${isCompact ? "shadow-sm" : ""}`}>
         {/* Desktop Mega Menu Background Panel */}
         {isMenuOpen && (
-          <div className="absolute left-0 top-full w-full bg-white border-b border-gray-300 shadow-xl min-h-[300px] z-40">
+          <div className="absolute left-0 top-full w-full bg-white shadow-xl min-h-[390px] z-40">
             {/* Mega Menu Footer */}
             <div className="max-w-[1440px] mx-auto px-8 absolute bottom-8 left-0 right-0">
-              <div className="pt-6 border-t border-gray-200 flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
+              <div className="pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
                 <div className="flex items-center space-x-4">
                   <span className="text-[#ce1126] font-black uppercase tracking-wider">FOLLOW US</span>
                   <a href="#" className="font-bold text-gray-900 hover:text-[#ce1126]">X</a>
@@ -224,12 +347,12 @@ export default function Header() {
                   <a href="#" className="font-bold text-gray-900 hover:text-[#ce1126]">FACEBOOK</a>
                   <a href="#" className="font-bold text-gray-900 hover:text-[#ce1126]">LINKEDIN</a>
                 </div>
-                <div className="flex items-center space-x-6 font-bold text-gray-900">
-                  <a href="#" className="hover:text-[#ce1126]">My Account</a>
+                <div className="flex items-center space-x-6 font-bold text-gray-900 text-sm md:text-base">
+                  <a href="#" className="hover:text-[#ce1126] transition-colors">My Account</a>
                   {user ? (
-                    <button onClick={handleLogout} className="hover:text-[#ce1126] uppercase">Log Out</button>
+                    <button onClick={handleLogout} className="hover:text-[#ce1126] uppercase transition-colors">Log Out</button>
                   ) : (
-                    <a href="/login" className="hover:text-[#ce1126]">Log In</a>
+                    <a href="/login" className="hover:text-[#ce1126] transition-colors">Log In</a>
                   )}
                 </div>
               </div>
@@ -241,10 +364,10 @@ export default function Header() {
           className={`max-w-[1440px] mx-auto px-3 flex items-start justify-center transition-all duration-300 ease-out py-3 text-[12px] min-[1280px]:py-4 min-[1280px]:text-[16px] font-bold text-[#1e1e1e] tracking-normal`}
         >
           <div className={`flex items-start relative z-50 transition-all duration-300 ease-out ${isMenuOpen ? "space-x-8 md:space-x-12 lg:space-x-16" : "space-x-4 md:space-x-6"}`}>
-            <div className="relative">
+            <div className={`relative transition-all duration-300 ${isMenuOpen ? "mr-4 md:mr-6 lg:mr-8" : "mr-4 md:mr-6"}`}>
               <a
                 href="/category/breaking-news"
-                className={`transition-colors text-[#ce1126] hover:text-[#a00c1c] py-2 block whitespace-nowrap transition-all duration-300 ${isMenuOpen ? "mr-8 md:mr-16 lg:mr-20" : "mr-4 md:mr-12"}`}
+                className="transition-colors text-[#ce1126] hover:text-[#a00c1c] py-2 block whitespace-nowrap"
               >
                 Breaking News
               </a>
@@ -281,7 +404,7 @@ export default function Header() {
 
       {/* Mobile/Tablet Mega Menu Overlay Dropdown */}
       {isMenuOpen && (
-        <div className="lg:hidden w-full bg-white border-b border-gray-300 shadow-xl max-h-[85vh] overflow-y-auto">
+        <div className="lg:hidden w-full bg-white shadow-xl max-h-[85vh] overflow-y-auto">
           <div className="px-4 py-6 space-y-6">
             {mainCategories.filter((cat) => cat.id !== "breakingNews").map((cat) => {
               const subCategories = megaMenuData[cat.id] || [];
@@ -305,7 +428,7 @@ export default function Header() {
             })}
 
             {/* Bottom Footer Section Mobile */}
-            <div className="mt-8 pt-6 border-t border-gray-200 flex flex-col gap-4 text-xs">
+            <div className="mt-8 pt-6 flex flex-col gap-4 text-xs">
               <div className="flex flex-col space-y-3">
                 <span className="text-[#ce1126] font-black uppercase tracking-wider">FOLLOW US</span>
                 <div className="flex space-x-4">
@@ -315,18 +438,27 @@ export default function Header() {
                   <a href="#" className="font-bold text-gray-900 hover:text-[#ce1126]">LINKEDIN</a>
                 </div>
               </div>
-              <div className="flex space-x-6 font-bold text-gray-900 mt-4">
-                <a href="#" className="hover:text-[#ce1126]">My Account</a>
+              <div className="flex space-x-6 font-bold text-gray-900 mt-4 text-sm md:text-base">
+                <a href="#" className="hover:text-[#ce1126] transition-colors">My Account</a>
                 {user ? (
-                  <button onClick={handleLogout} className="hover:text-[#ce1126] uppercase">Log Out</button>
+                  <button onClick={handleLogout} className="hover:text-[#ce1126] uppercase transition-colors">Log Out</button>
                 ) : (
-                  <a href="/login" className="hover:text-[#ce1126]">Log In</a>
+                  <a href="/login" className="hover:text-[#ce1126] transition-colors">Log In</a>
                 )}
               </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* Profile Settings Modal */}
+      <ProfileModal
+        isOpen={profileModalOpen}
+        onClose={() => setProfileModalOpen(false)}
+        onProfileUpdated={(updated) => {
+          setUser((prev) => (prev ? { ...prev, name: updated.name } : null));
+        }}
+      />
     </header>
   );
 }

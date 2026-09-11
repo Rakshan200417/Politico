@@ -14,6 +14,7 @@ import ElectionsSection from "@/components/home/ElectionsSection";
 import ForeignAffairsSection from "@/components/home/ForeignAffairsSection";
 import EarlierSection from "@/components/home/EarlierSection";
 import ThreeColumnSection from "@/components/home/ThreeColumnSection";
+import AdvertisementSlot from "@/components/common/AdvertisementSlot";
 
 export default function Home() {
   return (
@@ -59,6 +60,9 @@ export default function Home() {
           <MagazineCarousel />
         </div>
 
+        {/* ── Advertisement Space 1 matching Image 3 ── */}
+        <AdvertisementSlot variant="in-article" />
+
         {/* ── CONGRESS Section ── */}
         <div className="w-full border-b border-gray-200 pb-8">
           <CongressSection />
@@ -80,6 +84,9 @@ export default function Home() {
         <div className="w-full border-b border-gray-200 pb-8">
           <ElectionsSection />
         </div>
+
+        {/* ── Advertisement Space 2 matching Image 3 ── */}
+        <AdvertisementSlot variant="banner" />
 
         <div className="w-full border-b border-gray-200 pb-8">
           <ForeignAffairsSection />

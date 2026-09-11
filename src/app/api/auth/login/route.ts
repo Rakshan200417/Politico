@@ -45,8 +45,10 @@ export async function POST(request: Request) {
       message: 'Login successful',
       user: {
         id: user.id,
+        name: user.name || user.email.split('@')[0],
         email: user.email,
         role: user.role,
+        avatar_url: user.avatar_url || '',
       }
     }, { status: 200 });
 
