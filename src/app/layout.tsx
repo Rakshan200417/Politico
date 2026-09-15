@@ -12,6 +12,8 @@ export const metadata: Metadata = {
   },
 };
 
+import GlobalArticleLinkHandler from "@/components/common/GlobalArticleLinkHandler";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -24,6 +26,7 @@ export default function RootLayout({
         <link rel="shortcut icon" href="/icon.png?v=2" />
       </head>
       <body className="min-h-screen bg-white flex flex-col text-slate-900">
+        <GlobalArticleLinkHandler />
         {children}
       </body>
     </html>

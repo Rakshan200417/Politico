@@ -62,20 +62,41 @@ export default function ProfilePage() {
     const reader = new FileReader();
     reader.onload = async () => {
       const base64Url = reader.result as string;
+      const oldUrl = avatarUrl;
       setAvatarUrl(base64Url);
 
       try {
         const formData = new FormData();
         formData.append("file", file);
+        formData.append("uploader_email", user?.email || "");
 
-        const res = await fetch("/api/upload", {
+        const res = await fetch("/api/upload?type=avatars", {
           method: "POST",
           body: formData,
         });
 
         const data = await res.json();
         if (res.ok && data.url) {
-          setAvatarUrl(data.url);
+          const newUrl = data.url;
+          setAvatarUrl(newUrl);
+
+          // Instantly update database and delete old photo from DB table and disk
+          if (user?.email) {
+            await fetch("/api/profile/avatar", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                email: user.email,
+                avatarUrl: newUrl,
+                oldAvatarUrl: oldUrl,
+              }),
+            });
+
+            const updatedUser = { ...user, avatar_url: newUrl };
+            localStorage.setItem("user", JSON.stringify(updatedUser));
+            setUser(updatedUser);
+            window.dispatchEvent(new Event("userProfileUpdated"));
+          }
         }
       } catch (uploadErr) {
         console.warn("Upload to disk fallback to data URL:", uploadErr);
@@ -84,6 +105,33 @@ export default function ProfilePage() {
       }
     };
     reader.readAsDataURL(file);
+  };
+
+  // Handle instantly reverting to default icon and deleting old image from DB
+  const handleUseDefaultIcon = async () => {
+    const oldUrl = avatarUrl;
+    setAvatarUrl("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
+
+    if (user?.email) {
+      try {
+        await fetch("/api/profile/avatar", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: user.email,
+            oldAvatarUrl: oldUrl,
+          }),
+        });
+
+        const updatedUser = { ...user, avatar_url: "" };
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        setUser(updatedUser);
+        window.dispatchEvent(new Event("userProfileUpdated"));
+      } catch (err) {
+        console.error("Failed to delete avatar from DB:", err);
+      }
+    }
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -215,10 +263,7 @@ export default function ProfilePage() {
                     <span className="text-gray-300 text-xs select-none">|</span>
                     <button
                       type="button"
-                      onClick={() => {
-                        setAvatarUrl("");
-                        if (fileInputRef.current) fileInputRef.current.value = "";
-                      }}
+                      onClick={handleUseDefaultIcon}
                       className="text-xs font-bold text-gray-500 hover:text-[#ce1126] transition-colors cursor-pointer"
                     >
                       Use default icon

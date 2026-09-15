@@ -103,24 +103,24 @@ export default function DashboardShell({
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar (Slightly increased size for desktop mode) */}
       <aside
-        className={`fixed lg:static top-0 bottom-0 left-0 w-64 bg-white border-r border-gray-200 z-50 flex flex-col justify-between transition-transform duration-300 ease-in-out ${
+        className={`fixed lg:static top-0 bottom-0 left-0 w-72 xl:w-80 bg-white border-r border-gray-200 z-50 flex flex-col justify-between transition-transform duration-300 ease-in-out flex-shrink-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
         <div>
           {/* Sidebar Brand Header */}
-          <div className="h-16 px-6 border-b border-gray-200 flex items-center justify-between">
-            <a href="/" className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[#ce1126] flex items-center justify-center text-white font-black text-lg shadow-sm select-none">
+          <div className="h-16 lg:h-20 px-6 lg:px-7 border-b border-gray-200 flex items-center justify-between">
+            <a href="/" className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-[#ce1126] flex items-center justify-center text-white font-black text-xl shadow-sm select-none">
                 P
               </div>
               <div className="flex flex-col">
-                <span className="font-black text-lg tracking-tight text-gray-900 leading-none">
+                <span className="font-black text-xl tracking-tight text-gray-900 leading-none">
                   POLITICO
                 </span>
-                <span className="text-[10px] font-bold text-[#ce1126] tracking-wider uppercase mt-0.5">
+                <span className="text-[10px] font-bold text-[#ce1126] tracking-wider uppercase mt-1">
                   {portalBadge}
                 </span>
               </div>
@@ -136,8 +136,8 @@ export default function DashboardShell({
           </div>
 
           {/* Navigation Links */}
-          <div className="p-4 space-y-1">
-            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-3 mb-2">
+          <div className="p-4 lg:p-5 space-y-1.5">
+            <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider px-3 mb-2.5">
               Menu
             </div>
             {navItems.map((item) => {
@@ -150,19 +150,19 @@ export default function DashboardShell({
                     onTabChange(item.id);
                     setSidebarOpen(false);
                   }}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-bold transition-colors ${
+                  className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs sm:text-sm font-bold transition-colors ${
                     isActive
                       ? "bg-[#ce1126]/10 text-[#ce1126]"
                       : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <Icon size={18} className={isActive ? "text-[#ce1126]" : "text-gray-400"} />
+                  <div className="flex items-center gap-3.5">
+                    <Icon size={19} className={isActive ? "text-[#ce1126]" : "text-gray-400"} />
                     <span>{item.label}</span>
                   </div>
                   {item.badge !== undefined && (
                     <span
-                      className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                      className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold ${
                         isActive
                           ? "bg-[#ce1126] text-white"
                           : "bg-gray-100 text-gray-600"
@@ -178,9 +178,9 @@ export default function DashboardShell({
         </div>
 
         {/* Sidebar Footer User Info */}
-        <div className="p-4 border-t border-gray-200">
-          <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 mb-2">
-            <div className="w-8 h-8 rounded-full bg-[#b01753] text-white font-bold text-xs flex items-center justify-center flex-shrink-0 overflow-hidden">
+        <div className="p-4 lg:p-5 border-t border-gray-200">
+          <div className="flex items-center gap-3 p-2.5 rounded-xl bg-gray-50 mb-2.5 border border-gray-100">
+            <div className="w-9 h-9 rounded-full bg-[#b01753] text-white font-bold text-sm flex items-center justify-center flex-shrink-0 overflow-hidden">
               {user?.avatar_url ? (
                 <img src={user.avatar_url} alt="Profile" className="w-full h-full object-cover" />
               ) : (
@@ -188,14 +188,14 @@ export default function DashboardShell({
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-xs font-bold text-gray-900 truncate">{displayName}</div>
-              <div className="text-[10px] text-gray-500 font-mono truncate">{user?.email}</div>
+              <div className="text-xs sm:text-sm font-bold text-gray-900 truncate">{displayName}</div>
+              <div className="text-[11px] text-gray-500 font-mono truncate">{user?.email}</div>
             </div>
           </div>
 
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold text-gray-600 hover:text-[#ce1126] hover:bg-red-50 transition-colors"
+            className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-gray-600 hover:text-[#ce1126] hover:bg-red-50 transition-colors"
           >
             <LogOut size={16} />
             <span>Sign Out Terminal</span>
@@ -307,8 +307,8 @@ export default function DashboardShell({
           </div>
         </header>
 
-        {/* Main Body */}
-        <main className="flex-1 p-6 sm:p-8 lg:p-10 max-w-7xl w-full">
+        {/* Main Body (Expanded size & centered for desktop mode) */}
+        <main className="flex-1 p-6 sm:p-8 lg:p-10 xl:p-12 w-full max-w-[1560px] 2xl:max-w-[1680px] mx-auto">
           {children}
         </main>
       </div>
