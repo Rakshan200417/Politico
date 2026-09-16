@@ -197,7 +197,15 @@ export default function WriterEditor({
   };
 
   const handleInsertLink = () => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+    const range = selection.getRangeAt(0);
+
     const url = prompt("Enter the destination link URL (https://...):");
+
+    selection.removeAllRanges();
+    selection.addRange(range);
+
     if (url) {
       handleFormat("createLink", url);
     }
@@ -788,7 +796,10 @@ export default function WriterEditor({
         {/* Left Side: Writing Canvas Card */}
         <main className="flex-1 w-full min-w-0 bg-white border border-gray-200/90 rounded-2xl p-4 sm:p-8 lg:p-10 shadow-xs">
           {/* Editor Action Toolbar (Matching User Reference Image) */}
-          <div className="bg-[#f8fafc] border border-slate-200/90 rounded-2xl p-2.5 sm:p-3 mb-6 sm:mb-8 flex flex-col gap-2 shadow-xs">
+          <div 
+            className="bg-[#f8fafc] border border-slate-200/90 rounded-2xl p-2.5 sm:p-3 mb-6 sm:mb-8 flex flex-col gap-2 shadow-xs"
+            onMouseDown={(e) => e.preventDefault()}
+          >
             {/* Row 1 */}
             <div className="flex items-center gap-1 sm:gap-2">
               <button

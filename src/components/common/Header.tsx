@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { Search, Menu, X, User, BookOpen, LogOut } from "lucide-react";
+import { Search, Menu, X, User, BookOpen, LogOut, PenTool } from "lucide-react";
 import ProfileModal from "@/components/profile/ProfileModal";
 
 export default function Header() {
@@ -235,14 +235,20 @@ export default function Header() {
                           : "/reader"
                       }
                       onClick={() => setProfileMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-xs md:text-sm font-semibold text-gray-800 hover:bg-gray-50 hover:text-[#ce1126] transition-colors"
+                      className={`flex items-center gap-3 px-4 py-2.5 text-xs md:text-sm font-semibold hover:bg-gray-50 transition-colors ${
+                        user.role === "writer" ? "text-blue-600 hover:text-blue-700" : "text-gray-800 hover:text-[#ce1126]"
+                      }`}
                     >
-                      <BookOpen className="w-4 h-4 text-emerald-600 flex-shrink-0" strokeWidth={2} />
+                      {user.role === "writer" ? (
+                        <PenTool className="w-4 h-4 flex-shrink-0" strokeWidth={2} />
+                      ) : (
+                        <BookOpen className="w-4 h-4 text-emerald-600 flex-shrink-0" strokeWidth={2} />
+                      )}
                       <span>
                         {user.role === "admin"
                           ? "Admin Dashboard"
                           : user.role === "writer"
-                          ? "Writer Dashboard"
+                          ? "Author Workspace"
                           : "Readers Dashboard"}
                       </span>
                     </a>

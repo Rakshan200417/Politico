@@ -9,6 +9,7 @@ import {
   ChevronDown,
   User as UserIcon,
   BookOpen,
+  PenTool,
 } from "lucide-react";
 import ProfileModal from "@/components/profile/ProfileModal";
 
@@ -272,12 +273,30 @@ export default function DashboardShell({
 
                   <div className="py-1">
                     <a
-                      href="/reader"
+                      href={
+                        user?.role === "admin"
+                          ? "/admin"
+                          : user?.role === "writer"
+                          ? "/writer"
+                          : "/reader"
+                      }
                       onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-xs md:text-sm font-semibold text-gray-800 hover:bg-gray-50 hover:text-[#ce1126] transition-colors"
+                      className={`flex items-center gap-3 px-4 py-2.5 text-xs md:text-sm font-semibold transition-colors ${
+                        user?.role === "writer" ? "text-blue-600 hover:text-blue-700 hover:bg-gray-50" : "text-gray-800 hover:bg-gray-50 hover:text-[#ce1126]"
+                      }`}
                     >
-                      <BookOpen className="w-4 h-4 text-emerald-600 flex-shrink-0" strokeWidth={2} />
-                      <span>Readers Dashboard</span>
+                      {user?.role === "writer" ? (
+                        <PenTool className="w-4 h-4 flex-shrink-0" strokeWidth={2} />
+                      ) : (
+                        <BookOpen className="w-4 h-4 text-emerald-600 flex-shrink-0" strokeWidth={2} />
+                      )}
+                      <span>
+                        {user?.role === "admin"
+                          ? "Admin Dashboard"
+                          : user?.role === "writer"
+                          ? "Author Workspace"
+                          : "Readers Dashboard"}
+                      </span>
                     </a>
                     <button
                       type="button"
