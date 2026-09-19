@@ -73,19 +73,35 @@ export default function LatestNewsList() {
       {/* News List */}
       <div className="divide-y divide-[#e5e5e5]">
         {latestNews.map((item) => (
-          <article key={item.id} className="py-3 group cursor-pointer">
-            <a href={`/news/${slugify(item.title)}`} className="flex items-start gap-4">
-              <span
-                className={`text-[11px] font-extrabold shrink-0 min-w-[24px] pt-1 ${
-                  item.isRedTime ? "text-[#d32f2f]" : "text-gray-500"
-                }`}
-              >
-                {item.time}
-              </span>
-              <h3 className="text-[14px] font-extrabold leading-[1.3] text-[#222222] group-hover:text-[#d32f2f] transition-colors duration-150 font-sans">
-                {item.title}
-              </h3>
-            </a>
+          <article key={item.id} className="group cursor-pointer">
+            {/* Default State */}
+            <div className="py-3 block group-hover:hidden">
+              <a href={`/news/${slugify(item.title)}`} className="flex items-start gap-4">
+                <span
+                  className={`text-[11px] font-extrabold shrink-0 min-w-[24px] pt-1 ${
+                    item.isRedTime ? "text-[#d32f2f]" : "text-gray-500"
+                  }`}
+                >
+                  {item.time}
+                </span>
+                <h3 className="text-[14px] font-extrabold leading-[1.3] text-[#222222] font-sans">
+                  {item.title}
+                </h3>
+              </a>
+            </div>
+            
+            {/* Expanded Hover State */}
+            <div className="hidden group-hover:block py-4 px-2 -mx-2 bg-[#fbfbfb] border border-gray-100 shadow-sm transition-all duration-300">
+              <div className="text-[11px] font-extrabold text-[#00609d] uppercase tracking-[0.15em] mb-2 font-sans">
+                SPONSORED CONTENT
+              </div>
+              <h4 className="text-[17px] font-bold leading-[1.2] text-gray-900 mb-4 font-sans tracking-tight">
+                Bold stories. Real influence. This is POLITICO Focus.
+              </h4>
+              <div className="text-[12px] text-gray-500 font-semibold font-sans">
+                Sponsored by POLITICO Focus
+              </div>
+            </div>
           </article>
         ))}
       </div>

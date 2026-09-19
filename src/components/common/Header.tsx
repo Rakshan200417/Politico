@@ -186,18 +186,20 @@ export default function Header() {
               <button
                 type="button"
                 onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                className="relative flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full bg-[#b01753] hover:opacity-90 text-white font-bold text-xs md:text-sm shadow-sm transition-all focus:outline-none cursor-pointer select-none overflow-hidden"
+                className="relative flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full bg-[#b01753] hover:opacity-90 text-white font-bold text-xs md:text-sm shadow-sm transition-all focus:outline-none cursor-pointer select-none"
                 aria-label="User profile menu"
               >
-                {user.avatar_url ? (
-                  <img
-                    src={user.avatar_url}
-                    alt={user.name || "Profile"}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  (user.name?.[0] || user.email[0] || "U").toUpperCase()
-                )}
+                <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center">
+                  {user.avatar_url ? (
+                    <img
+                      src={user.avatar_url}
+                      alt={user.name || "Profile"}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    (user.name?.[0] || user.email[0] || "U").toUpperCase()
+                  )}
+                </div>
                 {/* Online status indicator green dot */}
                 <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-[#10b981] rounded-full border-2 border-white ring-1 ring-white/50 z-10"></span>
               </button>
@@ -367,13 +369,13 @@ export default function Header() {
         )}
 
         <div
-          className={`max-w-[1440px] mx-auto px-3 flex items-start justify-center transition-all duration-300 ease-out py-3 text-[12px] min-[1280px]:py-4 min-[1280px]:text-[16px] font-bold text-[#1e1e1e] tracking-normal`}
+          className={`max-w-[1440px] mx-auto px-3 flex items-start justify-center transition-all duration-300 ease-out py-1 text-[12px] min-[1280px]:py-2 min-[1280px]:text-[16px] font-bold text-[#1e1e1e] tracking-normal`}
         >
           <div className={`flex items-start relative z-50 transition-all duration-300 ease-out ${isMenuOpen ? "space-x-8 md:space-x-12 lg:space-x-16" : "space-x-4 md:space-x-6"}`}>
             <div className={`relative transition-all duration-300 ${isMenuOpen ? "mr-4 md:mr-6 lg:mr-8" : "mr-4 md:mr-6"}`}>
               <a
                 href="/category/breaking-news"
-                className="transition-colors text-[#ce1126] hover:text-[#a00c1c] py-2 block whitespace-nowrap"
+                className="transition-colors text-[#ce1126] hover:text-[#a00c1c] py-1 block whitespace-nowrap"
               >
                 Breaking News
               </a>
@@ -384,7 +386,7 @@ export default function Header() {
                 <div key={cat.name} className="relative">
                   <a
                     href={cat.href}
-                    className="transition-colors hover:text-[#ce1126] py-2 block whitespace-nowrap"
+                    className="transition-colors hover:text-[#ce1126] py-1 block whitespace-nowrap"
                   >
                     {cat.name}
                   </a>

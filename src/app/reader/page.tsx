@@ -134,7 +134,7 @@ export default function ReaderDashboard() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans bg-[#fbfbfc]">
+    <div className="min-h-screen flex flex-col font-sans bg-[#f3f4f6]">
       {/* Dashboard Top Navigation */}
       <DashboardHeader title="READERS DASHBOARD" />
 

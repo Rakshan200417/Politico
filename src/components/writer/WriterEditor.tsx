@@ -474,22 +474,20 @@ export default function WriterEditor({
         <button
           type="button"
           onClick={() => setSidebarTab("details")}
-          className={`py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition ${
-            sidebarTab === "details"
+          className={`py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition ${sidebarTab === "details"
               ? "bg-white text-gray-900 shadow-xs"
               : "text-gray-500 hover:text-gray-900"
-          }`}
+            }`}
         >
           DETAILS
         </button>
         <button
           type="button"
           onClick={() => setSidebarTab("seo")}
-          className={`py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition ${
-            sidebarTab === "seo"
+          className={`py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition ${sidebarTab === "seo"
               ? "bg-white text-gray-900 shadow-xs"
               : "text-gray-500 hover:text-gray-900"
-          }`}
+            }`}
         >
           SEO
         </button>
@@ -535,13 +533,12 @@ export default function WriterEditor({
                   return (
                     <label
                       key={sub}
-                      className={`flex items-center gap-2 p-1.5 rounded cursor-pointer transition ${
-                        checked
+                      className={`flex items-center gap-2 p-1.5 rounded cursor-pointer transition ${checked
                           ? "bg-red-50 text-[#ce1126] font-bold"
                           : disabled
-                          ? "opacity-40 cursor-not-allowed text-gray-400"
-                          : "hover:bg-white text-gray-700"
-                      }`}
+                            ? "opacity-40 cursor-not-allowed text-gray-400"
+                            : "hover:bg-white text-gray-700"
+                        }`}
                     >
                       <input
                         type="checkbox"
@@ -616,7 +613,7 @@ export default function WriterEditor({
             <button
               type="button"
               onClick={handleAutoGenerateSEO}
-              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#f97316] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c] text-white text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-[0.99]"
+              className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-[0.99]"
             >
               <Sparkles size={16} />
               <span>AUTO-GENERATE SEO</span>
@@ -661,9 +658,8 @@ export default function WriterEditor({
                 META DESCRIPTION
               </label>
               <span
-                className={`text-[10px] font-bold ${
-                  metaDescription.length > 160 ? "text-red-500" : "text-gray-400"
-                }`}
+                className={`text-[10px] font-bold ${metaDescription.length > 160 ? "text-red-500" : "text-gray-400"
+                  }`}
               >
                 {metaDescription.length}/160
               </span>
@@ -701,8 +697,8 @@ export default function WriterEditor({
                 {metaDescription.trim()
                   ? metaDescription
                   : cardSummary.trim()
-                  ? cardSummary
-                  : "Add a meta description to control the snippet shown in search results."}
+                    ? cardSummary
+                    : "Add a meta description to control the snippet shown in search results."}
               </p>
             </div>
           </div>
@@ -713,8 +709,8 @@ export default function WriterEditor({
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] flex flex-col font-sans text-gray-900 select-text">
-      {/* Top Navbar Header (Dark Navy #0c1424 matching screenshot) */}
-      <header className="h-14 sm:h-16 bg-[#0c1424] border-b border-slate-800/80 px-3 sm:px-6 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+      {/* Top Navbar Header */}
+      <header className="h-14 sm:h-16 bg-white border-b border-gray-200 px-3 sm:px-6 flex items-center justify-between sticky top-0 z-40 shadow-sm">
         {/* Left Side: Back Arrow & Tracking Headline */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
@@ -724,15 +720,15 @@ export default function WriterEditor({
               }
               onCancel();
             }}
-            className="p-1 rounded-lg text-slate-300 hover:text-white transition-colors flex-shrink-0"
+            className="p-1 rounded-lg text-gray-500 hover:text-gray-900 transition-colors flex-shrink-0"
             title="Back / Cancel"
           >
             <ArrowLeft size={18} strokeWidth={2.5} />
           </button>
 
-          <div className="h-3.5 w-px bg-slate-700/80 flex-shrink-0" />
+          <div className="h-3.5 w-px bg-gray-300 flex-shrink-0" />
 
-          <span className="text-[11px] sm:text-xs font-mono font-bold tracking-wider text-slate-300 uppercase truncate max-w-[130px] sm:max-w-[220px] md:max-w-md">
+          <span className="text-[11px] sm:text-xs font-mono font-bold tracking-wider text-gray-800 uppercase truncate max-w-[130px] sm:max-w-[220px] md:max-w-md">
             {headerTrackerTitle}
           </span>
         </div>
@@ -742,7 +738,7 @@ export default function WriterEditor({
           {/* Preview Button (Eye) */}
           <button
             onClick={() => setPreviewOpen(true)}
-            className="flex items-center justify-center gap-1.5 p-2 sm:px-3 sm:py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-200 bg-[#131d33] hover:bg-[#1a2744] border border-slate-700/70 transition shadow-xs"
+            className="flex items-center justify-center gap-1.5 p-2 sm:px-3 sm:py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 transition shadow-sm"
             title="Preview Story"
           >
             <Eye size={16} />
@@ -753,12 +749,12 @@ export default function WriterEditor({
           <button
             disabled={isSavingDraft || isSubmitting}
             onClick={() => saveArticle("draft")}
-            className="flex items-center justify-center gap-1.5 p-2 sm:px-3.5 sm:py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-200 bg-[#131d33] hover:bg-[#1a2744] border border-slate-700/70 disabled:opacity-70 transition shadow-xs"
+            className="flex items-center justify-center gap-1.5 p-2 sm:px-3.5 sm:py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 disabled:opacity-70 transition shadow-sm"
             title="Save Draft"
           >
             {isSavingDraft ? (
               <>
-                <Loader2 size={16} className="animate-spin text-slate-200" />
+                <Loader2 size={16} className="animate-spin text-gray-400" />
                 <span className="hidden md:inline">Saving...</span>
               </>
             ) : (
@@ -769,11 +765,11 @@ export default function WriterEditor({
             )}
           </button>
 
-          {/* Submit Button (Orange button with paper plane) */}
+          {/* Submit Button (Matching homepage red color) */}
           <button
             disabled={isSavingDraft || isSubmitting}
             onClick={() => saveArticle("pending")}
-            className="flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider text-white bg-[#ea580c] hover:bg-[#c2410c] active:scale-[0.98] disabled:opacity-75 transition shadow-sm"
+            className="flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider text-white bg-[#ce1126] hover:bg-[#a00c1c] active:scale-[0.98] disabled:opacity-75 transition shadow-sm"
           >
             {isSubmitting ? (
               <>
@@ -795,107 +791,100 @@ export default function WriterEditor({
       <div className="flex-1 w-full max-w-[1560px] mx-auto p-3 sm:p-6 lg:p-8 flex flex-col lg:flex-row items-start gap-6 lg:gap-8">
         {/* Left Side: Writing Canvas Card */}
         <main className="flex-1 w-full min-w-0 bg-white border border-gray-200/90 rounded-2xl p-4 sm:p-8 lg:p-10 shadow-xs">
-          {/* Editor Action Toolbar (Matching User Reference Image) */}
-          <div 
-            className="bg-[#f8fafc] border border-slate-200/90 rounded-2xl p-2.5 sm:p-3 mb-6 sm:mb-8 flex flex-col gap-2 shadow-xs"
+          {/* Editor Action Toolbar */}
+          <div
+            className="bg-[#f8fafc] border border-slate-200/90 rounded-2xl p-2 sm:p-2.5 mb-6 sm:mb-8 flex items-center gap-1 sm:gap-2 flex-wrap shadow-xs"
             onMouseDown={(e) => e.preventDefault()}
           >
-            {/* Row 1 */}
-            <div className="flex items-center gap-1 sm:gap-2">
-              <button
-                onClick={() => handleFormat("undo")}
-                title="Undo"
-                className="p-1.5 rounded-lg hover:bg-white text-slate-600 hover:text-black transition"
-              >
-                <Undo size={16} />
-              </button>
-              <button
-                onClick={() => handleFormat("redo")}
-                title="Redo"
-                className="p-1.5 rounded-lg hover:bg-white text-slate-600 hover:text-black transition"
-              >
-                <Redo size={16} />
-              </button>
+            <button
+              onClick={() => handleFormat("undo")}
+              title="Undo"
+              className="p-1.5 rounded-lg hover:bg-white text-slate-600 hover:text-black transition"
+            >
+              <Undo size={16} />
+            </button>
+            <button
+              onClick={() => handleFormat("redo")}
+              title="Redo"
+              className="p-1.5 rounded-lg hover:bg-white text-slate-600 hover:text-black transition"
+            >
+              <Redo size={16} />
+            </button>
 
-              <div className="h-4 w-px bg-slate-300 mx-1" />
+            <div className="h-4 w-px bg-slate-300 mx-1" />
 
-              <button
-                onClick={() => handleFormat("bold")}
-                title="Bold"
-                className="p-1.5 rounded-lg hover:bg-white text-slate-700 hover:text-black font-black transition"
-              >
-                <Bold size={16} />
-              </button>
-              <button
-                onClick={() => handleFormat("italic")}
-                title="Italic"
-                className="p-1.5 rounded-lg hover:bg-white text-slate-700 hover:text-black italic transition"
-              >
-                <Italic size={16} />
-              </button>
-              <button
-                onClick={() => handleFormat("underline")}
-                title="Underline"
-                className="p-1.5 rounded-lg hover:bg-white text-slate-700 hover:text-black underline transition"
-              >
-                <Underline size={16} />
-              </button>
+            <button
+              onClick={() => handleFormat("bold")}
+              title="Bold"
+              className="p-1.5 rounded-lg hover:bg-white text-slate-700 hover:text-black font-black transition"
+            >
+              <Bold size={16} />
+            </button>
+            <button
+              onClick={() => handleFormat("italic")}
+              title="Italic"
+              className="p-1.5 rounded-lg hover:bg-white text-slate-700 hover:text-black italic transition"
+            >
+              <Italic size={16} />
+            </button>
+            <button
+              onClick={() => handleFormat("underline")}
+              title="Underline"
+              className="p-1.5 rounded-lg hover:bg-white text-slate-700 hover:text-black underline transition"
+            >
+              <Underline size={16} />
+            </button>
 
-              <div className="h-4 w-px bg-slate-300 mx-1" />
+            <div className="h-4 w-px bg-slate-300 mx-1" />
 
-              <button
-                onClick={handleInsertLink}
-                title="Insert Link"
-                className="p-1.5 rounded-lg hover:bg-white text-slate-700 hover:text-black transition"
-              >
-                <Link2 size={16} />
-              </button>
-              <button
-                onClick={() => handleFormat("insertUnorderedList")}
-                title="Bullet List"
-                className="p-1.5 rounded-lg hover:bg-white text-slate-700 hover:text-black transition"
-              >
-                <List size={16} />
-              </button>
-            </div>
+            <button
+              onClick={handleInsertLink}
+              title="Insert Link"
+              className="p-1.5 rounded-lg hover:bg-white text-slate-700 hover:text-black transition"
+            >
+              <Link2 size={16} />
+            </button>
+            <button
+              onClick={() => handleFormat("insertUnorderedList")}
+              title="Bullet List"
+              className="p-1.5 rounded-lg hover:bg-white text-slate-700 hover:text-black transition"
+            >
+              <List size={16} />
+            </button>
+            <button
+              onClick={() => handleFormat("insertOrderedList")}
+              title="Numbered List"
+              className="p-1.5 rounded-lg hover:bg-white text-slate-700 hover:text-black transition"
+            >
+              <ListOrdered size={16} />
+            </button>
 
-            {/* Row 2 */}
-            <div className="flex items-center gap-1 sm:gap-2">
-              <button
-                onClick={() => handleFormat("insertOrderedList")}
-                title="Numbered List"
-                className="p-1.5 rounded-lg hover:bg-white text-slate-700 hover:text-black transition"
-              >
-                <ListOrdered size={16} />
-              </button>
+            <div className="h-4 w-px bg-slate-300 mx-1" />
 
-              <div className="h-4 w-px bg-slate-300 mx-1" />
+            <button
+              onClick={() => handleFormat("formatBlock", "blockquote")}
+              title="Quote"
+              className="p-1.5 rounded-lg hover:bg-white text-slate-700 hover:text-black transition"
+            >
+              <Quote size={16} />
+            </button>
+            <button
+              onClick={() => handleFormat("formatBlock", "pre")}
+              title="Code Block"
+              className="p-1.5 rounded-lg hover:bg-white text-slate-700 hover:text-black transition"
+            >
+              <Code size={16} />
+            </button>
 
-              <button
-                onClick={() => handleFormat("formatBlock", "blockquote")}
-                title="Quote"
-                className="p-1.5 rounded-lg hover:bg-white text-slate-700 hover:text-black transition"
-              >
-                <Quote size={16} />
-              </button>
-              <button
-                onClick={() => handleFormat("formatBlock", "pre")}
-                title="Code Block"
-                className="p-1.5 rounded-lg hover:bg-white text-slate-700 hover:text-black transition"
-              >
-                <Code size={16} />
-              </button>
+            <div className="h-4 w-px bg-slate-300 mx-1" />
 
-              <div className="h-4 w-px bg-slate-300 mx-1" />
-
-              <button
-                onClick={handleInsertImage}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#fff7ed] text-[#ea580c] hover:bg-orange-100 text-xs font-bold transition border border-orange-200/80 shadow-xs ml-auto sm:ml-0"
-              >
-                <ImageIcon size={14} className="text-[#ea580c]" />
-                <span className="text-[11px] sm:text-xs tracking-wider">INSERT IMAGE</span>
-              </button>
-            </div>
+            <button
+              onClick={handleInsertImage}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#fff7ed] text-[#ea580c] hover:bg-orange-100 text-xs font-bold transition border border-orange-200/80 shadow-xs ml-auto"
+            >
+              <ImageIcon size={14} className="text-[#ea580c]" />
+              <span className="text-[11px] sm:text-xs tracking-wider">INSERT IMAGE</span>
+            </button>
           </div>
 
           {/* Title Input Field */}

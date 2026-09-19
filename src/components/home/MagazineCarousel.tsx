@@ -169,6 +169,8 @@ const magazineArticles = [
   },
 ];
 
+const displayedArticles = magazineArticles.slice(0, 12);
+
 export default function MagazineCarousel() {
   const [startIndex, setStartIndex] = useState(0);
   const [visibleCount, setVisibleCount] = useState(3);
@@ -210,8 +212,8 @@ export default function MagazineCarousel() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Total cards = 1 (POLITICO MAGAZINE header) + articleCount
-  const totalCards = magazineArticles.length + 1;
+  // Total cards = articleCount (strictly 12)
+  const totalCards = displayedArticles.length;
   // maxIndex calculation: allow scrolling until the last card is in view
   const maxIndex = Math.max(0, totalCards - visibleCount);
   
@@ -230,7 +232,10 @@ export default function MagazineCarousel() {
     ])
   ).filter((index) => index <= maxIndex);
   const currentPage = Math.max(0, pageStarts.findIndex((index) => index === clampedStartIndex));
-  const progressWidth = `${100 / pageStarts.length}%`;
+  
+  // Since we want exactly 3 pages for 12 items on desktop (12/4 = 3)
+  const totalPages = pageStarts.length;
+  const progressWidth = `${100 / totalPages}%`;
 
   return (
     <section className="w-full my-10 font-sans">
@@ -264,26 +269,14 @@ export default function MagazineCarousel() {
           }
         }}
       >
-        <div 
+          <div 
           className="flex gap-4 transition-transform duration-300 ease-out" 
           style={{ 
             transform: `translateX(-${offset}px)`,
             willChange: "transform"
           }}
         >
-          <div className="flex-shrink-0 bg-[#f7f7f7] p-8 flex flex-col items-center justify-center text-center relative h-[420px] border border-transparent" style={{ width: `${cardWidth}px` }}>
-            <div className="absolute top-0 left-1/2 -translate-x-1/2">
-              <div className="w-16 h-5 bg-[#ce1126]" style={{ clipPath: "polygon(0 0, 100% 0, 85% 100%, 15% 100%)" }}></div>
-            </div>
-            <span className="font-extrabold text-xs tracking-[0.18em] text-[#ce1126] uppercase mb-1">
-              POLITICO
-            </span>
-            <span className="font-serif font-black text-4xl tracking-wide text-gray-900 uppercase leading-none">
-              MAGAZINE
-            </span>
-          </div>
-
-          {magazineArticles.map((article) => (
+          {displayedArticles.map((article) => (
             <a
               key={article.id}
               href={`/news/${slugify(article.title)}`}
@@ -329,9 +322,9 @@ export default function MagazineCarousel() {
         <div
           className="relative h-[2px] flex-1 bg-[#dedede]"
           style={{
-            backgroundImage: `repeating-linear-gradient(to right, transparent 0, transparent calc(${100 / pageStarts.length}% - 1px), #cfcfcf calc(${100 / pageStarts.length}% - 1px), #cfcfcf ${100 / pageStarts.length}%)`,
+            backgroundImage: `repeating-linear-gradient(to right, transparent 0, transparent calc(${100 / totalPages}% - 1px), #cfcfcf calc(${100 / totalPages}% - 1px), #cfcfcf ${100 / totalPages}%)`,
           }}
-          aria-label={`${pageStarts.length} magazine pages`}
+          aria-label={`${totalPages} magazine pages`}
         >
           <div
             className="absolute left-0 top-0 h-[3px] bg-[#171b2e] transition-all duration-300"

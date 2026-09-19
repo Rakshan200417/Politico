@@ -95,7 +95,7 @@ export default function DashboardShell({
   const initialLetter = (displayName[0] || user?.email?.[0] || "U").toUpperCase();
 
   return (
-    <div className="min-h-screen flex bg-[#f8f9fa] font-sans antialiased text-gray-900">
+    <div className="min-h-screen flex bg-[#f3f4f6] font-sans antialiased text-gray-900">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div

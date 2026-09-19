@@ -7,7 +7,7 @@ export default function LegalSection() {
 
   return (
     <section className="w-full font-sans my-8">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 divide-y lg:divide-y-0 lg:divide-x divide-gray-200 items-start max-w-[1400px] mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-9 gap-8 divide-y lg:divide-y-0 lg:divide-x divide-gray-200 mx-auto">
         
         {/* Left Column (3 cols): Extra Feed */}
         <div className="hidden lg:flex lg:col-span-3 pr-4 flex-col gap-6">
@@ -116,32 +116,6 @@ export default function LegalSection() {
                 </div>
               </a>
             </article>
-          </div>
-        </div>
-
-        {/* Right Column (3 cols): Advertisement */}
-        <div className="lg:col-span-3 pt-6 lg:pt-0 lg:pl-6 hidden lg:block">
-          <div className="w-full flex flex-col items-center">
-            <span className="text-[10px] text-gray-400 uppercase tracking-widest mb-1 font-sans">
-              Advertisement
-            </span>
-            <div className="w-[300px] h-[600px] bg-gray-100 flex items-center justify-center relative border border-gray-200">
-              <img
-                src="https://loremflickr.com/300/600/medicine"
-                alt="Advertisement"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-blue-900 bg-opacity-70 flex flex-col items-center justify-center p-6 text-center text-white font-sans">
-                <h3 className="text-2xl font-bold mb-4">GOP voters want candidates who will lower drug prices for Americans.</h3>
-                <div className="w-16 h-1 bg-red-500 mb-4"></div>
-                <button className="bg-red-500 text-white font-bold py-2 px-4 text-xs uppercase tracking-wider hover:bg-red-600 transition-colors">
-                  Codify Most Favored Nation
-                </button>
-                <p className="mt-8 text-sm font-bold tracking-widest uppercase">
-                  Pharmaceutical Reform Alliance
-                </p>
-              </div>
-            </div>
           </div>
         </div>
 
