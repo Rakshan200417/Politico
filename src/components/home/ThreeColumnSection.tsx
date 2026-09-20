@@ -12,7 +12,7 @@ export default function ThreeColumnSection() {
         {/* Left Column */}
         <div className="pt-4 lg:pt-0 lg:pr-6 flex flex-col gap-6">
           <article className="group cursor-pointer">
-            <a href={`/news/${slugify("New advancements in AI shake up the industry")}`} className="block">
+            <a href={`/news/${slugify("New advancements in AI shake up the industry")}`} className="block" target="_blank">
               <div className="text-[12px] font-bold text-[#ce1126] mb-1">TECH</div>
               <h3 className="text-xl font-bold leading-tight group-hover:text-[#ce1126] transition-colors mb-2">
                 New advancements in AI shake up the industry
@@ -24,7 +24,7 @@ export default function ThreeColumnSection() {
             </a>
           </article>
           <article className="group cursor-pointer">
-            <a href={`/news/${slugify("Global markets react to recent economic policies")}`} className="block">
+            <a href={`/news/${slugify("Global markets react to recent economic policies")}`} className="block" target="_blank">
               <div className="text-[12px] font-bold text-[#ce1126] mb-1">MARKETS</div>
               <h3 className="text-lg font-bold leading-tight group-hover:text-[#ce1126] transition-colors mb-2">
                 Global markets react to recent economic policies
@@ -33,7 +33,7 @@ export default function ThreeColumnSection() {
             </a>
           </article>
           <article className="group cursor-pointer">
-            <a href={`/news/${slugify("Funding rounds reach new highs this quarter")}`} className="block">
+            <a href={`/news/${slugify("Funding rounds reach new highs this quarter")}`} className="block" target="_blank">
               <div className="text-[12px] font-bold text-[#ce1126] mb-1">STARTUPS</div>
               <h3 className="text-lg font-bold leading-tight group-hover:text-[#ce1126] transition-colors mb-2">
                 Funding rounds reach new highs this quarter
@@ -46,7 +46,7 @@ export default function ThreeColumnSection() {
         {/* Center Column */}
         <div className="pt-4 lg:pt-0 lg:px-6 flex flex-col">
           <article className="group cursor-pointer">
-            <a href={`/news/${slugify("Major corporations shift focus to sustainable practices")}`} className="block">
+            <a href={`/news/${slugify("Major corporations shift focus to sustainable practices")}`} className="block" target="_blank">
               <div className="relative w-full h-[300px] mb-4 bg-gray-100 overflow-hidden">
                 <img
                   src="https://loremflickr.com/900/600/business"
@@ -69,7 +69,7 @@ export default function ThreeColumnSection() {
         {/* Right Column */}
         <div className="pt-4 lg:pt-0 lg:pl-6 flex flex-col gap-6">
           <article className="group cursor-pointer">
-            <a href={`/news/${slugify("Inflation rates show unexpected signs of cooling")}`} className="block">
+            <a href={`/news/${slugify("Inflation rates show unexpected signs of cooling")}`} className="block" target="_blank">
               <div className="relative w-full h-[180px] mb-3 bg-gray-100 overflow-hidden">
                 <img
                   src="https://loremflickr.com/600/400/economy"
@@ -85,7 +85,7 @@ export default function ThreeColumnSection() {
             </a>
           </article>
           <article className="group cursor-pointer">
-            <a href={`/news/${slugify("Interview: The CEO changing the retail landscape")}`} className="block">
+            <a href={`/news/${slugify("Interview: The CEO changing the retail landscape")}`} className="block" target="_blank">
               <div className="text-[12px] font-bold text-[#ce1126] mb-1">LEADERS</div>
               <h3 className="text-md font-bold leading-tight group-hover:text-[#ce1126] transition-colors mb-2">
                 Interview: The CEO changing the retail landscape

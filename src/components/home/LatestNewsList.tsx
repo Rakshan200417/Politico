@@ -76,20 +76,19 @@ export default function LatestNewsList() {
           <article key={item.id} className="group cursor-pointer">
             {/* Default State */}
             <div className="py-3 block group-hover:hidden">
-              <a href={`/news/${slugify(item.title)}`} className="flex items-start gap-4">
+              <a href={`/news/${slugify(item.title)}`} target="_blank" rel="noopener noreferrer" className="flex items-start gap-4">
                 <span
-                  className={`text-[11px] font-extrabold shrink-0 min-w-[24px] pt-1 ${
-                    item.isRedTime ? "text-[#d32f2f]" : "text-gray-500"
-                  }`}
+                  className={`text-[11px] font-extrabold shrink-0 min-w-[24px] pt-1 ${item.isRedTime ? "text-[#d32f2f]" : "text-gray-500"
+                    }`}
                 >
                   {item.time}
                 </span>
-                <h3 className="text-[14px] font-extrabold leading-[1.3] text-[#222222] font-sans">
+                <h3 className="text-[15px] font-bold leading-[1.3] text-[#222222] font-sans">
                   {item.title}
                 </h3>
               </a>
             </div>
-            
+
             {/* Expanded Hover State */}
             <div className="hidden group-hover:block py-4 px-2 -mx-2 bg-[#fbfbfb] border border-gray-100 shadow-sm transition-all duration-300">
               <div className="text-[11px] font-extrabold text-[#00609d] uppercase tracking-[0.15em] mb-2 font-sans">

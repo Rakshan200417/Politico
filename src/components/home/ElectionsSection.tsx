@@ -50,7 +50,7 @@ export default function ElectionsSection() {
 
           {/* Hero Lead Story */}
           <article className="group cursor-pointer">
-            <a href={`/news/${slugify("Mike Johnson planning to meet with Elon Musk in Texas")}`} className="block space-y-3">
+            <a href={`/news/${slugify("Mike Johnson planning to meet with Elon Musk in Texas")}`} className="block space-y-3" target="_blank">
               <div className="aspect-[16/9] bg-gray-100 overflow-hidden relative">
                 <img
                   src="https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=1000&q=80"
@@ -58,7 +58,7 @@ export default function ElectionsSection() {
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight text-gray-900 group-hover:text-[#d32f2f] transition-colors tracking-tight font-sans">
+              <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight text-gray-900 group-hover:text-[#d32f2f] transition-colors tracking-tight font-serif">
                 Mike Johnson planning to meet with Elon Musk in Texas
               </h1>
               <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider font-sans">
@@ -74,7 +74,7 @@ export default function ElectionsSection() {
                 key={item.id}
                 className="py-4 first:pt-0 group cursor-pointer"
               >
-                <a href={`/news/${slugify(item.title)}`} className="flex items-start gap-4">
+                <a href={`/news/${slugify(item.title)}`} className="flex items-start gap-4" target="_blank">
                   <div className="w-28 sm:w-36 aspect-[4/3] bg-gray-100 shrink-0 overflow-hidden">
                     <img
                       src={item.image}
@@ -83,7 +83,7 @@ export default function ElectionsSection() {
                     />
                   </div>
                   <div className="flex-1 space-y-1.5 min-w-0">
-                    <h3 className="text-base font-extrabold leading-snug text-gray-900 group-hover:text-[#d32f2f] transition-colors font-sans">
+                    <h3 className="text-base font-extrabold leading-snug text-gray-900 group-hover:text-[#d32f2f] transition-colors font-serif">
                       {item.title}
                     </h3>
                     <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider font-sans">

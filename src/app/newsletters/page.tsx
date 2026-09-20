@@ -149,7 +149,7 @@ export default function NewslettersPage() {
           <h1 className="text-4xl md:text-5xl font-serif tracking-widest text-[#ce1126] mb-4">
             NEWSLETTERS
           </h1>
-          <p className="text-gray-500 font-serif text-[15px] italic">
+          <p className="text-gray-500 font-sans text-[15px] italic">
             Stay up to date with our daily newsletter
           </p>
         </div>
@@ -185,7 +185,7 @@ export default function NewslettersPage() {
                       </svg>
                     )}
                   </div>
-                  <h3 className="text-[22px] font-serif text-gray-900 leading-none">{cat.name}</h3>
+                  <h3 className="text-[22px] font-sans text-gray-900 leading-none">{cat.name}</h3>
                 </div>
 
                 {megaMenuData[cat.id] && (

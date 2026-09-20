@@ -128,28 +128,68 @@ export function getNewsArticle(slug: string): NewsArticle {
     .replace(/-/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
 
+  // Use the slug string to generate a pseudo-random seed
+  let hash = 0;
+  for (let i = 0; i < slug.length; i++) {
+    hash = slug.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  
+  const decks = [
+    "An inside look at the key players, political calculations, and national policy ramifications driving today's headlines.",
+    "Lawmakers scramble as shifting alliances and new polling data force a sudden change in strategy.",
+    "Behind closed doors, officials weigh the economic costs against the political benefits ahead of the midterms.",
+    "A deep dive into the regulatory hurdles and legal battles that could reshape the industry.",
+    "Exclusive details reveal how a quiet lobbying effort turned into a major national policy debate."
+  ];
+  
+  const bylines = ["POLITICO STAFF", "ALEX ISENSTADT", "JONATHAN MARTIN", "VICTORIA GUIDA", "ALEXANDER WARD"];
+  
+  const paragraphs_pool = [
+    [
+      `WASHINGTON — Major developments surrounding “${readableTitle}” have sparked intense debate across Washington and within state capitals today as stakeholders assess the broader implications for governance and upcoming elections.`,
+      "Congressional leaders and administration officials spent the morning holding closed-door consultations with industry leaders and constitutional experts to formulate their strategic response.",
+      "“This is a pivotal moment that will shape both the regulatory environment and public sentiment over the coming months,” noted one veteran political strategist familiar with ongoing discussions. “Both parties understand the stakes, and neither is willing to surrender the narrative.”",
+      "Public interest groups and business associations have also stepped up advocacy efforts, submitting formal policy briefs and launching targeted media campaigns to ensure their perspectives are heard before final decisions are announced.",
+      "As negotiations continue through the weekend, observers expect further legislative proposals and executive announcements to be introduced in the coming days."
+    ],
+    [
+      `The recent focus on “${readableTitle}” has exposed deep fractures within both parties, complicating efforts to present a unified front on what was once considered settled policy.`,
+      "Sources on Capitol Hill suggest that leadership is increasingly concerned about primary challengers using the issue as a wedge in upcoming swing-district races.",
+      "“We are navigating a minefield right now,” one senior committee aide told reporters on the condition of anonymity. “Every statement is being scrutinized, and there’s very little room for error when the margins are this tight.”",
+      "Meanwhile, grassroots organizations are mobilizing rapid-response networks, planning rallies and digital ad blitzes to keep pressure on moderate lawmakers.",
+      "With the legislative calendar shrinking, the window for a compromise is rapidly closing, leaving many to wonder if any substantive action will be taken before the recess."
+    ],
+    [
+      `Economic indicators tied to “${readableTitle}” took an unexpected turn this week, prompting emergency meetings among financial regulators and trade representatives.`,
+      "The volatility has rippled through global markets, forcing multinational corporations to reassess their supply chains and quarterly forecasts.",
+      "“The sheer unpredictability of the current policy environment is our biggest headwind,” a leading industry analyst explained in a morning note to investors. “Capital craves certainty, and right now, Washington is delivering the exact opposite.”",
+      "In response, a bipartisan group of senators is drafting emergency stabilization measures, though partisan disagreements over funding mechanisms threaten to derail the effort.",
+      "All eyes are now on the administration's upcoming press briefing, where officials are expected to unveil a multi-pronged strategy to restore confidence and mitigate long-term damage."
+    ]
+  ];
+
+  const seed = Math.abs(hash);
+  const deck = decks[seed % decks.length];
+  const byline = bylines[seed % bylines.length];
+  const paragraphs = paragraphs_pool[seed % paragraphs_pool.length];
+  const imageId = (seed % 100) + 10;
+
   return {
     slug: normalized,
     category: "Politics",
     categorySlug: "politics",
     title: readableTitle,
-    deck: "An inside look at the key players, political calculations, and national policy ramifications driving today's headlines.",
-    byline: "POLITICO STAFF",
+    deck: deck,
+    byline: byline,
     authorRole: "Senior Editorial Reporter",
     authorBio: "POLITICO's editorial team provides breaking news, authoritative political journalism, and policy reporting from Washington and around the globe.",
     authorLinkedin: "https://www.linkedin.com/company/politico",
     publishedAt: "September 11, 2026 • 12:00 PM EDT",
     updatedAt: "September 11, 2026 • 12:30 PM EDT",
     readTime: "4 min read",
-    image: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1200&q=80",
+    image: `https://picsum.photos/seed/${imageId}/1200/800`,
     imageCaption: "Capitol Hill and federal offices in Washington, D.C., where lawmakers and officials are deliberating on major legislative and policy initiatives. (Photo: Unsplash / POLITICO)",
-    paragraphs: [
-      `WASHINGTON — Major developments surrounding “${readableTitle}” have sparked intense debate across Washington and within state capitals today as stakeholders assess the broader implications for governance and upcoming elections.`,
-      "Congressional leaders and administration officials spent the morning holding closed-door consultations with industry leaders and constitutional experts to formulate their strategic response.",
-      "“This is a pivotal moment that will shape both the regulatory environment and public sentiment over the coming months,” noted one veteran political strategist familiar with ongoing discussions. “Both parties understand the stakes, and neither is willing to surrender the narrative.”",
-      "Public interest groups and business associations have also stepped up advocacy efforts, submitting formal policy briefs and launching targeted media campaigns to ensure their perspectives are heard before final decisions are announced.",
-      "As negotiations continue through the weekend, observers expect further legislative proposals and executive announcements to be introduced in the coming days.",
-    ],
+    paragraphs: paragraphs,
     keyTakeaways: [
       "Key leaders are coordinating responses ahead of upcoming committee hearings.",
       "Market analysts and political observers anticipate policy guidelines will be finalized shortly.",

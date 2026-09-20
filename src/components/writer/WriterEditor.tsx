@@ -25,6 +25,12 @@ import {
   Loader2,
   Plus,
   Settings,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Maximize2,
+  Trash2,
+  Edit,
 } from "lucide-react";
 
 export interface ArticleData {
@@ -79,11 +85,7 @@ export const navbarSubcategoriesMap: Record<string, string[]> = {
     "Venture Capital",
     "Startup Failures",
   ],
-  Markets: [
-    "Stock Market",
-    "Bonds",
-    "Mutual Funds",
-  ],
+  Markets: ["Stock Market", "Bonds", "Mutual Funds"],
   Economy: [
     "GDP & Economic Growth",
     "Employment",
@@ -137,18 +139,28 @@ export default function WriterEditor({
   const [title, setTitle] = useState(initialArticle?.title || "");
   const [deck, setDeck] = useState(initialArticle?.deck || "");
   const [content, setContent] = useState(initialArticle?.content || "");
-  const [category, setCategory] = useState(initialArticle?.category || "Companies");
+  const [category, setCategory] = useState(
+    initialArticle?.category || "Companies",
+  );
   const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>(
-    initialArticle?.subcategories || []
+    initialArticle?.subcategories || [],
   );
   const [tags, setTags] = useState<string[]>(initialArticle?.tags || []);
   const [tagInput, setTagInput] = useState("");
-  const [readDuration, setReadDuration] = useState(initialArticle?.read_time || "5 min read");
+  const [readDuration, setReadDuration] = useState(
+    initialArticle?.read_time || "5 min read",
+  );
 
   // SEO States
-  const [cardSummary, setCardSummary] = useState(initialArticle?.card_summary || "");
-  const [focusKeyword, setFocusKeyword] = useState(initialArticle?.focus_keyword || "");
-  const [metaDescription, setMetaDescription] = useState(initialArticle?.meta_description || "");
+  const [cardSummary, setCardSummary] = useState(
+    initialArticle?.card_summary || "",
+  );
+  const [focusKeyword, setFocusKeyword] = useState(
+    initialArticle?.focus_keyword || "",
+  );
+  const [metaDescription, setMetaDescription] = useState(
+    initialArticle?.meta_description || "",
+  );
 
   // UI States
   const [sidebarTab, setSidebarTab] = useState<"details" | "seo">("details");
@@ -168,10 +180,49 @@ export default function WriterEditor({
   const [imageKeywordInput, setImageKeywordInput] = useState("");
   const [uploadedFileName, setUploadedFileName] = useState("");
   const [isUploadingImage, setIsUploadingImage] = useState(false);
-  const [uploadSuccessMessage, setUploadSuccessMessage] = useState<string | null>(null);
+  const [uploadSuccessMessage, setUploadSuccessMessage] = useState<
+    string | null
+  >(null);
   const [leadImage, setLeadImage] = useState(initialArticle?.image || "");
 
+  // Floating Image Toolbar States
+  const [selectedImageNode, setSelectedImageNode] =
+    useState<HTMLImageElement | null>(null);
+  const [toolbarPosition, setToolbarPosition] = useState({ top: 0, left: 0 });
+
   const editorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleEditorClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === "IMG") {
+        const img = target as HTMLImageElement;
+        setSelectedImageNode(img);
+        const rect = img.getBoundingClientRect();
+        const editorRect = editorRef.current?.getBoundingClientRect();
+        if (editorRect) {
+          setToolbarPosition({
+            top: img.offsetTop - 50,
+            left: img.offsetLeft + img.offsetWidth / 2 - 150,
+          });
+        }
+      } else {
+        if (!target.closest(".image-toolbar")) {
+          setSelectedImageNode(null);
+        }
+      }
+    };
+
+    const editor = editorRef.current;
+    if (editor) {
+      editor.addEventListener("click", handleEditorClick);
+    }
+    return () => {
+      if (editor) {
+        editor.removeEventListener("click", handleEditorClick);
+      }
+    };
+  }, []);
 
   // Initialize editor content
   useEffect(() => {
@@ -182,14 +233,23 @@ export default function WriterEditor({
 
   // Auto-calculate read time based on word count
   useEffect(() => {
-    const text = (title + " " + deck + " " + (editorRef.current?.innerText || content)).trim();
+    const text = (
+      title +
+      " " +
+      deck +
+      " " +
+      (editorRef.current?.innerText || content)
+    ).trim();
     const wordCount = text.length > 0 ? text.split(/\s+/).length : 0;
     const minutes = Math.max(1, Math.ceil(wordCount / 200));
     setReadDuration(`${minutes} min read`);
   }, [title, deck, content]);
 
   // Execute rich text commands
-  const handleFormat = (command: string, value: string | undefined = undefined) => {
+  const handleFormat = (
+    command: string,
+    value: string | undefined = undefined,
+  ) => {
     document.execCommand(command, false, value);
     if (editorRef.current) {
       setContent(editorRef.current.innerHTML);
@@ -241,7 +301,9 @@ export default function WriterEditor({
         const data = await res.json();
         const uploadedUrl = data.url;
         setImageUrl(uploadedUrl);
-        setUploadSuccessMessage(`FILE "${file.name.toUpperCase()}" COMPRESSED & UPLOADED TO CLOUD!`);
+        setUploadSuccessMessage(
+          `FILE "${file.name.toUpperCase()}" COMPRESSED & UPLOADED TO CLOUD!`,
+        );
         showToast("✔ IMAGE UPLOADED TO CLOUD STORAGE (HTTPS URL)!");
       } else {
         const reader = new FileReader();
@@ -269,7 +331,9 @@ export default function WriterEditor({
   };
 
   // Image SEO Keyword tags handler
-  const handleImageKeywordKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleImageKeywordKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
     if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
       const val = imageKeywordInput.trim().replace(/^,+|,+$/g, "");
@@ -292,19 +356,38 @@ export default function WriterEditor({
     }
 
     const altText = imageKeywords.join(", ") || imageCaption || "Article image";
-    const figureHtml = `
-      <figure class="my-6 block text-center clear-both" contenteditable="false">
-        <img src="${imageUrl}" alt="${altText}" class="w-full rounded-2xl shadow-sm object-cover max-h-[520px] mx-auto" />
-        ${imageCaption ? `<figcaption class="text-xs text-gray-500 mt-2.5 font-medium italic">${imageCaption} ${imageCredit ? `<span class="not-italic text-gray-400">(${imageCredit})</span>` : ""}</figcaption>` : ""}
-      </figure>
-      <p><br></p>
-    `;
 
-    if (editorRef.current) {
-      editorRef.current.focus();
-      document.execCommand("insertHTML", false, figureHtml);
-      setContent(editorRef.current.innerHTML);
+    if (selectedImageNode) {
+      selectedImageNode.src = imageUrl;
+      selectedImageNode.alt = altText;
+      const figure = selectedImageNode.closest("figure");
+      if (figure) {
+        const existingFigCaption = figure.querySelector("figcaption");
+        if (existingFigCaption) existingFigCaption.remove();
+        if (imageCaption) {
+          const figcaption = document.createElement("figcaption");
+          figcaption.className =
+            "text-xs text-gray-500 mt-2.5 font-medium italic";
+          figcaption.innerHTML = `${imageCaption} ${imageCredit ? `<span class="not-italic text-gray-400">(${imageCredit})</span>` : ""}`;
+          figure.appendChild(figcaption);
+        }
+      }
+      setSelectedImageNode(null);
+    } else {
+      const figureHtml = `
+        <figure class="my-6 block text-center clear-both" contenteditable="false">
+          <img src="${imageUrl}" alt="${altText}" class="w-full rounded-2xl shadow-sm object-cover max-h-[520px] mx-auto cursor-pointer" />
+          ${imageCaption ? `<figcaption class="text-xs text-gray-500 mt-2.5 font-medium italic">${imageCaption} ${imageCredit ? `<span class="not-italic text-gray-400">(${imageCredit})</span>` : ""}</figcaption>` : ""}
+        </figure>
+        <p><br></p>
+      `;
+      if (editorRef.current) {
+        editorRef.current.focus();
+        document.execCommand("insertHTML", false, figureHtml);
+      }
     }
+
+    if (editorRef.current) setContent(editorRef.current.innerHTML);
 
     if (!leadImage) {
       setLeadImage(imageUrl);
@@ -312,7 +395,56 @@ export default function WriterEditor({
 
     // Reset and close modal
     setImageModalOpen(false);
-    showToast("✔ IMAGE INSERTED INTO ARTICLE!");
+    setImageUrl("");
+    setImageCaption("");
+    setImageCredit("");
+    setImageKeywords([]);
+    showToast("✔ IMAGE UPDATED/INSERTED INTO ARTICLE!");
+  };
+
+  const handleEditSelectedImage = () => {
+    if (!selectedImageNode) return;
+    setImageUrl(selectedImageNode.src);
+    const altParts = selectedImageNode.alt.split(", ");
+    setImageKeywords(altParts);
+    setImageModalOpen(true);
+  };
+
+  const handleSetImageSize = (size: "w-1/3" | "w-1/2" | "w-full") => {
+    if (!selectedImageNode) return;
+    selectedImageNode.classList.remove("w-1/3", "w-1/2", "w-full");
+    selectedImageNode.classList.add(size);
+    if (editorRef.current) setContent(editorRef.current.innerHTML);
+  };
+
+  const handleSetImageAlign = (
+    align: "float-left" | "mx-auto" | "float-right",
+  ) => {
+    if (!selectedImageNode) return;
+    const figure = selectedImageNode.closest("figure");
+    if (figure) {
+      figure.classList.remove(
+        "float-left",
+        "mx-auto",
+        "float-right",
+        "clear-both",
+        "mr-6",
+        "ml-6",
+      );
+      figure.classList.add(align);
+      if (align === "float-left") figure.classList.add("mr-6");
+      if (align === "float-right") figure.classList.add("ml-6");
+      if (editorRef.current) setContent(editorRef.current.innerHTML);
+    }
+  };
+
+  const handleDeleteSelectedImage = () => {
+    if (!selectedImageNode) return;
+    const figure = selectedImageNode.closest("figure");
+    if (figure) figure.remove();
+    else selectedImageNode.remove();
+    setSelectedImageNode(null);
+    if (editorRef.current) setContent(editorRef.current.innerHTML);
   };
 
   // Subcategory toggle
@@ -349,13 +481,20 @@ export default function WriterEditor({
     setCardSummary(summary);
 
     // Extract focus keyword: title's key words
-    const words = title.replace(/[^\w\s]/gi, "").split(/\s+/).filter((w) => w.length > 3);
+    const words = title
+      .replace(/[^\w\s]/gi, "")
+      .split(/\s+/)
+      .filter((w) => w.length > 3);
     const kw = words.slice(0, 3).join(" ") || "Politics News";
     setFocusKeyword(kw);
 
     // Generate Meta description: deck or truncated summary <= 155 chars
     const meta = (deck || rawContent).slice(0, 150).replace(/\s+/g, " ").trim();
-    setMetaDescription(meta ? `${meta}...` : `Latest reporting and in-depth analysis on ${title}.`);
+    setMetaDescription(
+      meta
+        ? `${meta}...`
+        : `Latest reporting and in-depth analysis on ${title}.`,
+    );
 
     showToast("✨ SEO fields auto-generated successfully!");
   };
@@ -389,7 +528,10 @@ export default function WriterEditor({
       card_summary: cardSummary,
       focus_keyword: focusKeyword,
       meta_description: metaDescription,
-      slug: title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+      slug: title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, ""),
       image: leadImage || imageUrl,
       image_caption: imageCaption,
       image_credit: imageCredit,
@@ -422,12 +564,17 @@ export default function WriterEditor({
           savedArticle.id = data.id;
         }
       } else {
-        console.warn("DB save response not OK, relying on client sync:", await res.text());
+        console.warn(
+          "DB save response not OK, relying on client sync:",
+          await res.text(),
+        );
       }
 
       // 2. Also keep localStorage synchronized for instant offline cache
       const storedArticlesStr = localStorage.getItem("writer_articles");
-      let storedArticles: ArticleData[] = storedArticlesStr ? JSON.parse(storedArticlesStr) : [];
+      let storedArticles: ArticleData[] = storedArticlesStr
+        ? JSON.parse(storedArticlesStr)
+        : [];
 
       if (savedArticle.id) {
         const index = storedArticles.findIndex((a) => a.id === savedArticle.id);
@@ -474,20 +621,22 @@ export default function WriterEditor({
         <button
           type="button"
           onClick={() => setSidebarTab("details")}
-          className={`py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition ${sidebarTab === "details"
+          className={`py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition ${
+            sidebarTab === "details"
               ? "bg-white text-gray-900 shadow-xs"
               : "text-gray-500 hover:text-gray-900"
-            }`}
+          }`}
         >
           DETAILS
         </button>
         <button
           type="button"
           onClick={() => setSidebarTab("seo")}
-          className={`py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition ${sidebarTab === "seo"
+          className={`py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition ${
+            sidebarTab === "seo"
               ? "bg-white text-gray-900 shadow-xs"
               : "text-gray-500 hover:text-gray-900"
-            }`}
+          }`}
         >
           SEO
         </button>
@@ -521,24 +670,30 @@ export default function WriterEditor({
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-[11px] font-black uppercase tracking-wider text-gray-500">
-                SELECT SUB-CATEGORIES FOR {category.toUpperCase()} (OPTIONAL, MAX 5)
+                SELECT SUB-CATEGORIES FOR {category.toUpperCase()} (OPTIONAL,
+                MAX 5)
               </label>
             </div>
 
             <div className="border border-gray-200 rounded-xl p-3 max-h-52 overflow-y-auto bg-gray-50/50 space-y-2">
               <div className="grid grid-cols-2 gap-2 text-xs">
-                {(navbarSubcategoriesMap[category] || Object.values(navbarSubcategoriesMap).flat()).map((sub) => {
+                {(
+                  navbarSubcategoriesMap[category] ||
+                  Object.values(navbarSubcategoriesMap).flat()
+                ).map((sub) => {
                   const checked = selectedSubcategories.includes(sub);
-                  const disabled = !checked && selectedSubcategories.length >= 5;
+                  const disabled =
+                    !checked && selectedSubcategories.length >= 5;
                   return (
                     <label
                       key={sub}
-                      className={`flex items-center gap-2 p-1.5 rounded cursor-pointer transition ${checked
+                      className={`flex items-center gap-2 p-1.5 rounded cursor-pointer transition ${
+                        checked
                           ? "bg-red-50 text-[#ce1126] font-bold"
                           : disabled
                             ? "opacity-40 cursor-not-allowed text-gray-400"
                             : "hover:bg-white text-gray-700"
-                        }`}
+                      }`}
                     >
                       <input
                         type="checkbox"
@@ -572,7 +727,8 @@ export default function WriterEditor({
               className="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-black transition"
             />
             <p className="text-[9px] font-mono text-gray-400 mt-1 uppercase tracking-wider">
-              PRESS ENTER OR COMMA TO ADD • CLICK TAG TO REMOVE • {tags.length} TAGS
+              PRESS ENTER OR COMMA TO ADD • CLICK TAG TO REMOVE • {tags.length}{" "}
+              TAGS
             </p>
 
             {/* Render Tags */}
@@ -585,7 +741,10 @@ export default function WriterEditor({
                     className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-100 hover:bg-red-50 text-gray-700 hover:text-red-700 text-[11px] font-bold cursor-pointer transition border border-gray-200 group"
                   >
                     #{t}
-                    <X size={10} className="text-gray-400 group-hover:text-red-600" />
+                    <X
+                      size={10}
+                      className="text-gray-400 group-hover:text-red-600"
+                    />
                   </span>
                 ))}
               </div>
@@ -619,7 +778,8 @@ export default function WriterEditor({
               <span>AUTO-GENERATE SEO</span>
             </button>
             <p className="text-[11px] text-gray-500 leading-relaxed mt-2.5">
-              Keyword & meta description fill in automatically from your title and content. Edit any field to override.
+              Keyword & meta description fill in automatically from your title
+              and content. Edit any field to override.
             </p>
           </div>
 
@@ -658,8 +818,11 @@ export default function WriterEditor({
                 META DESCRIPTION
               </label>
               <span
-                className={`text-[10px] font-bold ${metaDescription.length > 160 ? "text-red-500" : "text-gray-400"
-                  }`}
+                className={`text-[10px] font-bold ${
+                  metaDescription.length > 160
+                    ? "text-red-500"
+                    : "text-gray-400"
+                }`}
               >
                 {metaDescription.length}/160
               </span>
@@ -684,9 +847,12 @@ export default function WriterEditor({
                   P
                 </div>
                 <div className="flex flex-col leading-tight">
-                  <span className="text-xs font-bold text-gray-900">POLITICO</span>
+                  <span className="text-xs font-bold text-gray-900">
+                    POLITICO
+                  </span>
                   <span className="text-[10px] text-gray-500 truncate max-w-[240px]">
-                    www.politico.com &gt; article &gt; {initialArticle?.slug || "story"}
+                    www.politico.com &gt; article &gt;{" "}
+                    {initialArticle?.slug || "story"}
                   </span>
                 </div>
               </div>
@@ -715,7 +881,12 @@ export default function WriterEditor({
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             onClick={() => {
-              if (title.trim() && !window.confirm("Are you sure you want to exit? Any unsaved edits will be lost.")) {
+              if (
+                title.trim() &&
+                !window.confirm(
+                  "Are you sure you want to exit? Any unsaved edits will be lost.",
+                )
+              ) {
                 return;
               }
               onCancel();
@@ -883,7 +1054,9 @@ export default function WriterEditor({
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#fff7ed] text-[#ea580c] hover:bg-orange-100 text-xs font-bold transition border border-orange-200/80 shadow-xs ml-auto"
             >
               <ImageIcon size={14} className="text-[#ea580c]" />
-              <span className="text-[11px] sm:text-xs tracking-wider">INSERT IMAGE</span>
+              <span className="text-[11px] sm:text-xs tracking-wider">
+                INSERT IMAGE
+              </span>
             </button>
           </div>
 
@@ -909,18 +1082,88 @@ export default function WriterEditor({
             />
           </div>
 
-          {/* Body Content Editor Canvas */}
-          <div
-            ref={editorRef}
-            contentEditable
-            onInput={() => {
-              if (editorRef.current) {
-                setContent(editorRef.current.innerHTML);
-              }
-            }}
-            data-placeholder="Start writing or type / for plugins"
-            className="w-full min-h-[400px] sm:min-h-[550px] outline-none text-base sm:text-lg leading-relaxed text-gray-800 prose max-w-none focus:ring-0 empty:before:content-[attr(data-placeholder)] empty:before:text-gray-300 empty:before:pointer-events-none"
-          />
+          <div className="relative">
+            {/* Floating Image Toolbar */}
+            {selectedImageNode && (
+              <div
+                className="image-toolbar absolute z-50 bg-[#1e293b] text-white rounded-lg shadow-xl flex items-center p-1.5 gap-2 border border-slate-700"
+                style={{ top: toolbarPosition.top, left: toolbarPosition.left }}
+              >
+                <button
+                  onClick={handleEditSelectedImage}
+                  className="flex items-center gap-1.5 bg-[#ea580c] hover:bg-[#c2410c] text-white px-3 py-1.5 rounded text-xs font-bold transition-colors"
+                >
+                  <Edit size={14} /> Edit Image
+                </button>
+
+                <div className="w-px h-5 bg-slate-600 mx-1"></div>
+
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">
+                  Size
+                </span>
+                <button
+                  onClick={() => handleSetImageSize("w-full")}
+                  className={`text-xs font-bold px-2 py-1 rounded hover:bg-slate-700 ${selectedImageNode.classList.contains("w-full") ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
+                >
+                  F
+                </button>
+                <button
+                  onClick={() => handleSetImageSize("w-1/2")}
+                  className={`text-xs font-bold px-2 py-1 rounded hover:bg-slate-700 ${selectedImageNode.classList.contains("w-1/2") ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
+                >
+                  M
+                </button>
+                <button
+                  onClick={() => handleSetImageSize("w-1/3")}
+                  className={`text-xs font-bold px-2 py-1 rounded hover:bg-slate-700 ${selectedImageNode.classList.contains("w-1/3") ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
+                >
+                  S
+                </button>
+
+                <div className="w-px h-5 bg-slate-600 mx-1"></div>
+
+                <button
+                  onClick={() => handleSetImageAlign("float-left")}
+                  className={`p-1.5 rounded hover:bg-slate-700 ${selectedImageNode.closest("figure")?.classList.contains("float-left") ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
+                >
+                  <AlignLeft size={16} />
+                </button>
+                <button
+                  onClick={() => handleSetImageAlign("mx-auto")}
+                  className={`p-1.5 rounded hover:bg-slate-700 ${selectedImageNode.closest("figure")?.classList.contains("mx-auto") ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
+                >
+                  <AlignCenter size={16} />
+                </button>
+                <button
+                  onClick={() => handleSetImageAlign("float-right")}
+                  className={`p-1.5 rounded hover:bg-slate-700 ${selectedImageNode.closest("figure")?.classList.contains("float-right") ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
+                >
+                  <AlignRight size={16} />
+                </button>
+
+                <div className="w-px h-5 bg-slate-600 mx-1"></div>
+
+                <button
+                  onClick={handleDeleteSelectedImage}
+                  className="p-1.5 rounded hover:bg-red-500/20 text-slate-300 hover:text-red-400 transition-colors"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            )}
+            {/* Body Content Editor Canvas */}
+            <div
+              ref={editorRef}
+              contentEditable
+              onInput={() => {
+                if (editorRef.current) {
+                  setContent(editorRef.current.innerHTML);
+                }
+              }}
+              data-placeholder="Start writing or type / for plugins"
+              className="w-full min-h-[400px] sm:min-h-[550px] outline-none text-base sm:text-lg leading-relaxed text-gray-800 prose max-w-none focus:ring-0 empty:before:content-[attr(data-placeholder)] empty:before:text-gray-300 empty:before:pointer-events-none"
+            />
+          </div>
         </main>
 
         {/* Article Settings Card (Side-by-side on desktop, stacked underneath on mobile) */}
@@ -938,7 +1181,9 @@ export default function WriterEditor({
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 bg-[#0f172a] text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-slate-700 animate-in fade-in slide-in-from-bottom-5 duration-300">
           <CheckCircle size={18} className="text-emerald-400 flex-shrink-0" />
-          <span className="text-xs font-black tracking-wider uppercase">{toastMessage}</span>
+          <span className="text-xs font-black tracking-wider uppercase">
+            {toastMessage}
+          </span>
           <button
             onClick={() => setToastMessage(null)}
             className="text-slate-400 hover:text-white ml-2"
@@ -1016,7 +1261,10 @@ export default function WriterEditor({
                   )}
                   {uploadSuccessMessage && (
                     <div className="mt-2 text-xs text-emerald-700 font-bold flex items-center gap-1.5">
-                      <CheckCircle size={14} className="text-emerald-600 flex-shrink-0" />
+                      <CheckCircle
+                        size={14}
+                        className="text-emerald-600 flex-shrink-0"
+                      />
                       <span>{uploadSuccessMessage}</span>
                     </div>
                   )}
@@ -1051,7 +1299,10 @@ export default function WriterEditor({
                 />
                 <p className="text-[10px] text-gray-500 mt-1.5 flex items-center gap-1">
                   <span>⚡</span>
-                  <span>Type keyword and press Enter or comma (,) to add. Maximum 4 keywords per image.</span>
+                  <span>
+                    Type keyword and press Enter or comma (,) to add. Maximum 4
+                    keywords per image.
+                  </span>
                 </p>
 
                 {imageKeywords.length > 0 && (
@@ -1063,7 +1314,10 @@ export default function WriterEditor({
                         className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white text-gray-800 text-[11px] font-bold cursor-pointer border border-orange-200 hover:bg-red-50 hover:text-red-700 transition group"
                       >
                         #{kw}
-                        <X size={10} className="text-gray-400 group-hover:text-red-600" />
+                        <X
+                          size={10}
+                          className="text-gray-400 group-hover:text-red-600"
+                        />
                       </span>
                     ))}
                   </div>
@@ -1156,7 +1410,12 @@ export default function WriterEditor({
 
             <div
               className="prose max-w-none text-gray-800 leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: editorRef.current?.innerHTML || content || "<p>No content written yet.</p>" }}
+              dangerouslySetInnerHTML={{
+                __html:
+                  editorRef.current?.innerHTML ||
+                  content ||
+                  "<p>No content written yet.</p>",
+              }}
             />
           </div>
         </div>

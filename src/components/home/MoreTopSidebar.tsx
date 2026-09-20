@@ -16,7 +16,7 @@ export default function MoreTopSidebar() {
 
           <div className="space-y-3">
             <div className="space-y-2">
-              <a href={`/news/${slugify(podcastTitle)}`} className="block group">
+              <a href={`/news/${slugify("CAN AMERICA'S OIL AND GAS INDUSTRY ACTUALLY POWER AI?")}`} className="block group" target="_blank">
                 <div className="overflow-hidden bg-gray-200">
                   <img
                     src="https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=1200&q=80"

@@ -237,7 +237,7 @@ export default function ReaderDashboard() {
                     </h4>
 
                     {item.deck && (
-                      <p className="text-[11px] text-gray-500 font-serif line-clamp-2 leading-relaxed mb-3">
+                      <p className="text-[11px] text-gray-500 font-sans line-clamp-2 leading-relaxed mb-3">
                         {item.deck}
                       </p>
                     )}

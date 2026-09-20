@@ -81,26 +81,26 @@ export default function DashboardHeader({ title, backHref = "/" }: DashboardHead
   return (
     <header className="w-full bg-white border-b border-gray-200/80 sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        {/* Left: Back to News */}
-        <div className="flex-1 flex justify-start">
-          <a
-            href={backHref}
-            className="inline-flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-black transition-colors select-none"
-          >
-            <ArrowLeft size={16} strokeWidth={2.2} />
-            <span>Back to News</span>
-          </a>
-        </div>
+        {/* Left: Empty space for balance */}
+        <div className="flex-1 flex justify-start"></div>
 
         {/* Center: Dashboard Title */}
         <div className="flex-1 flex justify-center text-center">
-          <h1 className="text-xl md:text-2xl font-serif font-black tracking-wide text-gray-900 uppercase">
+          <h1 className="text-xl md:text-2xl font-sans font-black tracking-wide text-gray-900 uppercase">
             {title}
           </h1>
         </div>
 
-        {/* Right: User Pill Button & Dropdown */}
-        <div className="flex-1 flex justify-end relative" ref={dropdownRef}>
+        {/* Right: Back to News & User Pill */}
+        <div className="flex-1 flex justify-end items-center gap-4 relative" ref={dropdownRef}>
+          <a
+            href={backHref}
+            className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-600 hover:text-[#ce1126] transition-colors select-none"
+          >
+            <ArrowLeft size={14} strokeWidth={2.5} />
+            <span className="hidden sm:inline">Back to News</span>
+          </a>
+
           <button
             type="button"
             onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -142,21 +142,6 @@ export default function DashboardHeader({ title, backHref = "/" }: DashboardHead
               </div>
 
               <div className="py-1">
-                <a
-                  href={dashboardHref}
-                  onClick={() => setDropdownOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-2.5 text-xs md:text-sm font-semibold transition-colors ${
-                    user?.role === "writer" ? "text-blue-600 hover:text-blue-700 hover:bg-gray-50" : "text-gray-800 hover:bg-gray-50 hover:text-[#ce1126]"
-                  }`}
-                >
-                  {user?.role === "writer" ? (
-                    <PenTool className="w-4 h-4 flex-shrink-0" strokeWidth={2} />
-                  ) : (
-                    <BookOpen className="w-4 h-4 text-emerald-600 flex-shrink-0" strokeWidth={2} />
-                  )}
-                  <span>{dashboardLabel}</span>
-                </a>
-
                 <button
                   type="button"
                   onClick={() => {

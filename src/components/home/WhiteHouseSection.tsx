@@ -111,7 +111,7 @@ export default function WhiteHouseSection() {
                 index > 0 ? "pt-4 border-t border-gray-200" : ""
               }`}
             >
-              <a href={`/news/${slugify(item.title)}`} className="block">
+              <a href={`/news/${slugify(item.title)}`} className="block" target="_blank">
                 <div className="aspect-[4/3] bg-gray-100 overflow-hidden mb-2">
                   <img
                     src={item.image}
@@ -119,7 +119,7 @@ export default function WhiteHouseSection() {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
-                <h3 className="text-sm font-extrabold leading-snug text-gray-900 group-hover:text-[#d32f2f] transition-colors font-sans">
+                <h3 className="text-sm font-extrabold leading-snug text-gray-900 group-hover:text-[#d32f2f] transition-colors font-serif">
                   {item.title}
                 </h3>
                 <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider mt-1 font-sans">
@@ -141,7 +141,7 @@ export default function WhiteHouseSection() {
 
           {/* Main Hero Lead Story for White House */}
           <article className="group cursor-pointer">
-            <a href={`/news/${slugify("Like something out of Saturday Night Live: Ontario premier laughs off Lake America executive order")}`} className="block space-y-3">
+            <a href={`/news/${slugify("'Like something out of 'Saturday Night Live': Ontario premier laughs off 'Lake America' executive order")}`} className="block space-y-3" target="_blank">
               <div className="aspect-[16/9] bg-gray-100 overflow-hidden relative">
                 <img
                   src="https://images.unsplash.com/photo-1575517111478-7f6afd0973db?auto=format&fit=crop&w=1000&q=80"
@@ -149,7 +149,7 @@ export default function WhiteHouseSection() {
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight text-gray-900 group-hover:text-[#d32f2f] transition-colors tracking-tight font-sans">
+              <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight text-gray-900 group-hover:text-[#d32f2f] transition-colors tracking-tight font-serif">
                 'Like something out of 'Saturday Night Live': Ontario premier laughs off 'Lake America' executive order
               </h1>
               <div className="flex items-center justify-between">
@@ -165,7 +165,7 @@ export default function WhiteHouseSection() {
           <div className="divide-y divide-gray-200 pt-2">
             {whiteHouseSubStories.map((item) => (
               <article key={item.id} className="py-4 first:pt-0 group cursor-pointer">
-                <a href={`/news/${slugify(item.title)}`} className="flex items-start gap-4">
+                <a href={`/news/${slugify(item.title)}`} className="flex items-start gap-4" target="_blank">
                   <div className="w-28 sm:w-36 aspect-[4/3] bg-gray-100 shrink-0 overflow-hidden">
                     <img
                       src={item.image}
@@ -174,7 +174,7 @@ export default function WhiteHouseSection() {
                     />
                   </div>
                   <div className="flex-1 space-y-1.5 min-w-0">
-                    <h3 className="text-base font-extrabold leading-snug text-gray-900 group-hover:text-[#d32f2f] transition-colors font-sans">
+                    <h3 className="text-base font-extrabold leading-snug text-gray-900 group-hover:text-[#d32f2f] transition-colors font-serif">
                       {item.title}
                     </h3>
                     <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider font-sans">
@@ -198,7 +198,7 @@ export default function WhiteHouseSection() {
                   idx > 0 ? "pt-3 border-t border-gray-200" : ""
                 }`}
               >
-                <a href={`/news/${slugify(item.title)}`} className="flex items-start gap-3">
+                <a href={`/news/${slugify(item.title)}`} className="flex items-start gap-3" target="_blank">
                   <div className="w-16 aspect-[4/3] bg-gray-100 shrink-0 overflow-hidden">
                     <img
                       src={item.image}
@@ -225,7 +225,7 @@ export default function WhiteHouseSection() {
             <div className="space-y-3">
               {videoStories.map((item) => (
                 <article key={item.id} className="group cursor-pointer">
-                  <a href={`/news/${slugify(item.title)}`} className="flex items-start gap-3">
+                  <a href={`/news/${slugify(item.title)}`} className="flex items-start gap-3" target="_blank">
                     <div className="w-20 aspect-[4/3] bg-gray-100 shrink-0 overflow-hidden relative group">
                       <img
                         src={item.image}
@@ -249,10 +249,10 @@ export default function WhiteHouseSection() {
 
           {/* Have a News Tip Box */}
           <div className="border border-gray-200 p-4 bg-[#fcfcfc] space-y-1.5 font-sans">
-            <h4 className="text-sm font-extrabold text-gray-900 font-sans">
+            <h4 className="text-sm font-extrabold text-gray-900 font-serif">
               Have a news tip?
             </h4>
-            <p className="text-xs text-gray-600 font-serif leading-snug">
+            <p className="text-xs text-gray-600 font-sans leading-snug">
               Contact POLITICO reporters and provide materials in an anonymous and secure way.{" "}
               <a href="#" className="font-bold text-black hover:underline">
                 Learn more »
@@ -265,7 +265,7 @@ export default function WhiteHouseSection() {
             <span className="text-lg font-black text-[#d32f2f] block uppercase tracking-tight font-sans">
               POLITICO<span className="text-gray-900">PRO</span>
             </span>
-            <p className="text-xs text-gray-600 font-serif leading-snug">
+            <p className="text-xs text-gray-600 font-sans leading-snug">
               Exclusive news, intelligence and tools for professionals on the front lines of policy.{" "}
               <a href="#" className="font-bold text-black hover:underline">
                 Learn more »

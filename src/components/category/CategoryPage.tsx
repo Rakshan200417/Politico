@@ -46,7 +46,7 @@ function StoryRow({ story }: { story: CategoryStory }) {
             <h3 className="text-[18px] font-bold leading-[1.08] tracking-[-0.02em] text-[#111] hover:text-[#d71920] sm:text-[21px]">
               {story.title}
             </h3>
-            <p className="mt-2 font-serif text-[15px] leading-[1.2] text-[#666] sm:text-[17px]">{story.deck}</p>
+            <p className="mt-2 font-sans text-[15px] leading-[1.2] text-[#666] sm:text-[17px]">{story.deck}</p>
           </a>
           <StoryMeta
             byline={story.byline}
@@ -83,7 +83,7 @@ export default function CategoryPage({ category }: { category: CategoryPageData 
             <h2 className="max-w-[700px] text-[31px] font-bold leading-[1.02] tracking-[-0.03em] text-[#111] hover:text-[#d71920] sm:text-[40px]">
               {category.lead.title}
             </h2>
-            <p className="mt-3 max-w-[700px] font-serif text-[17px] leading-[1.25] text-[#666] sm:text-[19px]">{category.lead.deck}</p>
+            <p className="mt-3 max-w-[700px] font-sans text-[17px] leading-[1.25] text-[#666] sm:text-[19px]">{category.lead.deck}</p>
             <StoryMeta
               byline={category.lead.byline}
               title={category.lead.title}

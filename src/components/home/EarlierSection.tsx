@@ -118,7 +118,7 @@ export default function EarlierSection() {
           <div className="divide-y divide-gray-200">
             {stories.map((item) => (
               <article key={item.id} className="py-4 group cursor-pointer">
-                <a href={`/news/${slugify(item.title)}`} className="flex items-start gap-4">
+                <a href={`/news/${slugify(item.title)}`} className="flex items-start gap-4" target="_blank">
                   <div className="w-32 sm:w-40 aspect-[4/3] bg-gray-100 shrink-0 overflow-hidden">
                     <img
                       src={item.image}
@@ -127,7 +127,7 @@ export default function EarlierSection() {
                     />
                   </div>
                   <div className="flex-1 space-y-1.5 min-w-0">
-                    <h3 className="text-base font-extrabold leading-snug text-gray-900 group-hover:text-[#d32f2f] transition-colors font-sans">
+                    <h3 className="text-base font-extrabold leading-snug text-gray-900 group-hover:text-[#d32f2f] transition-colors font-serif">
                       {item.title}
                     </h3>
                     <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider font-sans">

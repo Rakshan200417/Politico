@@ -282,7 +282,7 @@ export default function MagazineCarousel() {
               href={`/news/${slugify(article.title)}`}
               className="flex-shrink-0 bg-[#f7f7f7] p-4 flex flex-col justify-between group cursor-pointer hover:shadow-md transition-shadow border border-transparent block text-left"
               style={{ width: `${cardWidth}px` }}
-            >
+             target="_blank">
               <div>
                 <div className="aspect-[16/10] bg-gray-200 overflow-hidden mb-4">
                   <img
@@ -294,10 +294,10 @@ export default function MagazineCarousel() {
                 <span className="text-[11px] font-black uppercase text-[#ce1126] tracking-wider block mb-2">
                   {article.tag}
                 </span>
-                <h3 className="font-serif text-[23px] font-black leading-[1.05] text-gray-900 group-hover:text-[#ce1126] transition-colors mb-3 tracking-[-0.03em]">
+                <h3 className="font-sans text-[23px] font-black leading-[1.05] text-gray-900 group-hover:text-[#ce1126] transition-colors mb-3 tracking-[-0.03em]">
                   {article.title}
                 </h3>
-                <p className="text-xs text-gray-600 font-serif leading-relaxed mb-4">
+                <p className="text-xs text-gray-600 font-sans leading-relaxed mb-4">
                   {article.deck}
                 </p>
               </div>

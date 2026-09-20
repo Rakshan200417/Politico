@@ -43,13 +43,7 @@ export default function SaveShareButtons({
       const stored = localStorage.getItem("user");
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (
-          parsed &&
-          (parsed.role === "reader" ||
-            parsed.role === "writer" ||
-            parsed.role === "admin" ||
-            Boolean(parsed.email))
-        ) {
+        if (parsed && parsed.role === "reader") {
           setUser(parsed);
           return parsed;
         }

@@ -11,6 +11,7 @@ import {
   ArrowRight,
   ExternalLink,
 } from "lucide-react";
+import CommentsSection from "@/components/news/CommentsSection";
 
 export function generateStaticParams() {
   return Object.keys(featuredNewsArticles).map((slug) => ({ slug }));
@@ -110,7 +111,7 @@ export default function NewsArticlePage({ params }: { params: { slug: string } }
             {article.title}
           </h1>
 
-          <p className="mt-3 max-w-[840px] font-serif text-[18px] sm:text-[21px] leading-[1.25] text-[#555]">
+          <p className="mt-3 max-w-[840px] font-sans text-[18px] sm:text-[21px] leading-[1.25] text-[#555]">
             {article.deck}
           </p>
 
@@ -179,7 +180,7 @@ export default function NewsArticlePage({ params }: { params: { slug: string } }
             )}
 
             {/* Article Body Paragraphs with in-article Advertisement space matching Image 3 */}
-            <div className="space-y-6 pt-4 font-serif text-[17px] sm:text-[18px] leading-[1.65] text-[#292929]">
+            <div className="space-y-6 pt-4 font-sans text-[17px] sm:text-[18px] leading-[1.65] text-[#292929]">
               {article.paragraphs.map((p, idx) => (
                 <React.Fragment key={idx}>
                   <p
@@ -265,6 +266,9 @@ export default function NewsArticlePage({ params }: { params: { slug: string } }
                 </p>
               </div>
             </div>
+            
+            {/* Comments Section */}
+            <CommentsSection articleSlug={article.slug} />
           </article>
 
           {/* Sidebar Column identical to Category Pages */}
@@ -359,7 +363,7 @@ export default function NewsArticlePage({ params }: { params: { slug: string } }
                     <h3 className="text-[18px] sm:text-[21px] font-bold leading-[1.1] tracking-[-0.02em] text-[#111] group-hover:text-[#d71920] transition-colors">
                       {story.title}
                     </h3>
-                    <p className="mt-2 font-serif text-[14px] sm:text-[16px] leading-[1.25] text-[#666]">
+                    <p className="mt-2 font-sans text-[14px] sm:text-[16px] leading-[1.25] text-[#666]">
                       {story.deck}
                     </p>
                     <p className="mt-2 text-[9px] font-bold uppercase tracking-[0.14em] text-[#666]">

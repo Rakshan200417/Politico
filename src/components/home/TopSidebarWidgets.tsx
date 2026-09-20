@@ -25,7 +25,7 @@ export default function TopSidebarWidgets() {
     <aside className="w-full font-sans pl-0 lg:pl-2">
       <div className="space-y-4 border-l border-gray-200 pl-4">
         <article className="group cursor-pointer">
-          <a href={`/news/${slugify(leadHeadline)}`} className="block">
+          <a href={`/news/${slugify("Supreme Court allows Trump's ballroom construction, but Roberts says project is &lsquo;likely unlawful&rsquo;")}`} className="block" target="_blank">
             <div className="overflow-hidden bg-gray-200">
               <img
                 src="https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=1200&q=80"
@@ -47,7 +47,7 @@ export default function TopSidebarWidgets() {
         <div className="space-y-4 border-t border-[#e3e3e3] pt-4">
           {stories.map((story, index) => (
             <article key={index} className="group cursor-pointer border-b border-[#e3e3e3] pb-4 last:border-b-0 last:pb-0">
-              <a href={`/news/${slugify(story.title)}`} className="block">
+              <a href={`/news/${slugify(story.title)}`} className="block" target="_blank">
                 {story.tag && (
                   <div className="mb-2 text-[9px] font-black uppercase tracking-[0.18em] text-[#111111]">
                     {story.tag}

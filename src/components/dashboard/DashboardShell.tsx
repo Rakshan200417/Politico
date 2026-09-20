@@ -106,7 +106,7 @@ export default function DashboardShell({
 
       {/* Sidebar (Slightly increased size for desktop mode) */}
       <aside
-        className={`fixed lg:static top-0 bottom-0 left-0 w-72 xl:w-80 bg-white border-r border-gray-200 z-50 flex flex-col justify-between transition-transform duration-300 ease-in-out flex-shrink-0 ${
+        className={`fixed lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto left-0 w-72 xl:w-80 bg-white border-r border-gray-200 z-50 flex flex-col transition-transform duration-300 ease-in-out flex-shrink-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
@@ -177,38 +177,13 @@ export default function DashboardShell({
             })}
           </div>
         </div>
-
-        {/* Sidebar Footer User Info */}
-        <div className="p-4 lg:p-5 border-t border-gray-200">
-          <div className="flex items-center gap-3 p-2.5 rounded-xl bg-gray-50 mb-2.5 border border-gray-100">
-            <div className="w-9 h-9 rounded-full bg-[#b01753] text-white font-bold text-sm flex items-center justify-center flex-shrink-0 overflow-hidden">
-              {user?.avatar_url ? (
-                <img src={user.avatar_url} alt="Profile" className="w-full h-full object-cover" />
-              ) : (
-                initialLetter
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-xs sm:text-sm font-bold text-gray-900 truncate">{displayName}</div>
-              <div className="text-[11px] text-gray-500 font-mono truncate">{user?.email}</div>
-            </div>
-          </div>
-
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-gray-600 hover:text-[#ce1126] hover:bg-red-50 transition-colors"
-          >
-            <LogOut size={16} />
-            <span>Sign Out Terminal</span>
-          </button>
-        </div>
       </aside>
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Navbar */}
         <header className="h-16 bg-white border-b border-gray-200 px-4 sm:px-8 flex items-center justify-between sticky top-0 z-30">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(true)}
               className="lg:hidden p-1.5 rounded-md text-gray-600 hover:bg-gray-100"
@@ -216,6 +191,14 @@ export default function DashboardShell({
             >
               <Menu size={20} />
             </button>
+            <a
+              href="/"
+              className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-600 hover:text-[#ce1126] transition-colors"
+            >
+              <ArrowLeft size={14} strokeWidth={2.5} />
+              <span className="hidden sm:inline">Back to Home</span>
+            </a>
+            <div className="h-4 w-px bg-gray-300 hidden sm:block"></div>
             <h2 className="text-base sm:text-lg font-bold text-gray-900">
               {portalTitle}
             </h2>
@@ -223,13 +206,6 @@ export default function DashboardShell({
 
           {/* Right Actions */}
           <div className="flex items-center gap-4">
-            <a
-              href="/"
-              className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-600 hover:text-[#ce1126] transition-colors"
-            >
-              <ArrowLeft size={14} strokeWidth={2.5} />
-              <span className="hidden sm:inline">Back to News</span>
-            </a>
 
             {/* Profile Dropdown */}
             <div className="relative" ref={dropdownRef}>
@@ -272,32 +248,6 @@ export default function DashboardShell({
                   </div>
 
                   <div className="py-1">
-                    <a
-                      href={
-                        user?.role === "admin"
-                          ? "/admin"
-                          : user?.role === "writer"
-                          ? "/writer"
-                          : "/reader"
-                      }
-                      onClick={() => setDropdownOpen(false)}
-                      className={`flex items-center gap-3 px-4 py-2.5 text-xs md:text-sm font-semibold transition-colors ${
-                        user?.role === "writer" ? "text-blue-600 hover:text-blue-700 hover:bg-gray-50" : "text-gray-800 hover:bg-gray-50 hover:text-[#ce1126]"
-                      }`}
-                    >
-                      {user?.role === "writer" ? (
-                        <PenTool className="w-4 h-4 flex-shrink-0" strokeWidth={2} />
-                      ) : (
-                        <BookOpen className="w-4 h-4 text-emerald-600 flex-shrink-0" strokeWidth={2} />
-                      )}
-                      <span>
-                        {user?.role === "admin"
-                          ? "Admin Dashboard"
-                          : user?.role === "writer"
-                          ? "Author Workspace"
-                          : "Readers Dashboard"}
-                      </span>
-                    </a>
                     <button
                       type="button"
                       onClick={() => {

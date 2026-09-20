@@ -19,7 +19,7 @@ export default function AdvertisementSlot({
           <span className="text-[10px] font-mono font-bold tracking-widest text-gray-400 uppercase border border-gray-300 px-2 py-0.5 rounded mb-2">
             AD
           </span>
-          <p className="text-xs font-serif text-gray-400 italic">Sponsored Content</p>
+          <p className="text-xs font-sans text-gray-400 italic">Sponsored Content</p>
         </div>
       </aside>
     );

@@ -38,7 +38,7 @@ export default function MoreTopHeadlines() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <article className="group cursor-pointer">
-          <a href={`/news/${slugify(top1)}`} className="block space-y-2.5">
+          <a href={`/news/${slugify(top1)}`} className="block space-y-2.5" target="_blank">
             <div className="aspect-[16/10] bg-gray-100 overflow-hidden">
               <img
                 src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80"
@@ -66,7 +66,7 @@ export default function MoreTopHeadlines() {
         </article>
 
         <article className="group cursor-pointer">
-          <a href={`/news/${slugify(top2)}`} className="block space-y-2.5">
+          <a href={`/news/${slugify(top2)}`} className="block space-y-2.5" target="_blank">
             <div className="aspect-[16/10] bg-gray-100 overflow-hidden">
               <img
                 src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80"
@@ -97,7 +97,7 @@ export default function MoreTopHeadlines() {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 pb-2">
         {secondaryStories.map((story, index) => (
           <article key={index} className="group cursor-pointer border-t border-gray-200 pt-4">
-            <a href={`/news/${slugify(story.title)}`} className="block space-y-2.5">
+            <a href={`/news/${slugify(story.title)}`} className="block space-y-2.5" target="_blank">
               <div className="aspect-[16/10] bg-gray-100 overflow-hidden">
                 <img
                   src={story.image}

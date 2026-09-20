@@ -79,7 +79,7 @@ export default function CongressSection() {
                 California Currents
               </h4>
             </div>
-            <p className="text-xs text-gray-600 font-serif leading-relaxed px-1">
+            <p className="text-xs text-gray-600 font-sans leading-relaxed px-1">
               How the politics of energy, the environment and transportation are shaping California's future
             </p>
             <a
@@ -100,7 +100,7 @@ export default function CongressSection() {
             </div>
 
             <article className="group cursor-pointer space-y-2.5">
-              <a href={`/news/${slugify("A politically impossible situation: New poll shows Trump voters losing patience with Iran war")}`} className="block">
+              <a href={`/news/${slugify("'A politically impossible situation': New poll shows Trump voters losing patience with Iran war")}`} className="block" target="_blank">
                 <div className="aspect-[4/3] bg-gray-100 overflow-hidden mb-3 relative">
                   <img
                     src="https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80"
@@ -108,7 +108,7 @@ export default function CongressSection() {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
-                <h3 className="text-lg font-extrabold leading-tight text-gray-900 group-hover:text-[#d32f2f] transition-colors font-sans">
+                <h3 className="text-lg font-extrabold leading-tight text-gray-900 group-hover:text-[#d32f2f] transition-colors font-serif">
                   'A politically impossible situation': New poll shows Trump voters losing patience with Iran war
                 </h3>
                 <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider mt-1">
@@ -119,7 +119,7 @@ export default function CongressSection() {
 
             {/* Sub-Poll Article */}
             <article className="group cursor-pointer pt-4 border-t border-gray-200 space-y-2">
-              <a href={`/news/${slugify("A growing political reckoning is coming for data centers, POLITICO Poll shows")}`} className="block">
+              <a href={`/news/${slugify("A growing political reckoning is coming for data centers, POLITICO Poll shows")}`} className="block" target="_blank">
                 <div className="aspect-[4/3] bg-gray-100 overflow-hidden mb-3">
                   <img
                     src="https://images.unsplash.com/photo-1517411032315-54ef2cb783bb?auto=format&fit=crop&w=600&q=80"
@@ -127,7 +127,7 @@ export default function CongressSection() {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
-                <h4 className="text-sm font-extrabold leading-snug text-gray-900 group-hover:text-[#d32f2f] transition-colors font-sans">
+                <h4 className="text-sm font-extrabold leading-snug text-gray-900 group-hover:text-[#d32f2f] transition-colors font-serif">
                   A growing political reckoning is coming for data centers, POLITICO Poll shows
                 </h4>
                 <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider mt-1">
@@ -149,7 +149,7 @@ export default function CongressSection() {
 
           {/* Main Hero Lead Story for Congress */}
           <article className="group cursor-pointer">
-            <a href={`/news/${slugify("Trump pollster says Abdul El-Sayed's polling lead is a fake narrative")}`} className="block space-y-3">
+            <a href={`/news/${slugify("Trump pollster says Abdul El-Sayed's polling lead is a 'fake narrative'")}`} className="block space-y-3" target="_blank">
               <div className="aspect-[16/9] bg-gray-100 overflow-hidden relative">
                 <img
                   src="https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=1000&q=80"
@@ -157,7 +157,7 @@ export default function CongressSection() {
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight text-gray-900 group-hover:text-[#d32f2f] transition-colors tracking-tight font-sans">
+              <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight text-gray-900 group-hover:text-[#d32f2f] transition-colors tracking-tight font-serif">
                 Trump pollster says Abdul El-Sayed's polling lead is a 'fake narrative'
               </h1>
               <div className="flex items-center justify-between">
@@ -173,7 +173,7 @@ export default function CongressSection() {
           <div className="divide-y divide-gray-200 pt-2">
             {congressSubStories.map((item) => (
               <article key={item.id} className="py-4 first:pt-0 group cursor-pointer">
-                <a href={`/news/${slugify(item.title)}`} className="flex items-start gap-4">
+                <a href={`/news/${slugify(item.title)}`} className="flex items-start gap-4" target="_blank">
                   <div className="w-28 sm:w-36 aspect-[4/3] bg-gray-100 shrink-0 overflow-hidden">
                     <img
                       src={item.image}
@@ -182,7 +182,7 @@ export default function CongressSection() {
                     />
                   </div>
                   <div className="flex-1 space-y-1.5 min-w-0">
-                    <h3 className="text-base font-extrabold leading-snug text-gray-900 group-hover:text-[#d32f2f] transition-colors font-sans">
+                    <h3 className="text-base font-extrabold leading-snug text-gray-900 group-hover:text-[#d32f2f] transition-colors font-serif">
                       {item.title}
                     </h3>
                     <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider font-sans">
@@ -230,7 +230,7 @@ export default function CongressSection() {
                   <span className="text-sm font-black text-[#d32f2f] font-sans pt-0.5 min-w-[14px]">
                     {item.num}
                   </span>
-                  <a href={`/news/${slugify(item.title)}`} className="flex-1">
+                  <a href={`/news/${slugify(item.title)}`} className="flex-1" target="_blank">
                     <h3 className="text-xs sm:text-sm font-bold leading-tight text-gray-900 group-hover:text-[#d32f2f] transition-colors">
                       {item.title}
                     </h3>
@@ -251,7 +251,7 @@ export default function CongressSection() {
             <div className="space-y-4">
               {talkersStories.map((item) => (
                 <article key={item.id} className="group cursor-pointer">
-                  <a href={`/news/${slugify(item.title)}`} className="flex items-start gap-3">
+                  <a href={`/news/${slugify(item.title)}`} className="flex items-start gap-3" target="_blank">
                     <div className="w-20 aspect-[4/3] bg-gray-100 shrink-0 overflow-hidden">
                       <img
                         src={item.image}

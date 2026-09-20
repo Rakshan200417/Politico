@@ -52,7 +52,7 @@ export default function ForeignAffairsSection() {
 
           {/* Hero Lead Story */}
           <article className="group cursor-pointer">
-            <a href={`/news/${slugify("Iceland's parliament will discuss withdrawing EU bid after failed referendum")}`} className="block space-y-3">
+            <a href={`/news/${slugify("Iceland's parliament will 'discuss' withdrawing EU bid after failed referendum")}`} className="block space-y-3" target="_blank">
               <div className="aspect-[16/9] bg-gray-100 overflow-hidden relative">
                 <img
                   src="https://images.unsplash.com/photo-1521295121783-8a321d551ad2?auto=format&fit=crop&w=1000&q=80"
@@ -60,7 +60,7 @@ export default function ForeignAffairsSection() {
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight text-gray-900 group-hover:text-[#d32f2f] transition-colors tracking-tight font-sans">
+              <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight text-gray-900 group-hover:text-[#d32f2f] transition-colors tracking-tight font-serif">
                 Iceland's parliament will 'discuss' withdrawing EU bid after
                 failed referendum
               </h1>
@@ -77,7 +77,7 @@ export default function ForeignAffairsSection() {
                 key={item.id}
                 className="py-4 first:pt-0 group cursor-pointer"
               >
-                <a href={`/news/${slugify(item.title)}`} className="flex items-start gap-4">
+                <a href={`/news/${slugify(item.title)}`} className="flex items-start gap-4" target="_blank">
                   <div className="w-28 sm:w-36 aspect-[4/3] bg-gray-100 shrink-0 overflow-hidden">
                     <img
                       src={item.image}
@@ -87,7 +87,7 @@ export default function ForeignAffairsSection() {
                   </div>
                   <div className="flex-1 space-y-1.5 min-w-0">
                     <h3
-                      className={`text-base font-extrabold leading-snug transition-colors font-sans ${
+                      className={`text-base font-extrabold leading-snug transition-colors font-serif ${
                         item.highlight
                           ? "text-[#1a6bbf] group-hover:text-[#0d4f9e]"
                           : "text-gray-900 group-hover:text-[#d32f2f]"
