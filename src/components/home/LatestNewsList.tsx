@@ -4,59 +4,57 @@ import { slugify } from "@/data/newsArticles";
 interface LatestNewsItem {
   id: string;
   title: string;
-  time: string;
+  time?: string;
   isRedTime?: boolean;
+  isSponsored?: boolean;
+  sponsor?: string;
 }
 
 export default function LatestNewsList() {
   const latestNews: LatestNewsItem[] = [
     {
       id: "1",
-      time: "3m",
-      title: "Trump promises more strikes after US and Iran trade blows for first time in a month",
+      time: "15m",
+      title: "Von der Leyen offers diagnosis but no cure on EU's ecological malaise",
       isRedTime: true,
     },
     {
       id: "2",
-      time: "31m",
-      title: "Republicans ask Supreme Court to block campaign advertising ruling",
-      isRedTime: true,
+      title: "Democrats keep pressure on Hakeem Jeffries to punish rogue members",
     },
     {
       id: "3",
-      time: "34m",
-      title: "Trump: Communities that reject data centers will end up 'backwards and poor'",
-      isRedTime: true,
+      title: "Left on brink of victory in Swedish election",
     },
     {
       id: "4",
-      time: "28m",
-      title: "Germany's far right eyes eastern state as springboard to national power",
-      isRedTime: true,
+      isSponsored: true,
+      title: "A proven kidney treatment exists. It's time to expand US access",
+      sponsor: "Fresenius Medical Care"
     },
     {
       id: "5",
-      time: "1h",
-      title: "China will stop Russia from going nuclear, Finland's Stubb says",
-      isRedTime: true,
+      title: "Lee tells colleagues he's bullish on permitting deal",
     },
     {
       id: "6",
-      time: "1h",
-      title: "Capitol Agenda: Johnson faces pressure to cut out early",
-      isRedTime: true,
+      title: "Paramount is looking for Nashville office space as it weighs leaving LA",
     },
     {
       id: "7",
-      time: "1h",
-      title: "Belgium to US ambassador: Stop attacking our officials online",
-      isRedTime: true,
+      title: "Kamala Harris to join Abdul El-Sayed in Michigan next week",
     },
     {
       id: "8",
-      time: "1h",
-      title: "The Trump-shaped problems awaiting Andy Burnham, ranked",
-      isRedTime: false,
+      title: "With hopes for crypto legislation dimming, Trump's regulators step into the fray",
+    },
+    {
+      id: "9",
+      title: "Susie Wiles says she is cancer-free 6 months after diagnosis",
+    },
+    {
+      id: "10",
+      title: "Key spy law could go dark if Congress doesn't act by November, Trump admin says",
     },
   ];
 
@@ -74,33 +72,32 @@ export default function LatestNewsList() {
       <div className="divide-y divide-[#e5e5e5]">
         {latestNews.map((item) => (
           <article key={item.id} className="group cursor-pointer">
-            {/* Default State */}
-            <div className="py-3 block group-hover:hidden">
-              <a href={`/news/${slugify(item.title)}`} target="_blank" rel="noopener noreferrer" className="flex items-start gap-4">
-                <span
-                  className={`text-[11px] font-extrabold shrink-0 min-w-[24px] pt-1 ${item.isRedTime ? "text-[#d32f2f]" : "text-gray-500"
-                    }`}
-                >
-                  {item.time}
-                </span>
-                <h3 className="text-[15px] font-bold leading-[1.3] text-[#222222] font-sans">
+            {item.isSponsored ? (
+              <div className="py-4 block">
+                <div className="text-[11px] font-extrabold text-[#00609d] uppercase tracking-[0.15em] mb-2 font-sans">
+                  SPONSORED CONTENT
+                </div>
+                <h4 className="text-[15px] font-bold leading-[1.3] text-[#222222] mb-3 font-sans tracking-tight">
                   {item.title}
-                </h3>
-              </a>
-            </div>
-
-            {/* Expanded Hover State */}
-            <div className="hidden group-hover:block py-4 px-2 -mx-2 bg-[#fbfbfb] border border-gray-100 shadow-sm transition-all duration-300">
-              <div className="text-[11px] font-extrabold text-[#00609d] uppercase tracking-[0.15em] mb-2 font-sans">
-                SPONSORED CONTENT
+                </h4>
+                <div className="text-[11px] text-[#767676] font-semibold font-sans">
+                  Sponsored by {item.sponsor}
+                </div>
               </div>
-              <h4 className="text-[17px] font-bold leading-[1.2] text-gray-900 mb-4 font-sans tracking-tight">
-                Bold stories. Real influence. This is POLITICO Focus.
-              </h4>
-              <div className="text-[12px] text-gray-500 font-semibold font-sans">
-                Sponsored by POLITICO Focus
+            ) : (
+              <div className="py-3 block">
+                <a href={`/news/${slugify(item.title)}`} className="flex items-start gap-4">
+                  <span
+                    className={`text-[11px] font-extrabold shrink-0 min-w-[24px] pt-1 ${item.isRedTime ? "text-[#d32f2f]" : "text-gray-500"}`}
+                  >
+                    {item.time || ""}
+                  </span>
+                  <h3 className="text-[15px] font-bold leading-[1.3] text-[#222222] font-sans">
+                    {item.title}
+                  </h3>
+                </a>
               </div>
-            </div>
+            )}
           </article>
         ))}
       </div>

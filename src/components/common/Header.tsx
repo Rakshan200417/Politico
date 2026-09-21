@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { Search, Menu, X, User, BookOpen, LogOut, PenTool } from "lucide-react";
 import ProfileModal from "@/components/profile/ProfileModal";
 
 export default function Header() {
+  const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [isCompact, setIsCompact] = useState(false);
@@ -331,7 +333,7 @@ export default function Header() {
                 className={`transition-colors flex-shrink-0 ${cat.name === "Breaking News"
                     ? "text-[#ce1126] hover:text-[#a00c1c] mr-4"
                     : "hover:text-[#ce1126]"
-                  }`}
+                  } ${pathname === cat.href ? "text-[#ce1126] border-b-2 border-[#ce1126]" : ""}`}
               >
                 {cat.name}
               </a>
@@ -375,7 +377,7 @@ export default function Header() {
             <div className={`relative transition-all duration-300 ${isMenuOpen ? "mr-4 md:mr-6 lg:mr-8" : "mr-4 md:mr-6"}`}>
               <a
                 href="/category/breaking-news"
-                className="transition-colors text-[#ce1126] hover:text-[#a00c1c] py-1 block whitespace-nowrap"
+                className={`transition-colors text-[#ce1126] hover:text-[#a00c1c] py-1 block whitespace-nowrap ${pathname === "/category/breaking-news" ? "border-b-2 border-[#ce1126]" : ""}`}
               >
                 Breaking News
               </a>
@@ -386,7 +388,7 @@ export default function Header() {
                 <div key={cat.name} className="relative">
                   <a
                     href={cat.href}
-                    className="transition-colors hover:text-[#ce1126] py-1 block whitespace-nowrap"
+                    className={`transition-colors py-1 block whitespace-nowrap ${pathname === cat.href ? "text-[#ce1126] border-b-2 border-[#ce1126]" : "hover:text-[#ce1126]"}`}
                   >
                     {cat.name}
                   </a>

@@ -138,8 +138,14 @@ export default function DashboardShell({
 
           {/* Navigation Links */}
           <div className="p-4 lg:p-5 space-y-1.5">
-            <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider px-3 mb-2.5">
-              Menu
+            <div className="px-3 mb-2.5 flex justify-center">
+              <a
+                href="/"
+                className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-600 hover:text-[#ce1126] transition-colors"
+              >
+                <ArrowLeft size={14} strokeWidth={2.5} />
+                <span>Back to Home</span>
+              </a>
             </div>
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -191,14 +197,6 @@ export default function DashboardShell({
             >
               <Menu size={20} />
             </button>
-            <a
-              href="/"
-              className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-600 hover:text-[#ce1126] transition-colors"
-            >
-              <ArrowLeft size={14} strokeWidth={2.5} />
-              <span className="hidden sm:inline">Back to Home</span>
-            </a>
-            <div className="h-4 w-px bg-gray-300 hidden sm:block"></div>
             <h2 className="text-base sm:text-lg font-bold text-gray-900">
               {portalTitle}
             </h2>

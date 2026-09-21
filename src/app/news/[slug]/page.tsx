@@ -1,7 +1,9 @@
 import React from "react";
 import type { Metadata } from "next";
+import Link from "next/link";
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
+import BackButton from "@/components/common/BackButton";
 import SaveShareButtons from "@/components/common/SaveShareButtons";
 import AdvertisementSlot from "@/components/common/AdvertisementSlot";
 import { getNewsArticle, featuredNewsArticles, slugify } from "@/data/newsArticles";
@@ -52,6 +54,12 @@ export default function NewsArticlePage({ params }: { params: { slug: string } }
       time: "3h ago",
       image: "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=600&q=80",
     },
+    {
+      title: "New bipartisan crypto bill aims to establish regulatory framework",
+      byline: "BY ELEANOR MUELLER",
+      time: "4h ago",
+      image: "https://images.unsplash.com/photo-1621416894569-0f39ed31d247?auto=format&fit=crop&w=600&q=80",
+    },
   ];
 
   const moreNews = [
@@ -76,73 +84,80 @@ export default function NewsArticlePage({ params }: { params: { slug: string } }
   ];
 
   return (
-    <div className="min-h-screen bg-white font-sans text-[#111]">
+    <div className="min-h-screen bg-white font-sans text-[#111] flex flex-col">
       <Header />
 
-      <main className="mx-auto w-full max-w-[1080px] px-4 pb-16 font-sans sm:px-6">
-        {/* Top Banner identical to Category Pages */}
-        <div className="flex h-[130px] sm:h-[160px] items-center justify-center border-b border-[#ededed]">
-          <div className="w-full max-w-[650px] bg-[#f2f2f2] px-5 py-4 text-center rounded-sm">
-            <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#d71920]">
-              POLITICO
+      {/* ── Top Banner Advertisement (In the Beige Gap) ── */}
+      <div className="w-full bg-[#f3eadd] py-6 border-b border-gray-200">
+        <div className="w-full max-w-[970px] mx-auto hidden lg:block">
+          <div className="w-full font-sans text-center">
+            <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-gray-400 mb-2">
+              Advertisement
             </span>
-            <p className="mt-1 text-[15px] sm:text-[18px] font-bold text-[#222]">
-              Your first read on politics and policy
-            </p>
-            <button className="mt-2 rounded-full bg-[#d71920] px-5 py-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-white hover:bg-[#a00c1c] transition-colors">
-              Subscribe now
-            </button>
+            <div className="w-full min-h-[110px] sm:min-h-[140px] bg-[#f9fafb] border border-[#e5e7eb] flex flex-col items-center justify-center p-6 relative overflow-hidden">
+              <span className="text-[10px] font-mono font-bold tracking-widest text-gray-400 uppercase border border-gray-300 px-2.5 py-0.5 rounded mb-1">
+                AD
+              </span>
+              <span className="text-[11px] font-sans font-medium text-gray-400">
+                POLITICO Commercial Network
+              </span>
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* Article Breadcrumb / Category Tag */}
-        <div className="pt-6 pb-2">
-          <a
-            href={`/category/${article.categorySlug}`}
-            className="text-[11px] font-black uppercase tracking-[0.2em] text-[#d71920] hover:underline"
-          >
-            {article.category}
-          </a>
+      <main className="mx-auto w-full max-w-[1080px] px-4 pb-16 font-sans sm:px-6">
+
+        {/* Back to Newsfeed */}
+        <div className="pt-6 pb-4 border-b border-[#e3e3e3] mb-8">
+          <BackButton text="BACK TO NEWSFEED" />
         </div>
 
         {/* Headline Header */}
-        <header className="border-b border-[#e3e3e3] pb-6">
-          <h1 className="text-[32px] sm:text-[44px] lg:text-[50px] font-bold leading-[1.02] tracking-[-0.03em] text-[#111]">
+        <header className="pb-8">
+          {/* Category Tag */}
+          <div className="mb-4">
+            <Link
+              href={`/category/${article.categorySlug}`}
+              className="text-[12px] font-black uppercase tracking-[0.1em] text-[#1a202c] hover:underline"
+            >
+              {article.category}
+            </Link>
+          </div>
+
+          <h1 className="text-[36px] sm:text-[46px] lg:text-[54px] font-bold font-serif leading-[1.1] tracking-[-0.02em] text-[#111]">
             {article.title}
           </h1>
 
-          <p className="mt-3 max-w-[840px] font-sans text-[18px] sm:text-[21px] leading-[1.25] text-[#555]">
+          <p className="mt-4 mb-8 max-w-[840px] font-sans text-[18px] sm:text-[20px] leading-[1.5] text-[#4a5568]">
             {article.deck}
           </p>
 
-          {/* Byline & Metadata Bar */}
-          <div className="mt-6 pt-4 border-t border-[#f0f0f0] flex flex-wrap items-center justify-between gap-4 text-xs">
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="text-[10px] font-black tracking-[0.16em] uppercase text-[#666]">
-                BY {article.byline}
-              </span>
-              <span className="text-gray-300">•</span>
-              <span className="flex items-center gap-1 text-gray-500 font-mono text-[11px]">
-                <Calendar size={13} />
-                {article.publishedAt}
-              </span>
-              <span className="text-gray-300">•</span>
-              <span className="flex items-center gap-1 text-gray-500 font-mono text-[11px]">
-                <Clock size={13} />
-                {article.readTime}
-              </span>
-            </div>
-
-            {/* Save & Share Buttons matching user Image 2 */}
-            <SaveShareButtons
-              slug={article.slug}
-              title={article.title}
-              image={article.image}
-              category={article.category}
-              byline={article.byline}
-              deck={article.deck}
-              readTime={article.readTime}
-            />
+          {/* New Author Template (with top/bottom borders) */}
+          <div className="border-t border-b border-[#e3e3e3] py-5 flex items-center gap-4">
+            <Link
+              href={`/author/${slugify(article.byline)}`}
+              className="flex items-center gap-4 group"
+            >
+              {article.byline && (
+                 <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(article.byline)}&background=111111&color=fff`} className="w-12 h-12 rounded-full object-cover shadow-sm" alt="Author" />
+              )}
+              <div className="flex flex-col gap-0.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-[15px] font-bold text-[#111] group-hover:text-[#d71920] transition-colors">
+                    By {article.byline}
+                  </span>
+                  {article.authorLinkedin && (
+                    <a href={article.authorLinkedin} target="_blank" rel="noopener noreferrer" className="text-[#0077b5] hover:opacity-80 ml-1">
+                      <svg className="w-[14px] h-[14px]" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                    </a>
+                  )}
+                </div>
+                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wide font-sans">
+                  Published {article.publishedAt.toUpperCase()}
+                </span>
+              </div>
+            </Link>
           </div>
         </header>
 
@@ -188,10 +203,7 @@ export default function NewsArticlePage({ params }: { params: { slug: string } }
                   >
                     {p}
                   </p>
-                  {/* Advertisement Space like 3rd image between paragraphs 2 and 3 */}
-                  {idx === 1 && (
-                    <AdvertisementSlot variant="in-article" />
-                  )}
+                  {/* In-Article Advertisement Removed per user request */}
                 </React.Fragment>
               ))}
             </div>
@@ -220,121 +232,83 @@ export default function NewsArticlePage({ params }: { params: { slug: string } }
               </div>
             </div>
 
-            {/* Bottom Save & Share Bar */}
-            <div className="mt-8 flex items-center justify-between border-y border-gray-200 py-3 font-sans">
-              <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
-                Share or save this story
-              </span>
-              <SaveShareButtons
-                slug={article.slug}
-                title={article.title}
-                image={article.image}
-                category={article.category}
-                byline={article.byline}
-                deck={article.deck}
-                readTime={article.readTime}
-              />
-            </div>
-
-            {/* Author Bio Card matching Profile Settings */}
-            <div className="mt-8 p-6 bg-[#fafafa] rounded-xl border border-gray-200 flex flex-col sm:flex-row items-start gap-4">
-              <div className="w-14 h-14 rounded-xl bg-[#b01753] text-white font-black text-2xl flex items-center justify-center select-none shadow-sm flex-shrink-0">
-                {article.byline[0]}
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-bold text-gray-900 text-base">{article.byline}</h4>
-                  {article.authorLinkedin && (
-                    <a
-                      href={article.authorLinkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-[11px] font-bold text-[#0077b5] hover:underline"
-                    >
-                      <span className="w-3.5 h-3.5 bg-[#0077b5] text-white rounded text-[9px] font-black flex items-center justify-center">
-                        in
-                      </span>
-                      Connect
-                    </a>
-                  )}
-                </div>
-                <p className="text-xs text-[#ce1126] font-bold uppercase tracking-wider mt-0.5">
-                  {article.authorRole}
-                </p>
-                <p className="text-xs text-gray-600 mt-2 leading-relaxed">
-                  {article.authorBio}
-                </p>
-              </div>
-            </div>
+            {/* Removed Bottom Share and Author Block */}
             
             {/* Comments Section */}
             <CommentsSection articleSlug={article.slug} />
           </article>
 
           {/* Sidebar Column identical to Category Pages */}
-          <aside className="border-l border-[#e1e1e1] pl-0 lg:pl-6 space-y-8">
-            {/* Newsletter Signup Widget */}
-            <div className="border border-gray-200 bg-[#f9f9f9] p-5 rounded-lg">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#d71920]">
-                INSIDE POLITICO
-              </span>
-              <h3 className="mt-1 text-base font-bold text-gray-900">
-                Get the Daily Briefing
-              </h3>
-              <p className="mt-1 text-xs text-gray-600 leading-relaxed">
-                The most important political stories delivered to your inbox every weekday morning.
-              </p>
-              <div className="mt-3">
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="w-full border border-gray-300 rounded px-3 py-2 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#d71920]"
-                />
-                <button className="mt-2 w-full bg-[#d71920] hover:bg-[#a00c1c] text-white font-bold text-xs uppercase tracking-wider py-2 rounded transition-colors">
-                  SIGN UP FREE
-                </button>
-              </div>
-            </div>
-
-            {/* Sidebar Advertisement Slot */}
-            <AdvertisementSlot variant="sidebar" />
-
-            {/* Related Stories */}
-            <div>
-              <div className="flex items-center gap-2 pb-2 mb-3 border-b border-[#d9d9d9]">
-                <span className="w-2 h-2 rounded-full bg-[#d71920]" />
-                <h3 className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#222]">
-                  RELATED STORIES
-                </h3>
+          <aside className="border-l border-[#e1e1e1] pl-0 lg:pl-6">
+            <div className="flex flex-col h-full">
+              {/* Small Ad block (like Ad 01) */}
+              <div className="w-full max-w-[280px] mx-auto mb-8 aspect-square bg-[#e5e7eb] flex items-center justify-center border border-gray-300 relative z-10">
+                <span className="text-[#111111] font-bold text-[32px] tracking-tight">Ad</span>
               </div>
 
-              <div className="space-y-4">
-                {relatedStories.map((story) => (
-                  <article key={story.title} className="border-b border-[#e1e1e1] pb-4">
-                    <a href={`/news/${slugify(story.title)}`} className="group block">
-                      <div className="aspect-[16/10] overflow-hidden bg-gray-100 rounded-sm mb-2">
-                        <img
-                          src={story.image}
-                          alt=""
-                          className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
-                        />
-                      </div>
-                      <h4 className="text-[15px] font-bold leading-tight text-[#111] group-hover:text-[#d71920] transition-colors">
-                        {story.title}
-                      </h4>
-                      <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.14em] text-[#666]">
-                        {story.byline} • {story.time}
-                      </p>
-                    </a>
-                  </article>
-                ))}
+              {/* Related Stories (First 2) */}
+              <div>
+                <div className="flex items-center gap-2 pb-2 mb-3 border-b border-[#d9d9d9]">
+                  <span className="w-2 h-2 rounded-full bg-[#d71920]" />
+                  <h3 className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#222]">
+                    RELATED STORIES
+                  </h3>
+                </div>
+
+                <div className="space-y-4 mb-8">
+                  {relatedStories.slice(0, 2).map((story) => (
+                    <article key={story.title} className="border-b border-[#e1e1e1] pb-4">
+                      <a href={`/news/${slugify(story.title)}`} className="group block">
+                        <div className="aspect-[16/10] overflow-hidden bg-gray-100 rounded-sm mb-2">
+                          <img
+                            src={story.image}
+                            alt=""
+                            className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+                          />
+                        </div>
+                        <h4 className="text-[15px] font-bold leading-tight text-[#111] group-hover:text-[#d71920] transition-colors">
+                          {story.title}
+                        </h4>
+                        <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.14em] text-[#666]">
+                          {story.byline} • {story.time}
+                        </p>
+                      </a>
+                    </article>
+                  ))}
+                </div>
+              </div>
+
+              {/* Sticky Container for Last 2 Stories + Ad */}
+              <div className="space-y-6 w-full lg:sticky lg:top-[120px] self-start pb-8">
+                <div className="space-y-4">
+                  {relatedStories.slice(2).map((story) => (
+                    <article key={story.title} className="border-b border-[#e1e1e1] pb-4 last:border-b-0">
+                      <a href={`/news/${slugify(story.title)}`} className="group block">
+                        <div className="aspect-[16/10] overflow-hidden bg-gray-100 rounded-sm mb-2">
+                          <img
+                            src={story.image}
+                            alt=""
+                            className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+                          />
+                        </div>
+                        <h4 className="text-[15px] font-bold leading-tight text-[#111] group-hover:text-[#d71920] transition-colors">
+                          {story.title}
+                        </h4>
+                        <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.14em] text-[#666]">
+                          {story.byline} • {story.time}
+                        </p>
+                      </a>
+                    </article>
+                  ))}
+                </div>
+
+                {/* Long Ad Removed per user request */}
               </div>
             </div>
           </aside>
         </section>
 
-        {/* Banner Advertisement Space between article and bottom stories */}
-        <AdvertisementSlot variant="banner" />
+        {/* Banner Advertisement Space Removed */}
 
         {/* Bottom Section: More News Rows matching CategoryPage */}
         <section className="mt-10 border-t border-[#e1e1e1] pt-8">

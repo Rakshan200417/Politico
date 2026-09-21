@@ -17,8 +17,8 @@ export default function GlobalArticleLinkHandler() {
 
       const href = anchor.getAttribute("href") || "";
       if (href.startsWith("/news/") || href.includes("/news/")) {
-        anchor.setAttribute("target", "_blank");
-        anchor.setAttribute("rel", "noopener noreferrer");
+        anchor.removeAttribute("target");
+        anchor.removeAttribute("rel");
       }
     };
 

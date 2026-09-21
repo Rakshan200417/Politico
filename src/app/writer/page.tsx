@@ -392,19 +392,15 @@ export default function WriterDashboard() {
       onTabChange={(tab) => setActiveTab(tab as TabType)}
     >
       {/* Section Header with Single "+ Create New Post" button (No duplicate button) */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div>
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
+        <div className="flex-1 w-full">
           <h2 className="text-2xl sm:text-3xl font-black text-gray-950 tracking-tight">
             {getSectionTitle()}
           </h2>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-gray-500 mt-1 mb-4">
             Manage and track your articles in this section.
           </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {/* Search bar */}
-          <div className="relative w-full sm:w-64">
+          <div className="relative w-full sm:max-w-md">
             <Search
               size={14}
               className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
@@ -418,16 +414,15 @@ export default function WriterDashboard() {
             />
           </div>
         </div>
-      </div>
 
-      {/* Action Header */}
-      <div className="flex justify-end mb-6">
-        <button
-          onClick={handleCreateNewPost}
-          className="bg-[#ce1126] hover:bg-[#b00d1f] text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center gap-2"
-        >
-          <PlusCircle size={16} /> + Create New Post
-        </button>
+        <div className="flex items-center gap-3 mt-1 sm:mt-0">
+          <button
+            onClick={handleCreateNewPost}
+            className="bg-[#ce1126] hover:bg-[#b00d1f] text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center gap-2"
+          >
+            <PlusCircle size={16} /> + Create New Post
+          </button>
+        </div>
       </div>
 
       {/* Metric Cards Grid */}

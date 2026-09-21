@@ -31,6 +31,8 @@ import {
   Maximize2,
   Trash2,
   Edit,
+  User,
+  MessageSquare,
 } from "lucide-react";
 
 export interface ArticleData {
@@ -62,6 +64,7 @@ interface WriterEditorProps {
 }
 
 export const navbarCategories = [
+  "Business",
   "Companies",
   "Startups",
   "Markets",
@@ -140,7 +143,7 @@ export default function WriterEditor({
   const [deck, setDeck] = useState(initialArticle?.deck || "");
   const [content, setContent] = useState(initialArticle?.content || "");
   const [category, setCategory] = useState(
-    initialArticle?.category || "Companies",
+    initialArticle?.category || "Business",
   );
   const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>(
     initialArticle?.subcategories || [],
@@ -189,26 +192,45 @@ export default function WriterEditor({
   const [selectedImageNode, setSelectedImageNode] =
     useState<HTMLImageElement | null>(null);
   const [toolbarPosition, setToolbarPosition] = useState({ top: 0, left: 0 });
+  const [imageRect, setImageRect] = useState({ top: 0, left: 0, width: 0, height: 0 });
 
   const editorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let ro: ResizeObserver | null = null;
     const handleEditorClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (target.tagName === "IMG") {
         const img = target as HTMLImageElement;
         setSelectedImageNode(img);
-        const rect = img.getBoundingClientRect();
-        const editorRect = editorRef.current?.getBoundingClientRect();
-        if (editorRect) {
-          setToolbarPosition({
-            top: img.offsetTop - 50,
-            left: img.offsetLeft + img.offsetWidth / 2 - 150,
-          });
-        }
+        
+        const updateRects = () => {
+          const wrapperRect = editorRef.current?.parentElement?.getBoundingClientRect();
+          const imgRect = img.getBoundingClientRect();
+          if (wrapperRect) {
+            setToolbarPosition({
+              top: imgRect.top - wrapperRect.top - 50,
+              left: imgRect.left - wrapperRect.left + imgRect.width / 2 - 150,
+            });
+            setImageRect({
+              top: imgRect.top - wrapperRect.top,
+              left: imgRect.left - wrapperRect.left,
+              width: imgRect.width,
+              height: imgRect.height,
+            });
+          }
+        };
+        
+        updateRects();
+        
+        if (ro) ro.disconnect();
+        ro = new ResizeObserver(updateRects);
+        ro.observe(img);
+        
       } else {
-        if (!target.closest(".image-toolbar")) {
+        if (!target.closest(".image-toolbar") && !target.closest(".image-resizer")) {
           setSelectedImageNode(null);
+          if (ro) { ro.disconnect(); ro = null; }
         }
       }
     };
@@ -218,6 +240,7 @@ export default function WriterEditor({
       editor.addEventListener("click", handleEditorClick);
     }
     return () => {
+      if (ro) ro.disconnect();
       if (editor) {
         editor.removeEventListener("click", handleEditorClick);
       }
@@ -364,20 +387,20 @@ export default function WriterEditor({
       if (figure) {
         const existingFigCaption = figure.querySelector("figcaption");
         if (existingFigCaption) existingFigCaption.remove();
-        if (imageCaption) {
+        if (imageCaption || imageCredit) {
           const figcaption = document.createElement("figcaption");
           figcaption.className =
-            "text-xs text-gray-500 mt-2.5 font-medium italic";
-          figcaption.innerHTML = `${imageCaption} ${imageCredit ? `<span class="not-italic text-gray-400">(${imageCredit})</span>` : ""}`;
+            "text-base flex justify-between items-center text-gray-500 mt-2.5 font-medium italic";
+          figcaption.innerHTML = `<span class="text-left">${imageCaption}</span> ${imageCredit ? `<span class="text-right not-italic text-gray-400 text-[0.8em]">(${imageCredit})</span>` : ""}`;
           figure.appendChild(figcaption);
         }
       }
       setSelectedImageNode(null);
     } else {
       const figureHtml = `
-        <figure class="my-6 block text-center clear-both" contenteditable="false">
-          <img src="${imageUrl}" alt="${altText}" class="w-full rounded-2xl shadow-sm object-cover max-h-[520px] mx-auto cursor-pointer" />
-          ${imageCaption ? `<figcaption class="text-xs text-gray-500 mt-2.5 font-medium italic">${imageCaption} ${imageCredit ? `<span class="not-italic text-gray-400">(${imageCredit})</span>` : ""}</figcaption>` : ""}
+        <figure class="my-6 mx-auto w-full clear-both">
+          <img src="${imageUrl}" alt="${altText}" class="w-full rounded-2xl shadow-sm object-cover mx-auto cursor-pointer" />
+          ${(imageCaption || imageCredit) ? `<figcaption class="text-base flex justify-between items-center text-gray-500 mt-2.5 font-medium italic px-1"><span class="text-left">${imageCaption}</span> ${imageCredit ? `<span class="text-right not-italic text-gray-400 text-[0.8em]">(${imageCredit})</span>` : ""}</figcaption>` : ""}
         </figure>
         <p><br></p>
       `;
@@ -410,10 +433,65 @@ export default function WriterEditor({
     setImageModalOpen(true);
   };
 
+  const handleResizeStart = (e: React.MouseEvent, corner: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!selectedImageNode) return;
+    
+    const figure = selectedImageNode.closest("figure");
+    const targetElement = figure || selectedImageNode;
+    
+    const startX = e.clientX;
+    const startWidth = targetElement.getBoundingClientRect().width;
+    
+    // remove tailwind width classes if they exist so inline width takes over
+    targetElement.classList.remove("w-1/3", "w-1/2", "w-full");
+    selectedImageNode.classList.remove("max-h-[520px]");
+    
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+       const deltaX = moveEvent.clientX - startX;
+       const isLeftEdge = corner.includes('w');
+       const newWidth = isLeftEdge ? startWidth - deltaX : startWidth + deltaX;
+       
+       if (newWidth > 50) {
+          targetElement.style.width = `${newWidth}px`;
+          if (targetElement === selectedImageNode) {
+             selectedImageNode.style.height = "auto";
+          }
+       }
+    };
+    
+    const handleMouseUp = () => {
+       document.removeEventListener("mousemove", handleMouseMove);
+       document.removeEventListener("mouseup", handleMouseUp);
+       if (editorRef.current) setContent(editorRef.current.innerHTML);
+    };
+    
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
+
   const handleSetImageSize = (size: "w-1/3" | "w-1/2" | "w-full") => {
     if (!selectedImageNode) return;
-    selectedImageNode.classList.remove("w-1/3", "w-1/2", "w-full");
-    selectedImageNode.classList.add(size);
+    const figure = selectedImageNode.closest("figure");
+    
+    if (figure) {
+        figure.style.width = ''; // clear any inline style width set by drag
+        figure.classList.remove("w-1/3", "w-1/2", "w-full");
+        figure.classList.add(size);
+        const caption = figure.querySelector("figcaption");
+        if (caption) {
+            caption.classList.remove("text-xs", "text-sm", "text-base", "text-lg");
+            if (size === "w-1/3") caption.classList.add("text-xs");
+            else if (size === "w-1/2") caption.classList.add("text-sm");
+            else caption.classList.add("text-base");
+        }
+    } else {
+        selectedImageNode.style.width = '';
+        selectedImageNode.classList.remove("w-1/3", "w-1/2", "w-full");
+        selectedImageNode.classList.add(size);
+    }
+    
     if (editorRef.current) setContent(editorRef.current.innerHTML);
   };
 
@@ -677,10 +755,7 @@ export default function WriterEditor({
 
             <div className="border border-gray-200 rounded-xl p-3 max-h-52 overflow-y-auto bg-gray-50/50 space-y-2">
               <div className="grid grid-cols-2 gap-2 text-xs">
-                {(
-                  navbarSubcategoriesMap[category] ||
-                  Object.values(navbarSubcategoriesMap).flat()
-                ).map((sub) => {
+                {navbarCategories.filter(c => c !== category).map((sub) => {
                   const checked = selectedSubcategories.includes(sub);
                   const disabled =
                     !checked && selectedSubcategories.length >= 5;
@@ -1151,6 +1226,36 @@ export default function WriterEditor({
                 </button>
               </div>
             )}
+            
+            {/* Image Resize Overlay */}
+            {selectedImageNode && (
+              <div 
+                className="image-resizer absolute border-2 border-blue-500 pointer-events-none z-40"
+                style={{
+                  top: imageRect.top,
+                  left: imageRect.left,
+                  width: imageRect.width,
+                  height: imageRect.height,
+                }}
+              >
+                {/* 4 Corners */}
+                {['nw', 'ne', 'sw', 'se'].map((corner) => (
+                   <div 
+                     key={corner}
+                     className={`absolute w-3 h-3 bg-white border-2 border-blue-500 rounded-full pointer-events-auto`}
+                     style={{
+                       top: corner.includes('n') ? -6 : 'auto',
+                       bottom: corner.includes('s') ? -6 : 'auto',
+                       left: corner.includes('w') ? -6 : 'auto',
+                       right: corner.includes('e') ? -6 : 'auto',
+                       cursor: `${corner}-resize`,
+                     }}
+                     onMouseDown={(e) => handleResizeStart(e, corner)}
+                   />
+                ))}
+              </div>
+            )}
+            
             {/* Body Content Editor Canvas */}
             <div
               ref={editorRef}
@@ -1379,44 +1484,101 @@ export default function WriterEditor({
 
       {/* Live Preview Modal */}
       {previewOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl p-6 sm:p-10 relative">
+        <div className="fixed inset-0 z-50 bg-white flex flex-col overflow-hidden">
+          {/* Top Bar */}
+          <div className="flex items-center justify-between px-6 py-3 bg-[#0a1c2d] text-white flex-shrink-0">
+            <div className="flex items-center gap-4">
+              <span className="text-[10px] font-black tracking-wider text-orange-500 uppercase bg-orange-500/10 px-2 py-0.5 rounded">
+                PREVIEW MODE
+              </span>
+              <span className="text-xs sm:text-sm text-gray-300">
+                This is how your article with inline images will render on the live feed.
+              </span>
+            </div>
             <button
               onClick={() => setPreviewOpen(false)}
-              className="absolute top-5 right-5 p-2 text-gray-400 hover:text-gray-900 rounded-full hover:bg-gray-100"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white hover:bg-white/10 rounded transition"
             >
-              <X size={20} />
+              <X size={16} /> EXIT PREVIEW
             </button>
+          </div>
 
-            <div className="inline-block px-3 py-1 rounded-full bg-red-50 text-[#ce1126] text-xs font-bold uppercase tracking-wider mb-4">
-              {category}
+          {/* Scrollable Content */}
+          <div className="flex-1 overflow-y-auto w-full">
+            <div className="max-w-[1200px] mx-auto w-full p-6 sm:p-10 grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-12">
+              
+              {/* Main Content Column */}
+              <div className="w-full min-w-0">
+                <div className="text-xs font-black text-[#0a304e] uppercase tracking-widest mb-6">
+                  {category}
+                </div>
+
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold text-gray-950 tracking-tight leading-tight mb-6">
+                  {title || "Untitled Article"}
+                </h1>
+
+                {/* Author Block */}
+                <div className="flex items-center gap-3 mb-10">
+                  <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                    <User size={20} className="text-gray-500" />
+                  </div>
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-sm font-bold text-gray-900">
+                        By {userName || userEmail.split("@")[0]}
+                      </span>
+                      <div className="w-4 h-4 bg-blue-600 rounded text-white flex items-center justify-center text-[10px] font-bold">in</div>
+                    </div>
+                    <span className="text-[11px] text-gray-400 mt-0.5 uppercase tracking-wide">
+                      Published {new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' })} AT {new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div
+                  className="prose prose-lg max-w-none text-gray-800 leading-relaxed font-serif prose-p:mb-6 prose-img:rounded-none prose-headings:font-sans prose-a:text-[#ce1126]"
+                  dangerouslySetInnerHTML={{
+                    __html:
+                      editorRef.current?.innerHTML ||
+                      content ||
+                      "<p>No content written yet.</p>",
+                  }}
+                />
+
+                {/* Comments Section */}
+                <div className="mt-16 pt-8 border-t border-gray-200">
+                  <h3 className="text-sm font-black uppercase tracking-wider text-gray-900 flex items-center gap-2 mb-6">
+                    <MessageSquare size={16} />
+                    COMMENTS (0)
+                  </h3>
+                  <div className="flex gap-3 mb-6">
+                    <input 
+                      type="text" 
+                      placeholder="Add a comment..."
+                      className="flex-1 bg-white border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-gray-500"
+                    />
+                    <button className="px-6 py-2.5 bg-gray-500 hover:bg-gray-600 text-white text-sm font-bold rounded-lg transition">
+                      POST
+                    </button>
+                  </div>
+                  <p className="text-sm text-gray-400 italic">
+                    No comments yet. Be the first to share your thoughts.
+                  </p>
+                </div>
+              </div>
+
+              {/* Sidebar Column */}
+              <div className="w-full hidden lg:block">
+                <h3 className="text-xs font-black uppercase tracking-widest text-[#0a304e] mb-4 pb-2 border-b border-gray-200">
+                  RECENT IN {category.toUpperCase()}
+                </h3>
+                <p className="text-sm text-gray-400 italic mt-6">
+                  No other recent articles in this category.
+                </p>
+              </div>
+
             </div>
-
-            <h1 className="text-2xl sm:text-4xl font-black text-gray-900 tracking-tight leading-tight mb-3">
-              {title || "Untitled Article"}
-            </h1>
-
-            {deck && (
-              <p className="text-base sm:text-lg text-gray-600 font-medium leading-relaxed mb-4 border-l-4 border-[#ce1126] pl-4">
-                {deck}
-              </p>
-            )}
-
-            <div className="flex items-center gap-3 text-xs text-gray-500 pb-6 border-b border-gray-200 mb-6">
-              <span>By {userName || userEmail.split("@")[0]}</span>
-              <span>•</span>
-              <span>{readDuration}</span>
-            </div>
-
-            <div
-              className="prose max-w-none text-gray-800 leading-relaxed"
-              dangerouslySetInnerHTML={{
-                __html:
-                  editorRef.current?.innerHTML ||
-                  content ||
-                  "<p>No content written yet.</p>",
-              }}
-            />
           </div>
         </div>
       )}
