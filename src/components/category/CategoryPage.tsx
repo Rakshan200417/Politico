@@ -82,6 +82,18 @@ export default function CategoryPage({ category }: { category: CategoryPageData 
         </div>
       </div>
 
+      {/* Category Header */}
+      <div className="text-center mb-10 pb-8 border-b border-[#ededed]">
+        <h1 className="text-[40px] font-sans text-[#111] sm:text-[48px] mb-4">
+          {category.name}
+        </h1>
+        {category.description && (
+          <p className="font-sans text-[16px] text-[#333] max-w-3xl mx-auto">
+            {category.description}
+          </p>
+        )}
+      </div>
+
       {/* Lead Section (Image 1 match) */}
       <section className="grid gap-8 pt-6 lg:grid-cols-[minmax(0,1.8fr)_minmax(300px,1fr)] mb-12">
         <article>
