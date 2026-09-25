@@ -593,6 +593,17 @@ export default function WriterEditor({
     }
 
     const currentHtml = editorRef.current?.innerHTML || content;
+
+    if (status === "pending") {
+      const hasInlineImage = currentHtml.toLowerCase().includes("<img");
+      const hasCoverImage = !!leadImage || !!imageUrl;
+      
+      if (!hasInlineImage && !hasCoverImage) {
+        alert("Every article must contain at least one image (either a Cover Image or an inline image) before it can be submitted for review.");
+        return;
+      }
+    }
+
     const articlePayload: ArticleData = {
       id: initialArticle?.id,
       title: title.trim(),
