@@ -141,6 +141,7 @@ export async function POST(request: Request) {
       image = '',
       image_caption = '',
       image_credit = '',
+      pending_images = [],
     } = body;
 
     if (!writer_email || !title) {
@@ -183,6 +184,20 @@ export async function POST(request: Request) {
     );
 
     const insertedId = result.insertId;
+
+    if (pending_images && pending_images.length > 0) {
+      for (const img of pending_images) {
+        try {
+          await pool.execute(
+            `INSERT INTO article_images (url, filename, uploader_email, caption, credit, seo_keywords)
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [img.url, img.filename, writer_email, img.caption, img.credit, img.seo_keywords]
+          );
+        } catch (dbErr) {
+          console.warn('[DB] Failed to record pending image:', dbErr);
+        }
+      }
+    }
 
     return NextResponse.json(
       {
@@ -245,6 +260,7 @@ export async function PUT(request: Request) {
       image,
       image_caption,
       image_credit,
+      pending_images = [],
     } = body;
 
     if (!id) {
@@ -299,6 +315,20 @@ export async function PUT(request: Request) {
         { error: 'Article not found or unauthorized' },
         { status: 404 }
       );
+    }
+
+    if (pending_images && pending_images.length > 0) {
+      for (const img of pending_images) {
+        try {
+          await pool.execute(
+            `INSERT INTO article_images (url, filename, uploader_email, caption, credit, seo_keywords)
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [img.url, img.filename, writer_email, img.caption, img.credit, img.seo_keywords]
+          );
+        } catch (dbErr) {
+          console.warn('[DB] Failed to record pending image:', dbErr);
+        }
+      }
     }
 
     return NextResponse.json({

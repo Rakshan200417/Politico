@@ -105,17 +105,7 @@ export async function POST(request: Request) {
 
     const publicUrl = `/uploads/${subDir}/${filename}`;
 
-    // Save image metadata into article_images table in MySQL
-    try {
-      await pool.execute(
-        `INSERT INTO article_images (url, filename, uploader_email, caption, credit, seo_keywords)
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [publicUrl, originalName, uploaderEmail, caption, credit, seoKeywords]
-      );
-    } catch (dbErr) {
-      console.warn('[DB] Failed to record image in article_images table:', dbErr);
-    }
-
+    // Return the URL and metadata so the client can save it later
     return NextResponse.json({
       url: publicUrl,
       filename: originalName,

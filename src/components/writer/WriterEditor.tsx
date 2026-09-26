@@ -53,6 +53,7 @@ export interface ArticleData {
   image?: string;
   image_caption?: string;
   image_credit?: string;
+  pending_images?: any[];
 }
 
 interface WriterEditorProps {
@@ -187,6 +188,8 @@ export default function WriterEditor({
     string | null
   >(null);
   const [leadImage, setLeadImage] = useState(initialArticle?.image || "");
+  const [pendingImages, setPendingImages] = useState<any[]>([]);
+
 
   // Floating Image Toolbar States
   const [selectedImageNode, setSelectedImageNode] =
@@ -324,6 +327,16 @@ export default function WriterEditor({
         const data = await res.json();
         const uploadedUrl = data.url;
         setImageUrl(uploadedUrl);
+        setPendingImages([
+          ...pendingImages,
+          {
+            url: uploadedUrl,
+            filename: file.name,
+            caption: imageCaption,
+            credit: imageCredit,
+            seo_keywords: imageKeywords.join(", "),
+          },
+        ]);
         setUploadSuccessMessage(
           `FILE "${file.name.toUpperCase()}" COMPRESSED & UPLOADED TO CLOUD!`,
         );
@@ -554,25 +567,15 @@ export default function WriterEditor({
   // Auto-generate SEO
   const handleAutoGenerateSEO = () => {
     const rawContent = editorRef.current?.innerText || content || "";
-    // Generate card summary: first 1-2 sentences of deck or content
-    const summary = deck || rawContent.slice(0, 160).trim() + "...";
-    setCardSummary(summary);
+    // Generate card summary: content
+    const summary = rawContent.trim();
+    setCardSummary(summary.slice(0, 160));
 
-    // Extract focus keyword: title's key words
-    const words = title
-      .replace(/[^\w\s]/gi, "")
-      .split(/\s+/)
-      .filter((w) => w.length > 3);
-    const kw = words.slice(0, 3).join(" ") || "Politics News";
-    setFocusKeyword(kw);
+    // Extract focus keyword: title
+    setFocusKeyword(title);
 
-    // Generate Meta description: deck or truncated summary <= 155 chars
-    const meta = (deck || rawContent).slice(0, 150).replace(/\s+/g, " ").trim();
-    setMetaDescription(
-      meta
-        ? `${meta}...`
-        : `Latest reporting and in-depth analysis on ${title}.`,
-    );
+    // Generate Meta description:
+    setMetaDescription(summary.slice(0, 160));
 
     showToast("✨ SEO fields auto-generated successfully!");
   };
@@ -624,6 +627,7 @@ export default function WriterEditor({
       image: leadImage || imageUrl,
       image_caption: imageCaption,
       image_credit: imageCredit,
+      pending_images: pendingImages,
     };
 
     if (status === "draft") {
@@ -687,6 +691,7 @@ export default function WriterEditor({
           setIsSubmitting(false);
           showToast("✔ ARTICLE SUBMITTED FOR REVIEW!");
         }
+        setPendingImages([]); // clear pending images after save
         onSaveSuccess(savedArticle, status);
       }, 700);
     } catch (err) {
@@ -895,6 +900,46 @@ export default function WriterEditor({
               placeholder="e.g. Vexillum Minerals"
               className="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-black transition"
             />
+            {focusKeyword.trim() && (
+              <div className="mt-2 space-y-1.5 text-[10px] font-medium font-mono">
+                <div
+                  className={`flex items-start gap-1.5 ${
+                    title.toLowerCase().includes(focusKeyword.toLowerCase().trim())
+                      ? "text-emerald-600 font-bold"
+                      : "text-gray-400"
+                  }`}
+                >
+                  {title.toLowerCase().includes(focusKeyword.toLowerCase().trim()) ? (
+                    <CheckCircle size={13} className="mt-[1px] flex-shrink-0" />
+                  ) : (
+                    <span className="w-[13px] h-[13px] mt-[1px] flex items-center justify-center border border-current rounded-full text-[8px] flex-shrink-0">
+                      i
+                    </span>
+                  )}
+                  <span>
+                    The title {title.toLowerCase().includes(focusKeyword.toLowerCase().trim()) ? "includes" : "does not include"} the focus keyword.
+                  </span>
+                </div>
+                <div
+                  className={`flex items-start gap-1.5 ${
+                    metaDescription.toLowerCase().includes(focusKeyword.toLowerCase().trim())
+                      ? "text-emerald-600 font-bold"
+                      : "text-gray-400"
+                  }`}
+                >
+                  {metaDescription.toLowerCase().includes(focusKeyword.toLowerCase().trim()) ? (
+                    <CheckCircle size={13} className="mt-[1px] flex-shrink-0" />
+                  ) : (
+                    <span className="w-[13px] h-[13px] mt-[1px] flex items-center justify-center border border-current rounded-full text-[8px] flex-shrink-0">
+                      i
+                    </span>
+                  )}
+                  <span>
+                    The meta description {metaDescription.toLowerCase().includes(focusKeyword.toLowerCase().trim()) ? "includes" : "does not include"} the focus keyword.
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Meta Description */}
