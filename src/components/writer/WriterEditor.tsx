@@ -196,6 +196,7 @@ export default function WriterEditor({
     useState<HTMLImageElement | null>(null);
   const [toolbarPosition, setToolbarPosition] = useState({ top: 0, left: 0 });
   const [imageRect, setImageRect] = useState({ top: 0, left: 0, width: 0, height: 0 });
+  const [imageRenderTick, setImageRenderTick] = useState(0);
 
   const editorRef = useRef<HTMLDivElement>(null);
 
@@ -506,6 +507,7 @@ export default function WriterEditor({
     }
     
     if (editorRef.current) setContent(editorRef.current.innerHTML);
+    setImageRenderTick(t => t + 1);
   };
 
   const handleSetImageAlign = (
@@ -526,6 +528,7 @@ export default function WriterEditor({
       if (align === "float-left") figure.classList.add("mr-6");
       if (align === "float-right") figure.classList.add("ml-6");
       if (editorRef.current) setContent(editorRef.current.innerHTML);
+      setImageRenderTick(t => t + 1);
     }
   };
 
@@ -1234,19 +1237,19 @@ export default function WriterEditor({
                 </span>
                 <button
                   onClick={() => handleSetImageSize("w-full")}
-                  className={`text-xs font-bold px-2 py-1 rounded hover:bg-slate-700 ${selectedImageNode.classList.contains("w-full") ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
+                  className={`text-xs font-bold px-2 py-1 rounded hover:bg-slate-700 ${(selectedImageNode.closest("figure") ? selectedImageNode.closest("figure")!.classList.contains("w-full") : selectedImageNode.classList.contains("w-full")) ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
                 >
                   F
                 </button>
                 <button
                   onClick={() => handleSetImageSize("w-1/2")}
-                  className={`text-xs font-bold px-2 py-1 rounded hover:bg-slate-700 ${selectedImageNode.classList.contains("w-1/2") ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
+                  className={`text-xs font-bold px-2 py-1 rounded hover:bg-slate-700 ${(selectedImageNode.closest("figure") ? selectedImageNode.closest("figure")!.classList.contains("w-1/2") : selectedImageNode.classList.contains("w-1/2")) ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
                 >
                   M
                 </button>
                 <button
                   onClick={() => handleSetImageSize("w-1/3")}
-                  className={`text-xs font-bold px-2 py-1 rounded hover:bg-slate-700 ${selectedImageNode.classList.contains("w-1/3") ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
+                  className={`text-xs font-bold px-2 py-1 rounded hover:bg-slate-700 ${(selectedImageNode.closest("figure") ? selectedImageNode.closest("figure")!.classList.contains("w-1/3") : selectedImageNode.classList.contains("w-1/3")) ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
                 >
                   S
                 </button>
@@ -1255,19 +1258,19 @@ export default function WriterEditor({
 
                 <button
                   onClick={() => handleSetImageAlign("float-left")}
-                  className={`p-1.5 rounded hover:bg-slate-700 ${selectedImageNode.closest("figure")?.classList.contains("float-left") ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
+                  className={`p-1.5 rounded hover:bg-slate-700 ${(selectedImageNode.closest("figure") ? selectedImageNode.closest("figure")!.classList.contains("float-left") : selectedImageNode.classList.contains("float-left")) ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
                 >
                   <AlignLeft size={16} />
                 </button>
                 <button
                   onClick={() => handleSetImageAlign("mx-auto")}
-                  className={`p-1.5 rounded hover:bg-slate-700 ${selectedImageNode.closest("figure")?.classList.contains("mx-auto") ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
+                  className={`p-1.5 rounded hover:bg-slate-700 ${(selectedImageNode.closest("figure") ? selectedImageNode.closest("figure")!.classList.contains("mx-auto") : selectedImageNode.classList.contains("mx-auto")) ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
                 >
                   <AlignCenter size={16} />
                 </button>
                 <button
                   onClick={() => handleSetImageAlign("float-right")}
-                  className={`p-1.5 rounded hover:bg-slate-700 ${selectedImageNode.closest("figure")?.classList.contains("float-right") ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
+                  className={`p-1.5 rounded hover:bg-slate-700 ${(selectedImageNode.closest("figure") ? selectedImageNode.closest("figure")!.classList.contains("float-right") : selectedImageNode.classList.contains("float-right")) ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
                 >
                   <AlignRight size={16} />
                 </button>

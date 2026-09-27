@@ -715,6 +715,116 @@ export default function Home() {
                         <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mt-2 font-sans">BY AUTHOR NAME</p>
                       </div>
                     </a>
+                    <a href={`/news/${slugify("US and European allies announce new maritime security initiative")}`} className="group cursor-pointer flex gap-4 pb-4 border-b border-gray-100">
+                      <div className="w-[140px] aspect-video bg-gray-200 shrink-0 overflow-hidden">
+                        <img src="https://picsum.photos/seed/81/800/600" alt="News" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
+                      </div>
+                      <div>
+                        <h3 className="text-[17px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mb-1">
+                          US and European allies announce new maritime security initiative
+                        </h3>
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mt-2 font-sans">BY JANE DOE</p>
+                      </div>
+                    </a>
+                    <a href={`/news/${slugify("Japan unveils record defense budget amid regional tensions")}`} className="group cursor-pointer flex gap-4 pb-4 border-b border-gray-100">
+                      <div className="w-[140px] aspect-video bg-gray-200 shrink-0 overflow-hidden">
+                        <img src="https://picsum.photos/seed/82/800/600" alt="News" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
+                      </div>
+                      <div>
+                        <h3 className="text-[17px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mb-1">
+                          Japan unveils record defense budget amid regional tensions
+                        </h3>
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mt-2 font-sans">BY JOHN SMITH</p>
+                      </div>
+                    </a>
+                    <a href={`/news/${slugify("Global supply chains show signs of recovery following port agreements")}`} className="group cursor-pointer flex gap-4 pb-4 border-b border-gray-100">
+                      <div className="w-[140px] aspect-video bg-gray-200 shrink-0 overflow-hidden">
+                        <img src="https://picsum.photos/seed/83/800/600" alt="News" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
+                      </div>
+                      <div>
+                        <h3 className="text-[17px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mb-1">
+                          Global supply chains show signs of recovery following port agreements
+                        </h3>
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mt-2 font-sans">BY MICHAEL JOHNSON</p>
+                      </div>
+                    </a>
+                    <a href={`/news/${slugify("UN climate summit reaches consensus on funding mechanism")}`} className="group cursor-pointer flex gap-4 pb-4 border-b border-gray-100">
+                      <div className="w-[140px] aspect-video bg-gray-200 shrink-0 overflow-hidden">
+                        <img src="https://picsum.photos/seed/84/800/600" alt="News" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
+                      </div>
+                      <div>
+                        <h3 className="text-[17px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mb-1">
+                          UN climate summit reaches consensus on funding mechanism
+                        </h3>
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mt-2 font-sans">BY SARAH WILLIAMS</p>
+                      </div>
+                    </a>
+                    <a href={`/news/${slugify("Major trade deal signed between South American nations")}`} className="group cursor-pointer flex gap-4 pb-4 border-b border-gray-100">
+                      <div className="w-[140px] aspect-video bg-gray-200 shrink-0 overflow-hidden">
+                        <img src="https://picsum.photos/seed/85/800/600" alt="News" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
+                      </div>
+                      <div>
+                        <h3 className="text-[17px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mb-1">
+                          Major trade deal signed between South American nations
+                        </h3>
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mt-2 font-sans">BY DAVID BROWN</p>
+                      </div>
+                    </a>
+                    <a href={`/news/${slugify("Tech giants face new regulatory scrutiny in international markets")}`} className="group cursor-pointer flex gap-4 pb-4 border-b border-gray-100">
+                      <div className="w-[140px] aspect-video bg-gray-200 shrink-0 overflow-hidden">
+                        <img src="https://picsum.photos/seed/86/800/600" alt="News" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
+                      </div>
+                      <div>
+                        <h3 className="text-[17px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mb-1">
+                          Tech giants face new regulatory scrutiny in international markets
+                        </h3>
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mt-2 font-sans">BY EMILY DAVIS</p>
+                      </div>
+                    </a>
+                    <a href={`/news/${slugify("Health organizations mobilize response to emerging virus strain")}`} className="group cursor-pointer flex gap-4 pb-4 border-b border-gray-100">
+                      <div className="w-[140px] aspect-video bg-gray-200 shrink-0 overflow-hidden">
+                        <img src="https://picsum.photos/seed/87/800/600" alt="News" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
+                      </div>
+                      <div>
+                        <h3 className="text-[17px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mb-1">
+                          Health organizations mobilize response to emerging virus strain
+                        </h3>
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mt-2 font-sans">BY CHRIS MILLER</p>
+                      </div>
+                    </a>
+                    <a href={`/news/${slugify("Central banks signal coordinated effort to stabilize currency markets")}`} className="group cursor-pointer flex gap-4 pb-4 border-b border-gray-100">
+                      <div className="w-[140px] aspect-video bg-gray-200 shrink-0 overflow-hidden">
+                        <img src="https://picsum.photos/seed/88/800/600" alt="News" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
+                      </div>
+                      <div>
+                        <h3 className="text-[17px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mb-1">
+                          Central banks signal coordinated effort to stabilize currency markets
+                        </h3>
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mt-2 font-sans">BY AMY WILSON</p>
+                      </div>
+                    </a>
+                    <a href={`/news/${slugify("Historic peace treaty signed in long-standing border dispute")}`} className="group cursor-pointer flex gap-4 pb-4 border-b border-gray-100">
+                      <div className="w-[140px] aspect-video bg-gray-200 shrink-0 overflow-hidden">
+                        <img src="https://picsum.photos/seed/89/800/600" alt="News" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
+                      </div>
+                      <div>
+                        <h3 className="text-[17px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mb-1">
+                          Historic peace treaty signed in long-standing border dispute
+                        </h3>
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mt-2 font-sans">BY MARK TAYLOR</p>
+                      </div>
+                    </a>
+                    <a href={`/news/${slugify("International space station operations extended through 2030")}`} className="group cursor-pointer flex gap-4 pb-4 border-b border-gray-100">
+                      <div className="w-[140px] aspect-video bg-gray-200 shrink-0 overflow-hidden">
+                        <img src="https://picsum.photos/seed/90/800/600" alt="News" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
+                      </div>
+                      <div>
+                        <h3 className="text-[17px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mb-1">
+                          International space station operations extended through 2030
+                        </h3>
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mt-2 font-sans">BY LISA ANDERSON</p>
+                      </div>
+                    </a>
                 </div>
               </div>
             </div>
