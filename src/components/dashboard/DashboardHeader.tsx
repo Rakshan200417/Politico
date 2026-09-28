@@ -81,8 +81,16 @@ export default function DashboardHeader({ title, backHref = "/" }: DashboardHead
   return (
     <header className="w-full bg-white border-b border-gray-200/80 sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        {/* Left: Empty space for balance */}
-        <div className="flex-1 flex justify-start"></div>
+        {/* Left: Back to Home */}
+        <div className="flex-1 flex justify-start items-center">
+          <a
+            href={backHref}
+            className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-600 hover:text-[#ce1126] transition-colors select-none"
+          >
+            <ArrowLeft size={14} strokeWidth={2.5} />
+            <span className="hidden sm:inline">Back to Home</span>
+          </a>
+        </div>
 
         {/* Center: Dashboard Title */}
         <div className="flex-1 flex justify-center text-center">
@@ -91,15 +99,8 @@ export default function DashboardHeader({ title, backHref = "/" }: DashboardHead
           </h1>
         </div>
 
-        {/* Right: Back to News & User Pill */}
+        {/* Right: User Pill */}
         <div className="flex-1 flex justify-end items-center gap-4 relative" ref={dropdownRef}>
-          <a
-            href={backHref}
-            className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-600 hover:text-[#ce1126] transition-colors select-none"
-          >
-            <ArrowLeft size={14} strokeWidth={2.5} />
-            <span className="hidden sm:inline">Back to News</span>
-          </a>
 
           <button
             type="button"

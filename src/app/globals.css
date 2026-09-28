@@ -64,3 +64,14 @@
   margin-top: 1rem;
   margin-bottom: 1rem;
 }
+
+@media (min-height: 1020px) {
+  .tall-sticky {
+    position: sticky !important;
+    top: calc(100vh - 900px) !important;
+    flex: none !important;
+  }
+  .tall-static {
+    position: static !important;
+  }
+}

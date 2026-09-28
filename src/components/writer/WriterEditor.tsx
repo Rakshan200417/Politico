@@ -312,56 +312,26 @@ export default function WriterEditor({
     setUploadSuccessMessage(null);
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("caption", imageCaption);
-      formData.append("credit", imageCredit);
-      formData.append("seo_keywords", imageKeywords.join(", "));
-      formData.append("uploader_email", userEmail);
-
-      const res = await fetch("/api/upload?type=articles", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        const uploadedUrl = data.url;
-        setImageUrl(uploadedUrl);
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = reader.result as string;
+        setImageUrl(base64);
         setPendingImages([
           ...pendingImages,
           {
-            url: uploadedUrl,
+            url: base64,
             filename: file.name,
             caption: imageCaption,
             credit: imageCredit,
             seo_keywords: imageKeywords.join(", "),
           },
         ]);
-        setUploadSuccessMessage(
-          `FILE "${file.name.toUpperCase()}" COMPRESSED & UPLOADED TO CLOUD!`,
-        );
-        showToast("✔ IMAGE UPLOADED TO CLOUD STORAGE (HTTPS URL)!");
-      } else {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const base64 = reader.result as string;
-          setImageUrl(base64);
-          setUploadSuccessMessage(`FILE "${file.name.toUpperCase()}" LOADED!`);
-          showToast("✔ IMAGE LOADED SUCCESSFULLY!");
-        };
-        reader.readAsDataURL(file);
-      }
-    } catch (err) {
-      console.warn("Upload error, using local base64 fallback:", err);
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64 = reader.result as string;
-        setImageUrl(base64);
-        setUploadSuccessMessage(`FILE "${file.name.toUpperCase()}" LOADED!`);
-        showToast("✔ IMAGE LOADED SUCCESSFULLY!");
+        setUploadSuccessMessage(`FILE "${file.name.toUpperCase()}" LOADED TEMPORARILY!`);
+        showToast("✔ IMAGE PREPARED (WILL SAVE ON DRAFT/SUBMIT)");
       };
       reader.readAsDataURL(file);
+    } catch (err) {
+      console.warn("Upload error, using local base64 fallback:", err);
     } finally {
       setIsUploadingImage(false);
     }
@@ -1216,6 +1186,7 @@ export default function WriterEditor({
             />
           </div>
 
+
           <div className="relative">
             {/* Floating Image Toolbar */}
             {selectedImageNode && (
@@ -1328,6 +1299,22 @@ export default function WriterEditor({
               className="w-full min-h-[400px] sm:min-h-[550px] outline-none text-base sm:text-lg leading-relaxed text-gray-800 prose max-w-none focus:ring-0 empty:before:content-[attr(data-placeholder)] empty:before:text-gray-300 empty:before:pointer-events-none"
             />
           </div>
+
+          {tags.length > 0 && (
+            <div className="mt-8 flex flex-wrap items-center gap-2 border-t border-gray-100 pt-6">
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mr-2">
+                TAGS:
+              </span>
+              {tags.map((t) => (
+                <span
+                  key={t}
+                  className="text-xs font-bold text-[#1a0dab] bg-gray-100 px-2 py-1 rounded transition"
+                >
+                  #{t}
+                </span>
+              ))}
+            </div>
+          )}
         </main>
 
         {/* Article Settings Card (Side-by-side on desktop, stacked underneath on mobile) */}

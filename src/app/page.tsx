@@ -263,7 +263,7 @@ export default function Home() {
           {/* ── MIDDLE FOLD: Below Carousel ── */}
           <div className="grid grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)_320px] gap-6 mt-8 h-full">
             {/* Left Column: COMPANIES + Ads */}
-            <div className="flex flex-col space-y-8">
+            <div className="flex flex-col space-y-8 h-full">
               <div className="w-full">
                 <div className="flex items-center gap-2 pb-2 mb-3 border-b border-[#d9d9d9]">
                   <span className="w-2.5 h-2.5 rounded-full border-2 border-[#d32f2f] bg-transparent inline-block"></span>
@@ -305,32 +305,35 @@ export default function Home() {
                       <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mt-2 font-sans">BY MYAH WARD AND ERIN DOHERTY</p>
                     </a>
                   </li>
-                  <li className="group cursor-pointer">
-                    <a href={`/news/${slugify("Poll: Trump's MAGA voters would stick by a candidate through the most serious of scandals")}`} className="block">
-                      <div className="w-full aspect-[4/3] bg-gray-200 mb-2 overflow-hidden">
-                        <img src="https://picsum.photos/seed/53/800/600" alt="News" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
-                      </div>
-                      <h3 className="text-[16px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mb-1">
-                        Poll: Trump&apos;s MAGA voters would stick by a candidate through the most serious of scandals
-                      </h3>
-                      <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mt-2 font-sans">BY ERIN DOHERTY</p>
-                    </a>
-                  </li>
                 </ul>
               </div>
               
-              {/* Ad 02 & 03 Blocks */}
-              <div className="space-y-6 w-full lg:sticky lg:top-[120px] self-start">
-                {[2, 3].map((i) => (
+              {/* Sticky Block for Left Column */}
+              <div className="flex-1 space-y-6 w-full tall-sticky self-start pt-6 lg:pt-8 border-t border-gray-100 lg:border-t-0 mt-6 lg:mt-0">
+                <div className="group cursor-pointer">
+                  <a href={`/news/${slugify("Poll: Trump's MAGA voters would stick by a candidate through the most serious of scandals")}`} className="block">
+                    <div className="w-full aspect-[4/3] bg-gray-200 mb-2 overflow-hidden">
+                      <img src="https://picsum.photos/seed/53/800/600" alt="News" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
+                    </div>
+                    <h3 className="text-[16px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mb-1">
+                      Poll: Trump&apos;s MAGA voters would stick by a candidate through the most serious of scandals
+                    </h3>
+                    <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mt-2 font-sans">BY ERIN DOHERTY</p>
+                  </a>
+                </div>
+              
+                <div className="space-y-6 lg:sticky lg:top-[calc(100vh-620px)] tall-static">
+                  {[2, 3].map((i) => (
                   <div key={i} className="w-full max-w-[280px] mx-auto aspect-square bg-[#e5e7eb] flex items-center justify-center relative z-10">
                     <span className="text-[#111111] font-bold text-[32px] tracking-tight">Ad 0{i}</span>
                   </div>
                 ))}
+                </div>
               </div>
             </div>
 
             {/* Center Column: TECHNOLOGY, WHITE HOUSE, ECONOMY */}
-            <div className="flex flex-col lg:px-6 border-l border-r border-gray-200">
+            <div className="flex flex-col lg:px-6 border-l border-r border-gray-200 h-full">
               {/* TECHNOLOGY */}
               <div className="w-full mb-10">
                 <div className="flex items-center gap-2 pb-2 mb-3 border-b border-[#d9d9d9]">
@@ -830,7 +833,7 @@ export default function Home() {
             </div>
 
             {/* Right Column: LEADERS, MOST READ, ECONOMY, VIDEO */}
-            <div className="flex flex-col space-y-8">
+            <div className="flex flex-col space-y-8 h-full">
               {/* LEADERS */}
               <div className="w-full">
                 <div className="flex items-center gap-2 pb-2 mb-3 border-b border-[#d9d9d9]">
@@ -967,7 +970,13 @@ export default function Home() {
                       </h3>
                     </a>
                   </li>
-                  <li className="pt-4 border-t border-gray-100">
+                </ul>
+              </div>
+
+              {/* Sticky Block Right */}
+              <div className="flex-1 w-full space-y-6 tall-sticky self-start mt-4 lg:mt-6 border-t border-gray-100 lg:border-t-0 pt-4 lg:pt-0">
+                <ul className="space-y-4">
+                  <li className="group block">
                     <a href={`/news/${slugify("Anthropic's Sarah Heck discusses the AI race, American voters and more")}`}  className="flex gap-3 group block">
                       <div className="w-[80px] h-[55px] bg-gray-200 shrink-0 overflow-hidden relative">
                          <img src="https://picsum.photos/seed/91/800/600" alt="Video" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
@@ -1028,15 +1037,14 @@ export default function Home() {
                     </a>
                   </li>
                 </ul>
-              </div>
-
-              {/* Ad 04 & 05 (Right Column Bottom) */}
-              <div className="space-y-6 w-full lg:sticky lg:top-[120px] self-start">
-                {[4, 5].map((i) => (
-                  <div key={i} className="w-full max-w-[280px] mx-auto aspect-square bg-[#e5e7eb] flex items-center justify-center border border-gray-300 relative z-10">
-                    <span className="text-[#111111] font-bold text-[32px] tracking-tight">Ad 0{i}</span>
-                  </div>
-                ))}
+                
+                <div className="space-y-6 lg:sticky lg:top-[calc(100vh-620px)] tall-static">
+                  {[4, 5].map((i) => (
+                    <div key={i} className="w-full max-w-[280px] mx-auto aspect-square bg-[#e5e7eb] flex items-center justify-center border border-gray-300 relative z-10">
+                      <span className="text-[#111111] font-bold text-[32px] tracking-tight">Ad 0{i}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

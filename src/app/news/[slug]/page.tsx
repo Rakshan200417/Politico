@@ -129,9 +129,26 @@ export default function NewsArticlePage({ params }: { params: { slug: string } }
             {article.title}
           </h1>
 
-          <p className="mt-4 mb-8 max-w-[840px] font-sans text-[18px] sm:text-[20px] leading-[1.5] text-[#4a5568]">
+          <p className="mt-4 mb-4 max-w-[840px] font-sans text-[18px] sm:text-[20px] leading-[1.5] text-[#4a5568]">
             {article.deck}
           </p>
+
+          {/* Tags Row */}
+          <div className="mb-8">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mr-2">
+                FILED UNDER:
+              </span>
+              {article.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="text-[11px] font-bold bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1 rounded-full transition-colors cursor-pointer"
+                >
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          </div>
 
           {/* New Author Template (with top/bottom borders) */}
           <div className="border-t border-b border-[#e3e3e3] py-5 flex items-center gap-4">
@@ -213,23 +230,6 @@ export default function NewsArticlePage({ params }: { params: { slug: string } }
               <blockquote className="text-xl sm:text-2xl font-serif italic text-gray-900 leading-snug">
                 “This is a pivotal moment that will shape both the regulatory environment and public sentiment over the coming months.”
               </blockquote>
-            </div>
-
-            {/* Tags Row */}
-            <div className="mt-10 pt-6 border-t border-gray-200">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mr-2">
-                  FILED UNDER:
-                </span>
-                {article.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="text-[11px] font-bold bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1 rounded-full transition-colors cursor-pointer"
-                  >
-                    #{tag}
-                  </span>
-                ))}
-              </div>
             </div>
 
             {/* Removed Bottom Share and Author Block */}

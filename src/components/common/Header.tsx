@@ -78,18 +78,33 @@ export default function Header() {
     window.location.href = "/";
   };
 
-  const mainCategories = [
+  const navCategories = [
     { id: "breakingNews", name: "Breaking News", href: "/category/breaking-news" },
     { id: "companies", name: "Companies", href: "/category/companies" },
     { id: "startups", name: "Startups", href: "/category/startups" },
     { id: "markets", name: "Markets", href: "/category/markets" },
     { id: "economy", name: "Economy", href: "/category/economy" },
     { id: "finance", name: "Finance", href: "/category/finance" },
-    { id: "leaders", name: "Leaders", href: "/category/leaders" },
+    { id: "technology", name: "Technology", href: "/category/technology" },
     { id: "industries", name: "Industries", href: "/category/industries" },
-    { id: "global", name: "Global", href: "/category/global" },
+    { id: "global", name: "Global", href: "/category/global-leader" },
+    { id: "leaders", name: "Leaders", href: "/category/global-leader" },
+  ];
+
+  const menuCategories = [
+    { id: "breakingNews", name: "Breaking News", href: "/category/breaking-news" },
+    { id: "companies", name: "Companies", href: "/category/companies" },
+    { id: "startups", name: "Startups", href: "/category/startups" },
+    { id: "markets", name: "Markets", href: "/category/markets" },
+    { id: "economy", name: "Economy", href: "/category/economy" },
+    { id: "finance", name: "Finance", href: "/category/finance" },
+    { id: "leaders", name: "Leaders", href: "/category/global-leader" },
+    { id: "industries", name: "Industries", href: "/category/industries" },
+    { id: "global", name: "Global", href: "/category/global-leader" },
     { id: "technology", name: "Technology", href: "/category/technology" },
   ];
+
+  const activeCategories = isMenuOpen ? menuCategories : navCategories;
 
   const megaMenuData: Record<string, { name: string; href: string }[]> = {
     companies: [
@@ -326,7 +341,7 @@ export default function Header() {
       <nav className="lg:hidden bg-white border-b border-gray-200">
         <div className="px-4 py-2 overflow-x-auto whitespace-nowrap scrollbar-hide">
           <div className="flex items-center gap-4 text-[12px] font-bold text-gray-800">
-            {mainCategories.map((cat) => (
+            {activeCategories.map((cat) => (
               <a
                 key={cat.name}
                 href={cat.href}
@@ -382,7 +397,7 @@ export default function Header() {
                 Breaking News
               </a>
             </div>
-            {mainCategories.filter((cat) => cat.id !== "breakingNews").map((cat) => {
+            {activeCategories.filter((cat) => cat.id !== "breakingNews").map((cat) => {
               const subCategories = megaMenuData[cat.id] || [];
               return (
                 <div key={cat.name} className="relative">
@@ -416,7 +431,7 @@ export default function Header() {
       {isMenuOpen && (
         <div className="lg:hidden w-full bg-white shadow-xl max-h-[85vh] overflow-y-auto">
           <div className="px-4 py-6 space-y-6">
-            {mainCategories.filter((cat) => cat.id !== "breakingNews").map((cat) => {
+            {activeCategories.filter((cat) => cat.id !== "breakingNews").map((cat) => {
               const subCategories = megaMenuData[cat.id] || [];
               if (subCategories.length === 0) return null;
               return (
