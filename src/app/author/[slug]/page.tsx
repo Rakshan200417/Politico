@@ -135,7 +135,7 @@ export default function AuthorProfilePage({ params }: { params: { slug: string }
             <div className="space-y-8">
               {articles.map((article) => (
                 <article key={article.slug} className="border-b border-[#e1e1e1] pb-8 last:border-b-0">
-                  <Link href={`/news/${article.slug}`} className="group grid grid-cols-1 sm:grid-cols-[240px_minmax(0,1fr)] gap-6 items-start">
+                  <a href={`/news/${article.slug}`} className="group grid grid-cols-1 sm:grid-cols-[240px_minmax(0,1fr)] gap-6 items-start">
                     <div className="aspect-[16/10] overflow-hidden bg-gray-100 w-full rounded-sm">
                       <img 
                         src={article.image} 
@@ -157,7 +157,7 @@ export default function AuthorProfilePage({ params }: { params: { slug: string }
                         BY {article.byline} • {article.publishedAt.split('•')[0].trim()}
                       </div>
                     </div>
-                  </Link>
+                  </a>
                 </article>
               ))}
             </div>

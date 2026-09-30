@@ -117,12 +117,12 @@ export default function NewsArticlePage({ params }: { params: { slug: string } }
         <header className="pb-8">
           {/* Category Tag */}
           <div className="mb-4">
-            <Link
+            <a
               href={`/category/${article.categorySlug}`}
               className="text-[12px] font-black uppercase tracking-[0.1em] text-[#1a202c] hover:underline"
             >
               {article.category}
-            </Link>
+            </a>
           </div>
 
           <h1 className="text-[36px] sm:text-[46px] lg:text-[54px] font-bold font-serif leading-[1.1] tracking-[-0.02em] text-[#111]">
@@ -152,7 +152,7 @@ export default function NewsArticlePage({ params }: { params: { slug: string } }
 
           {/* New Author Template (with top/bottom borders) */}
           <div className="border-t border-b border-[#e3e3e3] py-5 flex items-center gap-4">
-            <Link
+            <a
               href={`/author/${slugify(article.byline)}`}
               className="flex items-center gap-4 group"
             >
@@ -174,7 +174,7 @@ export default function NewsArticlePage({ params }: { params: { slug: string } }
                   Published {article.publishedAt.toUpperCase()}
                 </span>
               </div>
-            </Link>
+            </a>
           </div>
         </header>
 
