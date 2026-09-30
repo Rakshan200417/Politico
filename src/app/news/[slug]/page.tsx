@@ -152,18 +152,17 @@ export default function NewsArticlePage({ params }: { params: { slug: string } }
 
           {/* New Author Template (with top/bottom borders) */}
           <div className="border-t border-b border-[#e3e3e3] py-5 flex items-center gap-4">
-            <a
-              href={`/author/${slugify(article.byline)}`}
-              className="flex items-center gap-4 group"
-            >
+            <div className="flex items-center gap-4">
               {article.byline && (
-                 <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(article.byline)}&background=111111&color=fff`} className="w-12 h-12 rounded-full object-cover shadow-sm" alt="Author" />
+                <a href={`/author/${slugify(article.byline)}`} className="group">
+                  <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(article.byline)}&background=111111&color=fff`} className="w-12 h-12 rounded-full object-cover shadow-sm group-hover:opacity-90 transition-opacity" alt="Author" />
+                </a>
               )}
               <div className="flex flex-col gap-0.5">
                 <div className="flex items-center gap-2">
-                  <span className="text-[15px] font-bold text-[#111] group-hover:text-[#d71920] transition-colors">
+                  <a href={`/author/${slugify(article.byline)}`} className="text-[15px] font-bold text-[#111] hover:text-[#d71920] transition-colors">
                     By {article.byline}
-                  </span>
+                  </a>
                   {article.authorLinkedin && (
                     <a href={article.authorLinkedin} target="_blank" rel="noopener noreferrer" className="text-[#0077b5] hover:opacity-80 ml-1">
                       <svg className="w-[14px] h-[14px]" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
@@ -174,7 +173,7 @@ export default function NewsArticlePage({ params }: { params: { slug: string } }
                   Published {article.publishedAt.toUpperCase()}
                 </span>
               </div>
-            </a>
+            </div>
           </div>
         </header>
 

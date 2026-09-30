@@ -139,23 +139,13 @@ const definitions: Array<Omit<CategoryPageData, "moreStories">> = [
     ],
   },
   {
-    slug: "global",
-    name: "Global",
-    description: "Global news, analysis and updates.",
+    slug: "global-leaders",
+    name: "Global Leaders",
+    description: "Global leadership news, analysis and updates.",
     lead: { title: "Global leaders confront a crowded political agenda", deck: "The next decisions will reverberate well beyond.", byline: "BY STAFF | SEPTEMBER 04, 2026 07:45 AM", image: images.city },
     sideStories: [
       { title: "Power players take new positions", deck: "The negotiations are beginning earlier than expected.", byline: "BY STAFF", image: images.briefing },
       { title: "The issues driving Global voters", deck: "Housing, jobs and public safety remain central.", byline: "BY STAFF", image: images.people },
-    ],
-  },
-  {
-    slug: "leaders",
-    name: "Leaders",
-    description: "Leadership news, analysis and updates.",
-    lead: { title: "The power players setting Washington's fall agenda", deck: "The people with the most influence are preparing for a season of high-stakes decisions.", byline: "BY STAFF | SEPTEMBER 04, 2026 07:00 AM", image: images.capitol },
-    sideStories: [
-      { title: "The conversations happening behind the scenes", deck: "What Washington is saying when the cameras are off.", byline: "BY STAFF", image: images.people },
-      { title: "The morning's essential reads", deck: "The stories and signals you need to know.", byline: "BY STAFF", image: images.briefing },
     ],
   },
 ];

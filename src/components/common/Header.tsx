@@ -87,8 +87,8 @@ export default function Header() {
     { id: "finance", name: "Finance", href: "/category/finance" },
     { id: "technology", name: "Technology", href: "/category/technology" },
     { id: "industries", name: "Industries", href: "/category/industries" },
-    { id: "global", name: "Global", href: "/category/global-leader" },
-    { id: "leaders", name: "Leaders", href: "/category/global-leader" },
+    { id: "global", name: "Global", href: "/category/global-leaders" },
+    { id: "leaders", name: "Leaders", href: "/category/global-leaders" },
   ];
 
   const menuCategories = [
@@ -98,9 +98,9 @@ export default function Header() {
     { id: "markets", name: "Markets", href: "/category/markets" },
     { id: "economy", name: "Economy", href: "/category/economy" },
     { id: "finance", name: "Finance", href: "/category/finance" },
-    { id: "leaders", name: "Leaders", href: "/category/global-leader" },
+    { id: "leaders", name: "Leaders", href: "/category/global-leaders" },
     { id: "industries", name: "Industries", href: "/category/industries" },
-    { id: "global", name: "Global", href: "/category/global-leader" },
+    { id: "global", name: "Global", href: "/category/global-leaders" },
     { id: "technology", name: "Technology", href: "/category/technology" },
   ];
 
