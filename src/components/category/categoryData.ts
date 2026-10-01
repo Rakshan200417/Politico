@@ -54,11 +54,11 @@ const sharedMoreStories = (name: string): CategoryStory[] => [
 
 const definitions: Array<Omit<CategoryPageData, "moreStories">> = [
   {
-    slug: "breaking-news",
-    name: "Breaking News",
-    description: "The latest breaking news, analysis and updates.",
+    slug: "world",
+    name: "World",
+    description: "The latest global news, analysis and updates.",
     lead: {
-      title: "How Breaking News is counting down to a consequential midterms convention",
+      title: "How the World is counting down to a consequential midterms convention",
       deck: "The latest fights on Capitol Hill are setting the terms for the next phase of the political year.",
       byline: "BY STAFF | SEPTEMBER 04, 2026 03:17 PM",
       image: images.campaign,
@@ -139,18 +139,19 @@ const definitions: Array<Omit<CategoryPageData, "moreStories">> = [
     ],
   },
   {
-    slug: "global-leaders",
-    name: "Global Leaders",
-    description: "Global leadership news, analysis and updates.",
-    lead: { title: "Global leaders confront a crowded political agenda", deck: "The next decisions will reverberate well beyond.", byline: "BY STAFF | SEPTEMBER 04, 2026 07:45 AM", image: images.city },
+    slug: "leaders",
+    name: "Leaders",
+    description: "Leadership news, analysis and updates.",
+    lead: { title: "Leaders confront a crowded political agenda", deck: "The next decisions will reverberate well beyond.", byline: "BY STAFF | SEPTEMBER 04, 2026 07:45 AM", image: images.city },
     sideStories: [
       { title: "Power players take new positions", deck: "The negotiations are beginning earlier than expected.", byline: "BY STAFF", image: images.briefing },
-      { title: "The issues driving Global voters", deck: "Housing, jobs and public safety remain central.", byline: "BY STAFF", image: images.people },
+      { title: "The issues driving leaders", deck: "Housing, jobs and public safety remain central.", byline: "BY STAFF", image: images.people },
     ],
   },
 ];
 
 const subcategoriesList = [
+  "China", "United States", "Europe", "Britain", "Middle East", "Africa", "Asia",
   "Corporate Announcements", "Mergers & Acquisitions", "Leadership Changes",
   "Funding & Investment", "Founder Stories", "Venture Capital", "Startup Failures",
   "Stock Market", "Bonds", "Mutual Funds",

@@ -79,7 +79,7 @@ export default function Header() {
   };
 
   const navCategories = [
-    { id: "breakingNews", name: "Breaking News", href: "/category/breaking-news" },
+    { id: "world", name: "World", href: "/category/world" },
     { id: "companies", name: "Companies", href: "/category/companies" },
     { id: "startups", name: "Startups", href: "/category/startups" },
     { id: "markets", name: "Markets", href: "/category/markets" },
@@ -87,26 +87,33 @@ export default function Header() {
     { id: "finance", name: "Finance", href: "/category/finance" },
     { id: "technology", name: "Technology", href: "/category/technology" },
     { id: "industries", name: "Industries", href: "/category/industries" },
-    { id: "global", name: "Global", href: "/category/global-leaders" },
-    { id: "leaders", name: "Leaders", href: "/category/global-leaders" },
+    { id: "leaders", name: "Leaders", href: "/category/leaders" },
   ];
 
   const menuCategories = [
-    { id: "breakingNews", name: "Breaking News", href: "/category/breaking-news" },
+    { id: "world", name: "World", href: "/category/world" },
     { id: "companies", name: "Companies", href: "/category/companies" },
     { id: "startups", name: "Startups", href: "/category/startups" },
     { id: "markets", name: "Markets", href: "/category/markets" },
     { id: "economy", name: "Economy", href: "/category/economy" },
     { id: "finance", name: "Finance", href: "/category/finance" },
-    { id: "leaders", name: "Leaders", href: "/category/global-leaders" },
+    { id: "leaders", name: "Leaders", href: "/category/leaders" },
     { id: "industries", name: "Industries", href: "/category/industries" },
-    { id: "global", name: "Global", href: "/category/global-leaders" },
     { id: "technology", name: "Technology", href: "/category/technology" },
   ];
 
   const activeCategories = isMenuOpen ? menuCategories : navCategories;
 
   const megaMenuData: Record<string, { name: string; href: string }[]> = {
+    world: [
+      { name: "China", href: "/category/china" },
+      { name: "United States", href: "/category/united-states" },
+      { name: "Europe", href: "/category/europe" },
+      { name: "Britain", href: "/category/britain" },
+      { name: "Middle East", href: "/category/middle-east" },
+      { name: "Africa", href: "/category/africa" },
+      { name: "Asia", href: "/category/asia" },
+    ],
     companies: [
       { name: "Corporate Announcements", href: "/category/corporate-announcements" },
       { name: "Mergers & Acquisitions", href: "/category/mergers-acquisitions" },
@@ -345,10 +352,7 @@ export default function Header() {
               <a
                 key={cat.name}
                 href={cat.href}
-                className={`transition-colors flex-shrink-0 ${cat.name === "Breaking News"
-                    ? "text-[#ce1126] hover:text-[#a00c1c] mr-4"
-                    : "hover:text-[#ce1126]"
-                  } ${pathname === cat.href ? "text-[#ce1126] border-b-2 border-[#ce1126]" : ""}`}
+                className={`transition-colors flex-shrink-0 hover:text-[#ce1126] ${pathname === cat.href ? "text-[#ce1126] border-b-2 border-[#ce1126]" : ""}`}
               >
                 {cat.name}
               </a>
@@ -389,15 +393,7 @@ export default function Header() {
           className={`max-w-[1440px] mx-auto px-3 flex items-start justify-center transition-all duration-300 ease-out py-1 text-[12px] min-[1280px]:py-2 min-[1280px]:text-[16px] font-bold text-[#1e1e1e] tracking-normal`}
         >
           <div className={`flex items-start relative z-50 transition-all duration-300 ease-out ${isMenuOpen ? "space-x-8 md:space-x-12 lg:space-x-16" : "space-x-4 md:space-x-6"}`}>
-            <div className={`relative transition-all duration-300 ${isMenuOpen ? "mr-4 md:mr-6 lg:mr-8" : "mr-4 md:mr-6"}`}>
-              <a
-                href="/category/breaking-news"
-                className={`transition-colors text-[#ce1126] hover:text-[#a00c1c] py-1 block whitespace-nowrap ${pathname === "/category/breaking-news" ? "border-b-2 border-[#ce1126]" : ""}`}
-              >
-                Breaking News
-              </a>
-            </div>
-            {activeCategories.filter((cat) => cat.id !== "breakingNews").map((cat) => {
+            {activeCategories.map((cat) => {
               const subCategories = megaMenuData[cat.id] || [];
               return (
                 <div key={cat.name} className="relative">
@@ -431,7 +427,7 @@ export default function Header() {
       {isMenuOpen && (
         <div className="lg:hidden w-full bg-white shadow-xl max-h-[85vh] overflow-y-auto">
           <div className="px-4 py-6 space-y-6">
-            {activeCategories.filter((cat) => cat.id !== "breakingNews").map((cat) => {
+            {activeCategories.map((cat) => {
               const subCategories = megaMenuData[cat.id] || [];
               if (subCategories.length === 0) return null;
               return (

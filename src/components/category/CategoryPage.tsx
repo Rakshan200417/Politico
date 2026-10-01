@@ -281,6 +281,32 @@ export default function CategoryPage({ category }: { category: CategoryPageData 
             {allMoreStories.map((story, idx) => (
               <StoryRow key={`${story.title}-${idx}`} story={story} />
             ))}
+
+            {/* Pagination Mockup */}
+            <div className="mt-12 pt-8 flex items-center justify-center gap-1.5 sm:gap-2">
+              <button className="px-3 sm:px-4 py-2 text-[11px] font-bold tracking-wider text-gray-400 border border-gray-200 rounded cursor-not-allowed">
+                PREV
+              </button>
+              <button className="w-8 h-8 flex items-center justify-center text-[12px] font-bold bg-[#820000] text-white rounded">
+                1
+              </button>
+              <button className="w-8 h-8 flex items-center justify-center text-[12px] font-bold text-gray-600 hover:bg-gray-100 rounded transition-colors">
+                2
+              </button>
+              <button className="w-8 h-8 flex items-center justify-center text-[12px] font-bold text-gray-600 hover:bg-gray-100 rounded transition-colors">
+                3
+              </button>
+              <button className="w-8 h-8 hidden sm:flex items-center justify-center text-[12px] font-bold text-gray-600 hover:bg-gray-100 rounded transition-colors">
+                4
+              </button>
+              <span className="text-gray-400 px-1">...</span>
+              <button className="w-8 h-8 hidden sm:flex items-center justify-center text-[12px] font-bold text-gray-600 hover:bg-gray-100 rounded transition-colors">
+                11
+              </button>
+              <button className="px-3 sm:px-4 py-2 text-[11px] font-bold tracking-wider text-[#111] border border-gray-300 rounded hover:bg-gray-50 transition-colors">
+                NEXT
+              </button>
+            </div>
           </div>
 
           {/* Right Column: Sticky Advertisement */}
