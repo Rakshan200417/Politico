@@ -62,15 +62,7 @@ function StoryRow({ story }: { story: CategoryStory }) {
 }
 
 export default function CategoryPage({ category }: { category: CategoryPageData }) {
-  // Combine all stories to simulate a long feed of ~30 articles
-  const allMoreStories = [
-    ...category.moreStories,
-    ...category.sideStories,
-    ...category.moreStories,
-    ...category.sideStories,
-    ...category.moreStories,
-    ...category.sideStories,
-  ];
+  const allMoreStories = category.moreStories;
 
   return (
     <main className="mx-auto w-full max-w-[1080px] px-4 pb-16 font-sans sm:px-6">

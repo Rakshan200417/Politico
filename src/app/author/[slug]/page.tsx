@@ -2,26 +2,15 @@ import React from "react";
 import type { Metadata } from "next";
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
-import { featuredNewsArticles, slugify } from "@/data/newsArticles";
 import Link from "next/link";
 import BackButton from "@/components/common/BackButton";
+import { getArticlesByAuthorSlug } from "@/lib/articleService";
 
-export function generateStaticParams() {
-  const authors = new Set<string>();
-  Object.values(featuredNewsArticles).forEach((article) => {
-    if (article.byline) {
-      authors.add(slugify(article.byline));
-    }
-  });
-  return Array.from(authors).map((slug) => ({ slug }));
-}
-
-export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
-  const articles = Object.values(featuredNewsArticles).filter(
-    (a) => slugify(a.byline) === params.slug
-  );
-  
-  const authorName = articles[0]?.byline || "Author";
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const authorName = params.slug
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
   
   return {
     title: `${authorName} - POLITICO`,
@@ -29,57 +18,21 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   };
 }
 
-export default function AuthorProfilePage({ params }: { params: { slug: string } }) {
-  // Find all articles by this author
-  let articles: any[] = Object.values(featuredNewsArticles).filter(
-    (a) => slugify(a.byline) === params.slug
-  );
+export default async function AuthorProfilePage({ params }: { params: { slug: string } }) {
+  // Simulate network delay
+  await new Promise((resolve) => setTimeout(resolve, 800));
+  
+  const articles = await getArticlesByAuthorSlug(params.slug, 20);
 
-  let authorName = "Author";
+  let authorName = params.slug
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
   let authorRole = "WRITER";
   let authorBio = "A dedicated journalist with a passion for delivering accurate, timely, and impactful news. Committed to ethical reporting and in-depth storytelling, she covers a wide range of topics with professionalism, integrity, and a focus on informing audiences through credible journalism.";
 
-  if (articles.length === 0) {
-    // Generate a formatted name from the slug (e.g., jonathan-martin -> Jonathan Martin)
-    authorName = params.slug
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-      
-    // Provide fake placeholder articles
-    articles = [
-      {
-        slug: "fake-article-1",
-        category: "Politics",
-        title: "Trump's Hormuz Retreat Highlights Struggles to End Iran Conflict",
-        deck: "On Monday, Trump announced that all vessels using the strategically important waterway would be required to pay a 20% fee...",
-        byline: authorName,
-        publishedAt: "JUL 15, 2026",
-        image: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80",
-      },
-      {
-        slug: "fake-article-2",
-        category: "Business",
-        title: "ICE Suspends Most Vehicle Stops After Fatal Shootings in Texas and Maine",
-        deck: "According to US media reports citing law enforcement sources, the suspension takes effect immediately and applies to most routine vehicle stops...",
-        byline: authorName,
-        publishedAt: "JUL 15, 2026",
-        image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80",
-      },
-      {
-        slug: "fake-article-3",
-        category: "Health",
-        title: "US 'Explosive Diarrhoea' Outbreak Remains Unsolved as Cases Near 7,000",
-        deck: "The outbreak has now spread to 34 states, with nearly 7,000 confirmed cases, according to the US Centers for Disease Control...",
-        byline: authorName,
-        publishedAt: "JUL 15, 2026",
-        image: "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=600&q=80",
-      }
-    ];
-  } else {
-    authorName = articles[0].byline;
-    authorRole = articles[0].authorRole || "WRITER";
-    authorBio = articles[0].authorBio || authorBio;
+  if (articles && articles.length > 0) {
+    authorName = articles[0].writer_name;
   }
 
   const mostRead = [
@@ -133,60 +86,56 @@ export default function AuthorProfilePage({ params }: { params: { slug: string }
             </h2>
 
             <div className="space-y-8">
-              {articles.map((article) => (
-                <article key={article.slug} className="border-b border-[#e1e1e1] pb-8 last:border-b-0">
-                  <a href={`/news/${article.slug}`} className="group grid grid-cols-1 sm:grid-cols-[240px_minmax(0,1fr)] gap-6 items-start">
-                    <div className="aspect-[16/10] overflow-hidden bg-gray-100 w-full rounded-sm">
-                      <img 
-                        src={article.image} 
-                        alt={article.title} 
-                        className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" 
-                      />
-                    </div>
-                    <div>
-                      <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#2c5282] mb-2 block">
-                        {article.category}
-                      </span>
-                      <h3 className="text-[22px] sm:text-[24px] font-serif font-bold leading-[1.2] text-[#1a202c] group-hover:text-[#d71920] transition-colors mb-3">
-                        {article.title}
-                      </h3>
-                      <p className="text-[15px] leading-[1.4] text-[#4a5568] font-sans mb-3 line-clamp-3">
-                        {article.deck}
-                      </p>
-                      <div className="text-[9px] font-bold uppercase tracking-[0.1em] text-[#718096]">
-                        BY {article.byline} • {article.publishedAt.split('•')[0].trim()}
+              {articles.length === 0 ? (
+                <p className="text-gray-500">No published articles found for this author yet.</p>
+              ) : (
+                articles.map((article) => (
+                  <article key={article.slug} className="border-b border-[#e1e1e1] pb-8 last:border-b-0">
+                    <a href={`/news/${article.slug}`} className="group grid grid-cols-1 sm:grid-cols-[240px_minmax(0,1fr)] gap-6 items-start">
+                      <div className="aspect-[16/10] overflow-hidden bg-gray-100 w-full rounded-sm">
+                        <img 
+                          src={article.image || `https://picsum.photos/seed/${article.id}/800/600`} 
+                          alt={article.title} 
+                          className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" 
+                        />
                       </div>
-                    </div>
-                  </a>
-                </article>
-              ))}
+                      <div>
+                        <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#2c5282] mb-2 block">
+                          {article.category}
+                        </span>
+                        <h3 className="text-[22px] sm:text-[24px] font-serif font-bold leading-[1.2] text-[#1a202c] group-hover:text-[#d71920] transition-colors mb-3">
+                          {article.title}
+                        </h3>
+                        <p className="text-[15px] leading-[1.4] text-[#4a5568] font-sans mb-3 line-clamp-3">
+                          {article.deck}
+                        </p>
+                        <div className="text-[9px] font-bold uppercase tracking-[0.1em] text-[#718096]">
+                          BY {article.writer_name} • {new Date(article.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }).toUpperCase()}
+                        </div>
+                      </div>
+                    </a>
+                  </article>
+                ))
+              )}
             </div>
 
             {/* Pagination Mockup */}
-            <div className="mt-12 pt-8 flex items-center justify-center gap-1.5 sm:gap-2">
-              <button className="px-3 sm:px-4 py-2 text-[11px] font-bold tracking-wider text-gray-400 border border-gray-200 rounded cursor-not-allowed">
-                PREV
-              </button>
-              <button className="w-8 h-8 flex items-center justify-center text-[12px] font-bold bg-[#820000] text-white rounded">
-                1
-              </button>
-              <button className="w-8 h-8 flex items-center justify-center text-[12px] font-bold text-gray-600 hover:bg-gray-100 rounded transition-colors">
-                2
-              </button>
-              <button className="w-8 h-8 flex items-center justify-center text-[12px] font-bold text-gray-600 hover:bg-gray-100 rounded transition-colors">
-                3
-              </button>
-              <button className="w-8 h-8 hidden sm:flex items-center justify-center text-[12px] font-bold text-gray-600 hover:bg-gray-100 rounded transition-colors">
-                4
-              </button>
-              <span className="text-gray-400 px-1">...</span>
-              <button className="w-8 h-8 hidden sm:flex items-center justify-center text-[12px] font-bold text-gray-600 hover:bg-gray-100 rounded transition-colors">
-                11
-              </button>
-              <button className="px-3 sm:px-4 py-2 text-[11px] font-bold tracking-wider text-[#111] border border-gray-300 rounded hover:bg-gray-50 transition-colors">
-                NEXT
-              </button>
-            </div>
+            {articles.length > 0 && (
+              <div className="mt-12 pt-8 flex items-center justify-center gap-1.5 sm:gap-2">
+                <button className="px-3 sm:px-4 py-2 text-[11px] font-bold tracking-wider text-gray-400 border border-gray-200 rounded cursor-not-allowed">
+                  PREV
+                </button>
+                <button className="w-8 h-8 flex items-center justify-center text-[12px] font-bold bg-[#820000] text-white rounded">
+                  1
+                </button>
+                <button className="w-8 h-8 flex items-center justify-center text-[12px] font-bold text-gray-600 hover:bg-gray-100 rounded transition-colors">
+                  2
+                </button>
+                <button className="px-3 sm:px-4 py-2 text-[11px] font-bold tracking-wider text-[#111] border border-gray-300 rounded hover:bg-gray-50 transition-colors">
+                  NEXT
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Sidebar */}

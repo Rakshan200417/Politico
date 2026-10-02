@@ -1,12 +1,13 @@
 import React from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
 import BackButton from "@/components/common/BackButton";
 import SaveShareButtons from "@/components/common/SaveShareButtons";
 import AdvertisementSlot from "@/components/common/AdvertisementSlot";
-import { getNewsArticle, featuredNewsArticles, slugify } from "@/data/newsArticles";
+import { getArticleBySlug, getLatestPublishedArticles } from "@/lib/articleService";
 import {
   Clock,
   Calendar,
@@ -14,13 +15,12 @@ import {
   ExternalLink,
 } from "lucide-react";
 import CommentsSection from "@/components/news/CommentsSection";
+import { slugify } from "@/data/newsArticles";
 
-export function generateStaticParams() {
-  return Object.keys(featuredNewsArticles).map((slug) => ({ slug }));
-}
-
-export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
-  const article = getNewsArticle(params.slug);
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const article = await getArticleBySlug(params.slug);
+  if (!article) return { title: "Article Not Found - POLITICO" };
+  
   return {
     title: `${article.title} - POLITICO`,
     description: article.deck,
@@ -36,55 +36,24 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
   // Simulate network delay to ensure the loading skeleton is visible
   await new Promise((resolve) => setTimeout(resolve, 800));
   
-  const article = getNewsArticle(params.slug);
+  const article = await getArticleBySlug(params.slug);
+  if (!article) return notFound();
 
-  const relatedStories = [
-    {
-      title: "Capitol Agenda: Johnson faces pressure to cut out early ahead of recess",
-      byline: "BY ANTHONY ADRAGNA",
-      time: "1h ago",
-      image: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      title: "Supreme Court agrees to hear landmark executive power dispute",
-      byline: "BY JOSH GERSTEIN",
-      time: "2h ago",
-      image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      title: "White House clarifies tariff guidelines amid northern border concerns",
-      byline: "BY DOUG PALMER",
-      time: "3h ago",
-      image: "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      title: "New bipartisan crypto bill aims to establish regulatory framework",
-      byline: "BY ELEANOR MUELLER",
-      time: "4h ago",
-      image: "https://images.unsplash.com/photo-1621416894569-0f39ed31d247?auto=format&fit=crop&w=600&q=80",
-    },
-  ];
+  // Fetch some dynamic latest stories for related/more news
+  const allLatest = await getLatestPublishedArticles(10);
+  const relatedStories = allLatest.filter(a => a.id !== article.id).slice(0, 4);
+  const moreNews = allLatest.filter(a => a.id !== article.id).slice(4, 7);
 
-  const moreNews = [
-    {
-      title: "Germany's far right eyes eastern state as springboard to national power",
-      deck: "Regional polling points to historic gains as traditional parties scramble for coalition partners.",
-      byline: "BY HANS VON DER BURCHARD",
-      image: "https://images.unsplash.com/photo-1560523160-754a9e25c68f?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      title: "China will stop Russia from going nuclear, Finland's Stubb says",
-      deck: "The Finnish president highlighted Beijing's critical economic leverage over Moscow during a Helsinki security forum.",
-      byline: "BY STUART LAU",
-      image: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      title: "Trump: Communities that reject data centers will end up 'backwards and poor'",
-      deck: "The remarks came during an economic address in Ohio pushing for massive artificial intelligence infrastructure expansion.",
-      byline: "BY GAVIN BADE",
-      image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80",
-    },
-  ];
+  const tagsArray = article.tags ? article.tags.split(',').map(t => t.trim()) : [];
+  
+  const formattedDate = new Date(article.created_at).toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZoneName: 'short'
+  });
 
   return (
     <div className="min-h-screen bg-white font-sans text-[#111] flex flex-col">
@@ -121,7 +90,7 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
           {/* Category Tag */}
           <div className="mb-4">
             <a
-              href={`/category/${article.categorySlug}`}
+              href={`/category/${article.category.toLowerCase()}`}
               className="text-[12px] font-black uppercase tracking-[0.1em] text-[#1a202c] hover:underline"
             >
               {article.category}
@@ -142,7 +111,7 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
               <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mr-2">
                 FILED UNDER:
               </span>
-              {article.tags.map((tag) => (
+              {tagsArray.map((tag) => (
                 <span
                   key={tag}
                   className="text-[11px] font-bold bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1 rounded-full transition-colors cursor-pointer"
@@ -156,24 +125,17 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
           {/* New Author Template (with top/bottom borders) */}
           <div className="border-t border-b border-[#e3e3e3] py-5 flex items-center gap-4">
             <div className="flex items-center gap-4">
-              {article.byline && (
-                <a href={`/author/${slugify(article.byline)}`} className="group">
-                  <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(article.byline)}&background=111111&color=fff`} className="w-12 h-12 rounded-full object-cover shadow-sm group-hover:opacity-90 transition-opacity" alt="Author" />
-                </a>
-              )}
+              <a href={`/author/${slugify(article.writer_name)}`} className="group">
+                <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(article.writer_name)}&background=111111&color=fff`} className="w-12 h-12 rounded-full object-cover shadow-sm group-hover:opacity-90 transition-opacity" alt="Author" />
+              </a>
               <div className="flex flex-col gap-0.5">
                 <div className="flex items-center gap-2">
-                  <a href={`/author/${slugify(article.byline)}`} className="text-[15px] font-bold text-[#111] hover:text-[#d71920] transition-colors">
-                    By {article.byline}
+                  <a href={`/author/${slugify(article.writer_name)}`} className="text-[15px] font-bold text-[#111] hover:text-[#d71920] transition-colors">
+                    By {article.writer_name}
                   </a>
-                  {article.authorLinkedin && (
-                    <a href={article.authorLinkedin} target="_blank" rel="noopener noreferrer" className="text-[#0077b5] hover:opacity-80 ml-1">
-                      <svg className="w-[14px] h-[14px]" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                    </a>
-                  )}
                 </div>
                 <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wide font-sans">
-                  Published {article.publishedAt.toUpperCase()}
+                  Published {formattedDate.toUpperCase()}
                 </span>
               </div>
             </div>
@@ -187,55 +149,21 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
             {/* Hero Image */}
             <div className="aspect-[16/9] w-full overflow-hidden bg-[#f2f2f2] rounded-sm">
               <img
-                src={article.image}
+                src={article.image || `https://picsum.photos/seed/${article.id}/800/600`}
                 alt={article.title}
                 className="h-full w-full object-cover"
               />
             </div>
             <p className="mt-2 text-[11px] text-gray-500 italic leading-relaxed">
-              {article.imageCaption}
+              {article.image_caption || 'A representative photo'}
             </p>
 
-            {/* Key Takeaways Box */}
-            {article.keyTakeaways && article.keyTakeaways.length > 0 && (
-              <div className="my-8 rounded-lg border-l-4 border-[#d71920] bg-[#f9f9f9] p-5">
-                <h3 className="text-xs font-black uppercase tracking-[0.18em] text-[#d71920] mb-2">
-                  KEY TAKEAWAYS
-                </h3>
-                <ul className="space-y-2 text-sm text-gray-800 font-medium">
-                  {article.keyTakeaways.map((point, index) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <span className="text-[#d71920] font-black">•</span>
-                      <span>{point}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {/* Article Body Paragraphs */}
+            <div 
+              className="space-y-6 pt-8 font-sans text-[17px] sm:text-[18px] leading-[1.65] text-[#292929] article-content"
+              dangerouslySetInnerHTML={{ __html: article.content }}
+            />
 
-            {/* Article Body Paragraphs with in-article Advertisement space matching Image 3 */}
-            <div className="space-y-6 pt-4 font-sans text-[17px] sm:text-[18px] leading-[1.65] text-[#292929]">
-              {article.paragraphs.map((p, idx) => (
-                <React.Fragment key={idx}>
-                  <p
-                    className={idx === 0 ? "first-letter:text-5xl first-letter:font-black first-letter:float-left first-letter:mr-3 first-letter:text-[#111]" : ""}
-                  >
-                    {p}
-                  </p>
-                  {/* In-Article Advertisement Removed per user request */}
-                </React.Fragment>
-              ))}
-            </div>
-
-            {/* Pull Quote */}
-            <div className="my-8 border-l-4 border-[#111] pl-6 py-2">
-              <blockquote className="text-xl sm:text-2xl font-serif italic text-gray-900 leading-snug">
-                “This is a pivotal moment that will shape both the regulatory environment and public sentiment over the coming months.”
-              </blockquote>
-            </div>
-
-            {/* Removed Bottom Share and Author Block */}
-            
             {/* Comments Section */}
             <CommentsSection articleSlug={article.slug} />
           </article>
@@ -260,10 +188,10 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
                 <div className="space-y-4 mb-8">
                   {relatedStories.slice(0, 2).map((story) => (
                     <article key={story.title} className="border-b border-[#e1e1e1] pb-4">
-                      <a href={`/news/${slugify(story.title)}`} className="group block">
+                      <a href={`/news/${story.slug}`} className="group block">
                         <div className="aspect-[16/10] overflow-hidden bg-gray-100 rounded-sm mb-2">
                           <img
-                            src={story.image}
+                            src={story.image || `https://picsum.photos/seed/${story.id}/800/600`}
                             alt=""
                             className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
                           />
@@ -272,7 +200,7 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
                           {story.title}
                         </h4>
                         <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.14em] text-[#666]">
-                          {story.byline} • {story.time}
+                          BY {story.writer_name}
                         </p>
                       </a>
                     </article>
@@ -280,15 +208,15 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
                 </div>
               </div>
 
-              {/* Sticky Container for Last 2 Stories + Ad */}
+              {/* Sticky Container for Last 2 Stories */}
               <div className="space-y-6 w-full lg:sticky lg:top-[120px] self-start pb-8">
                 <div className="space-y-4">
-                  {relatedStories.slice(2).map((story) => (
+                  {relatedStories.slice(2, 4).map((story) => (
                     <article key={story.title} className="border-b border-[#e1e1e1] pb-4 last:border-b-0">
-                      <a href={`/news/${slugify(story.title)}`} className="group block">
+                      <a href={`/news/${story.slug}`} className="group block">
                         <div className="aspect-[16/10] overflow-hidden bg-gray-100 rounded-sm mb-2">
                           <img
-                            src={story.image}
+                            src={story.image || `https://picsum.photos/seed/${story.id}/800/600`}
                             alt=""
                             className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
                           />
@@ -297,20 +225,16 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
                           {story.title}
                         </h4>
                         <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.14em] text-[#666]">
-                          {story.byline} • {story.time}
+                          BY {story.writer_name}
                         </p>
                       </a>
                     </article>
                   ))}
                 </div>
-
-                {/* Long Ad Removed per user request */}
               </div>
             </div>
           </aside>
         </section>
-
-        {/* Banner Advertisement Space Removed */}
 
         {/* Bottom Section: More News Rows matching CategoryPage */}
         <section className="mt-10 border-t border-[#e1e1e1] pt-8">
@@ -325,12 +249,12 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
             {moreNews.map((story) => (
               <article key={story.title} className="border-b border-[#e1e1e1] pb-6 last:border-b-0">
                 <a
-                  href={`/news/${slugify(story.title)}`}
+                  href={`/news/${story.slug}`}
                   className="grid grid-cols-[140px_minmax(0,1fr)] sm:grid-cols-[200px_minmax(0,1fr)] gap-5 group"
                 >
                   <div className="aspect-[4/3] overflow-hidden bg-[#f2f2f2] rounded-sm">
                     <img
-                      src={story.image}
+                      src={story.image || `https://picsum.photos/seed/${story.id}/800/600`}
                       alt=""
                       className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
                     />
@@ -343,7 +267,7 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
                       {story.deck}
                     </p>
                     <p className="mt-2 text-[9px] font-bold uppercase tracking-[0.14em] text-[#666]">
-                      {story.byline}
+                      BY {story.writer_name}
                     </p>
                   </div>
                 </a>
