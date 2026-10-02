@@ -17,7 +17,10 @@ import EarlierSection from "@/components/home/EarlierSection";
 import ThreeColumnSection from "@/components/home/ThreeColumnSection";
 import AdvertisementSlot from "@/components/common/AdvertisementSlot";
 
-export default function Home() {
+export default async function Home() {
+  // Simulate network delay to ensure the loading skeleton is visible
+  await new Promise((resolve) => setTimeout(resolve, 800));
+  
   return (
     <div className="min-h-screen flex flex-col font-sans">
       <Header />
@@ -391,12 +394,12 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* WHITE HOUSE */}
+              {/* STARTUPS */}
               <div className="w-full mb-10 border-t border-gray-200 pt-8">
                 <div className="flex items-center gap-2 pb-2 mb-3 border-b border-[#d9d9d9]">
                   <span className="w-2.5 h-2.5 rounded-full border-2 border-[#d32f2f] bg-transparent inline-block"></span>
                   <h2 className="text-[10px] font-extrabold tracking-[0.12em] text-[#222222] uppercase font-sans">
-                    WHITE HOUSE
+                    STARTUPS
                   </h2>
                 </div>
                 <a href={`/news/${slugify("Trump's former AI czar says fears of an AI apocalypse are a 'hoax'")}`}  className="mb-6 group cursor-pointer border-b border-gray-200 pb-6 block">
@@ -653,12 +656,12 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* GLOBAL */}
+              {/* WORLD */}
               <div className="w-full mb-10 border-t border-gray-200 pt-8">
                 <div className="flex items-center gap-2 pb-2 mb-3 border-b border-[#d9d9d9]">
                   <span className="w-2.5 h-2.5 rounded-full border-2 border-[#d32f2f] bg-transparent inline-block"></span>
                   <h2 className="text-[10px] font-extrabold tracking-[0.12em] text-[#222222] uppercase font-sans">
-                    GLOBAL
+                    WORLD
                   </h2>
                 </div>
 

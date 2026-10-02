@@ -32,7 +32,10 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   };
 }
 
-export default function NewsArticlePage({ params }: { params: { slug: string } }) {
+export default async function NewsArticlePage({ params }: { params: { slug: string } }) {
+  // Simulate network delay to ensure the loading skeleton is visible
+  await new Promise((resolve) => setTimeout(resolve, 800));
+  
   const article = getNewsArticle(params.slug);
 
   const relatedStories = [

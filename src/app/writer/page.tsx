@@ -198,7 +198,7 @@ export default function WriterDashboard() {
   const writerNavItems: NavItem[] = [
     {
       id: "published",
-      label: "Publish Post",
+      label: "Published Articles",
       icon: CheckCircle2,
       badge: publishedArticles.length,
     },
@@ -323,7 +323,7 @@ export default function WriterDashboard() {
   // Handler: Save success from WriterEditor
   const handleSaveSuccess = (
     savedArticle: ArticleData,
-    action: "draft" | "pending",
+    action: "draft" | "pending" | "trash" | "published",
   ) => {
     setArticles((prev) => {
       const idx = prev.findIndex((a) => a.id === savedArticle.id);
@@ -368,7 +368,7 @@ export default function WriterDashboard() {
   const getSectionTitle = () => {
     switch (activeTab) {
       case "published":
-        return "My Articles (Published)";
+        return "Published Articles";
       case "drafts":
         return "Saved Drafts";
       case "pending":
@@ -384,7 +384,7 @@ export default function WriterDashboard() {
 
   return (
     <DashboardShell
-      portalTitle="Writer Workspace"
+      portalTitle="My Workspace"
       portalBadge="Writer"
       role="writer"
       navItems={writerNavItems}

@@ -151,7 +151,7 @@ const definitions: Array<Omit<CategoryPageData, "moreStories">> = [
 ];
 
 const subcategoriesList = [
-  "China", "United States", "Europe", "Britain", "Middle East", "Africa", "Asia",
+  "China", "United States", "Europe", "Britain", "Middle East", "Africa", "Asia", "Interview",
   "Corporate Announcements", "Mergers & Acquisitions", "Leadership Changes",
   "Funding & Investment", "Founder Stories", "Venture Capital", "Startup Failures",
   "Stock Market", "Bonds", "Mutual Funds",

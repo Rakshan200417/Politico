@@ -2,8 +2,9 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { usePathname } from "next/navigation";
-import { Search, Menu, X, User, BookOpen, LogOut, PenTool } from "lucide-react";
+import { Search, Menu, X, User, BookOpen, LogOut, PenTool, Shield } from "lucide-react";
 import ProfileModal from "@/components/profile/ProfileModal";
+import GlobalSearchModal from "@/components/common/GlobalSearchModal";
 
 export default function Header() {
   const pathname = usePathname();
@@ -113,6 +114,7 @@ export default function Header() {
       { name: "Middle East", href: "/category/middle-east" },
       { name: "Africa", href: "/category/africa" },
       { name: "Asia", href: "/category/asia" },
+      { name: "Interview", href: "/category/interview" },
     ],
     companies: [
       { name: "Corporate Announcements", href: "/category/corporate-announcements" },
@@ -279,6 +281,16 @@ export default function Header() {
                       </span>
                     </a>
 
+                    {user.role === "admin" && (
+                      <a
+                        href="/admin"
+                        onClick={() => setProfileMenuOpen(false)}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-xs md:text-sm font-bold text-[#ce1126] hover:bg-gray-50 transition-colors text-left cursor-pointer"
+                      >
+                        <Shield className="w-4 h-4 text-[#ce1126] flex-shrink-0" strokeWidth={2.5} />
+                        <span>Editor Control Panel</span>
+                      </a>
+                    )}
                     <button
                       type="button"
                       onClick={() => {
@@ -325,24 +337,11 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Expandable Search Input */}
-      {searchOpen && (
-        <div className="bg-gray-100 border-b border-gray-300 p-3 max-w-[1440px] mx-auto flex items-center gap-2">
-          <Search size={18} className="text-gray-500" />
-          <input
-            type="text"
-            placeholder="Search POLITICO stories, topics, authors..."
-            className="w-full bg-transparent border-none focus:outline-none text-sm text-gray-900 placeholder-gray-500"
-            autoFocus
-          />
-          <button
-            onClick={() => setSearchOpen(false)}
-            className="text-xs font-bold uppercase text-gray-500 hover:text-black px-2"
-          >
-            Cancel
-          </button>
-        </div>
-      )}
+      {/* Global Search Modal */}
+      <GlobalSearchModal 
+        isOpen={searchOpen} 
+        onClose={() => setSearchOpen(false)} 
+      />
 
       {/* Mobile/Tablet Responsive Category Nav */}
       <nav className="lg:hidden bg-white border-b border-gray-200">

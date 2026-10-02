@@ -10,6 +10,7 @@ import {
   User as UserIcon,
   BookOpen,
   PenTool,
+  Shield,
 } from "lucide-react";
 import ProfileModal from "@/components/profile/ProfileModal";
 
@@ -106,19 +107,19 @@ export default function DashboardShell({
 
       {/* Sidebar (Slightly increased size for desktop mode) */}
       <aside
-        className={`fixed lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto left-0 w-72 xl:w-80 bg-white border-r border-gray-200 z-50 flex flex-col transition-transform duration-300 ease-in-out flex-shrink-0 ${
+        className={`fixed lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto left-0 w-72 xl:w-80 bg-[#10141e] border-r border-gray-800 z-50 flex flex-col transition-transform duration-300 ease-in-out flex-shrink-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
         <div>
           {/* Sidebar Brand Header */}
-          <div className="h-16 lg:h-20 px-6 lg:px-7 border-b border-gray-200 flex items-center justify-between">
+          <div className="h-16 lg:h-20 px-6 lg:px-7 border-b border-gray-800 flex items-center justify-between">
             <a href="/" className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-[#ce1126] flex items-center justify-center text-white font-black text-xl shadow-sm select-none">
                 P
               </div>
               <div className="flex flex-col">
-                <span className="font-black text-xl tracking-tight text-gray-900 leading-none">
+                <span className="font-black text-xl tracking-tight text-white leading-none">
                   POLITICO
                 </span>
                 <span className="text-[10px] font-bold text-[#ce1126] tracking-wider uppercase mt-1">
@@ -129,7 +130,7 @@ export default function DashboardShell({
 
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden p-1 text-gray-500 hover:text-gray-900"
+              className="lg:hidden p-1 text-gray-500 hover:text-white"
               aria-label="Close menu"
             >
               <X size={20} />
@@ -141,7 +142,7 @@ export default function DashboardShell({
             <div className="px-3 mb-2.5 flex justify-center">
               <a
                 href="/"
-                className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-600 hover:text-[#ce1126] transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-[#ce1126] transition-colors"
               >
                 <ArrowLeft size={14} strokeWidth={2.5} />
                 <span>Back to Home</span>
@@ -159,8 +160,8 @@ export default function DashboardShell({
                   }}
                   className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs sm:text-sm font-bold transition-colors ${
                     isActive
-                      ? "bg-[#ce1126]/10 text-[#ce1126]"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      ? "bg-[#ce1126]/20 text-[#ce1126]"
+                      : "text-gray-400 hover:bg-[#1e2532] hover:text-white"
                   }`}
                 >
                   <div className="flex items-center gap-3.5">
@@ -172,7 +173,7 @@ export default function DashboardShell({
                       className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold ${
                         isActive
                           ? "bg-[#ce1126] text-white"
-                          : "bg-gray-100 text-gray-600"
+                          : "bg-[#1e2532] text-gray-400"
                       }`}
                     >
                       {item.badge}
@@ -197,9 +198,16 @@ export default function DashboardShell({
             >
               <Menu size={20} />
             </button>
-            <h2 className="text-base sm:text-lg font-bold text-gray-900">
-              {portalTitle}
-            </h2>
+            <div className="flex flex-col">
+              <h2 className="text-xl sm:text-2xl font-black text-[#111] tracking-tight leading-none">
+                {portalTitle}
+              </h2>
+              {portalTitle === "My Workspace" && (
+                <span className="text-xs text-gray-500 mt-1">
+                  Welcome back, {displayName}!
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Right Actions */}

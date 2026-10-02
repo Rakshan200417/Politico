@@ -67,22 +67,26 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const email = searchParams.get('email');
     const status = searchParams.get('status');
+    const search = searchParams.get('search');
 
-    let query = 'SELECT * FROM articles';
+    let query = 'SELECT * FROM articles WHERE 1=1';
     const params: any[] = [];
 
-    if (email && status) {
-      query += ' WHERE writer_email = ? AND status = ? ORDER BY updated_at DESC';
-      params.push(email, status);
-    } else if (email) {
-      query += ' WHERE writer_email = ? ORDER BY updated_at DESC';
+    if (email) {
+      query += ' AND writer_email = ?';
       params.push(email);
-    } else if (status) {
-      query += ' WHERE status = ? ORDER BY updated_at DESC';
-      params.push(status);
-    } else {
-      query += ' ORDER BY updated_at DESC';
     }
+    if (status) {
+      query += ' AND status = ?';
+      params.push(status);
+    }
+    if (search) {
+      query += ' AND (title LIKE ? OR writer_name LIKE ? OR deck LIKE ? OR category LIKE ?)';
+      const likeSearch = `%${search}%`;
+      params.push(likeSearch, likeSearch, likeSearch, likeSearch);
+    }
+
+    query += ' ORDER BY updated_at DESC';
 
     const [rows]: any = await pool.execute(query, params);
 

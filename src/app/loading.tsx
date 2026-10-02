@@ -1,15 +1,41 @@
 export default function Loading() {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-white z-[9999]">
-      <div className="relative flex items-center justify-center w-24 h-24">
-        {/* The spinning circle */}
-        <div className="absolute inset-0 rounded-full border-[3px] border-gray-100 border-t-[#ce1126] animate-spin"></div>
-        {/* The logo inside */}
-        <div className="flex items-center justify-center w-[72px] h-[72px] bg-white rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.1)]">
-          <span className="font-black tracking-[-0.04em] text-[#ce1126] uppercase text-4xl leading-none">
-            P
-          </span>
+    <div className="min-h-screen bg-white flex flex-col pointer-events-none select-none z-[9999] relative">
+      <div className="w-full max-w-[1440px] mx-auto px-4 lg:px-8 py-8 md:py-12 flex flex-col gap-10">
+        
+        {/* Top Banner Box - Light blue with dotted border */}
+        <div className="w-full max-w-[970px] mx-auto h-[140px] md:h-[200px] bg-blue-50/40 border border-blue-200 border-dashed rounded-sm animate-pulse"></div>
+
+        {/* 4 Cards Row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="flex flex-col gap-4">
+              {/* Image Placeholder with Gradient */}
+              <div className="w-full aspect-[4/3] sm:aspect-video lg:aspect-[4/3] bg-gradient-to-tr from-slate-100 to-slate-50 rounded-sm animate-pulse"></div>
+              
+              {/* Lines */}
+              <div className="flex flex-col gap-2.5 px-1">
+                <div className="w-1/3 h-2.5 bg-slate-100 rounded-sm animate-pulse"></div>
+                <div className="w-full h-3.5 bg-slate-100 rounded-sm animate-pulse"></div>
+                <div className="w-2/3 h-3.5 bg-slate-100 rounded-sm animate-pulse"></div>
+              </div>
+            </div>
+          ))}
         </div>
+
+        {/* Bottom Section */}
+        <div className="w-full flex items-end justify-between gap-8 mt-12">
+           {/* Left Line */}
+           <div className="w-full border-b border-gray-400 pb-2 relative">
+             <div className="w-24 h-5 bg-slate-100 rounded-sm animate-pulse absolute bottom-3 left-0"></div>
+           </div>
+           
+           {/* Right Line */}
+           <div className="w-full border-b border-gray-400 pb-2 relative">
+             <div className="w-24 h-5 bg-slate-100 rounded-sm animate-pulse absolute bottom-3 left-0"></div>
+           </div>
+        </div>
+
       </div>
     </div>
   );

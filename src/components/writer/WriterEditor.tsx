@@ -18,8 +18,9 @@ import {
   Undo,
   Redo,
   Sparkles,
-  ChevronRight,
   ChevronLeft,
+  ChevronDown,
+  ChevronRight,
   X,
   CheckCircle,
   Loader2,
@@ -59,9 +60,10 @@ export interface ArticleData {
 interface WriterEditorProps {
   initialArticle?: ArticleData | null;
   onCancel: () => void;
-  onSaveSuccess: (article: ArticleData, action: "draft" | "pending") => void;
+  onSaveSuccess: (article: ArticleData, action: "draft" | "pending" | "trash" | "published") => void;
   userEmail: string;
   userName: string;
+  isAdminMode?: boolean;
 }
 
 export const navbarCategories = [
@@ -73,63 +75,22 @@ export const navbarCategories = [
   "Finance",
   "Leaders",
   "Industries",
-  "Global",
   "Technology",
+  "Interview",
+];
+
+export const worldRegions = [
+  "Asia",
+  "Middle East",
+  "Europe",
+  "Britain",
+  "Africa",
+  "China",
+  "United States",
 ];
 
 export const navbarSubcategoriesMap: Record<string, string[]> = {
-  Companies: [
-    "Corporate Announcements",
-    "Mergers & Acquisitions",
-    "Leadership Changes",
-  ],
-  Startups: [
-    "Funding & Investment",
-    "Founder Stories",
-    "Venture Capital",
-    "Startup Failures",
-  ],
-  Markets: ["Stock Market", "Bonds", "Mutual Funds"],
-  Economy: [
-    "GDP & Economic Growth",
-    "Employment",
-    "Government Economic Policies",
-  ],
-  Finance: [
-    "Digital Banking",
-    "FinTech",
-    "Banking Industry",
-    "Loans & Lending",
-  ],
-  Leaders: [
-    "Business Leaders",
-    "CEO Interviews",
-    "Executive Appointments",
-    "Leadership Strategies",
-  ],
-  Industries: [
-    "Manufacturing",
-    "Energy",
-    "Pharmaceuticals",
-    "Automobile",
-    "Agriculture Business",
-    "Construction",
-    "Design",
-    "Textiles",
-    "Entertainment",
-  ],
-  Global: [
-    "World Politics",
-    "International Trade",
-    "Diplomacy",
-    "Global Climate",
-  ],
-  Technology: [
-    "Artificial Intelligence",
-    "Cybersecurity",
-    "Big Tech",
-    "Hardware & Cloud",
-  ],
+  // kept for potential fallback usage elsewhere if needed, though removed Global
 };
 
 export default function WriterEditor({
@@ -138,6 +99,7 @@ export default function WriterEditor({
   onSaveSuccess,
   userEmail,
   userName,
+  isAdminMode = false,
 }: WriterEditorProps) {
   // Article content states
   const [title, setTitle] = useState(initialArticle?.title || "");
@@ -146,6 +108,8 @@ export default function WriterEditor({
   const [category, setCategory] = useState(
     initialArticle?.category || "Business",
   );
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+  const [activeHoverCategory, setActiveHoverCategory] = useState<string | null>(null);
   const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>(
     initialArticle?.subcategories || [],
   );
@@ -200,56 +164,34 @@ export default function WriterEditor({
 
   const editorRef = useRef<HTMLDivElement>(null);
 
+  // Manage ResizeObserver for the selected image
   useEffect(() => {
     let ro: ResizeObserver | null = null;
-    const handleEditorClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.tagName === "IMG") {
-        const img = target as HTMLImageElement;
-        setSelectedImageNode(img);
-        
-        const updateRects = () => {
-          const wrapperRect = editorRef.current?.parentElement?.getBoundingClientRect();
-          const imgRect = img.getBoundingClientRect();
-          if (wrapperRect) {
-            setToolbarPosition({
-              top: imgRect.top - wrapperRect.top - 50,
-              left: imgRect.left - wrapperRect.left + imgRect.width / 2 - 150,
-            });
-            setImageRect({
-              top: imgRect.top - wrapperRect.top,
-              left: imgRect.left - wrapperRect.left,
-              width: imgRect.width,
-              height: imgRect.height,
-            });
-          }
-        };
-        
-        updateRects();
-        
-        if (ro) ro.disconnect();
-        ro = new ResizeObserver(updateRects);
-        ro.observe(img);
-        
-      } else {
-        if (!target.closest(".image-toolbar") && !target.closest(".image-resizer")) {
-          setSelectedImageNode(null);
-          if (ro) { ro.disconnect(); ro = null; }
+    if (selectedImageNode) {
+      const updateRects = () => {
+        const wrapperRect = editorRef.current?.parentElement?.getBoundingClientRect();
+        const imgRect = selectedImageNode.getBoundingClientRect();
+        if (wrapperRect) {
+          setToolbarPosition({
+            top: imgRect.top - wrapperRect.top - 50,
+            left: imgRect.left - wrapperRect.left + imgRect.width / 2 - 150,
+          });
+          setImageRect({
+            top: imgRect.top - wrapperRect.top,
+            left: imgRect.left - wrapperRect.left,
+            width: imgRect.width,
+            height: imgRect.height,
+          });
         }
-      }
-    };
-
-    const editor = editorRef.current;
-    if (editor) {
-      editor.addEventListener("click", handleEditorClick);
+      };
+      updateRects();
+      ro = new ResizeObserver(updateRects);
+      ro.observe(selectedImageNode);
     }
     return () => {
       if (ro) ro.disconnect();
-      if (editor) {
-        editor.removeEventListener("click", handleEditorClick);
-      }
     };
-  }, []);
+  }, [selectedImageNode, imageRenderTick]);
 
   // Initialize editor content
   useEffect(() => {
@@ -562,7 +504,7 @@ export default function WriterEditor({
   };
 
   // Save to DB (and fallback to localStorage)
-  const saveArticle = async (status: "draft" | "pending") => {
+  const saveArticle = async (status: "draft" | "pending" | "trash" | "published") => {
     if (!title.trim()) {
       alert("Please enter a title for your article before saving.");
       return;
@@ -660,6 +602,12 @@ export default function WriterEditor({
         if (status === "draft") {
           setIsSavingDraft(false);
           showToast("✔ DRAFT SAVED SUCCESSFULLY!");
+        } else if (status === "trash") {
+          setIsSavingDraft(false);
+          showToast("✔ REJECTED TO TRASH!");
+        } else if (status === "published") {
+          setIsSubmitting(false);
+          showToast("✔ APPROVED & PUBLISHED!");
         } else {
           setIsSubmitting(false);
           showToast("✔ ARTICLE SUBMITTED FOR REVIEW!");
@@ -684,14 +632,14 @@ export default function WriterEditor({
   const renderSettingsContent = () => (
     <div className="space-y-6">
       {/* DETAILS vs SEO Tab Switcher */}
-      <div className="bg-gray-100 p-1 rounded-xl grid grid-cols-2 gap-1">
+      <div className="bg-[#1e2532] p-1 rounded-xl grid grid-cols-2 gap-1">
         <button
           type="button"
           onClick={() => setSidebarTab("details")}
           className={`py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition ${
             sidebarTab === "details"
-              ? "bg-white text-gray-900 shadow-xs"
-              : "text-gray-500 hover:text-gray-900"
+              ? "bg-[#2d3748] text-white shadow-xs"
+              : "text-gray-400 hover:text-white"
           }`}
         >
           DETAILS
@@ -701,8 +649,8 @@ export default function WriterEditor({
           onClick={() => setSidebarTab("seo")}
           className={`py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition ${
             sidebarTab === "seo"
-              ? "bg-white text-gray-900 shadow-xs"
-              : "text-gray-500 hover:text-gray-900"
+              ? "bg-[#2d3748] text-white shadow-xs"
+              : "text-gray-400 hover:text-white"
           }`}
         >
           SEO
@@ -714,35 +662,86 @@ export default function WriterEditor({
         <div className="space-y-6">
           {/* Select Category (Main) */}
           <div>
-            <label className="block text-[11px] font-black uppercase tracking-wider text-gray-500 mb-2">
+            <label className="block text-[11px] font-black uppercase tracking-wider text-gray-400 mb-2">
               SELECT CATEGORY (MAIN)
             </label>
-            <select
-              value={category}
-              onChange={(e) => {
-                setCategory(e.target.value);
-                setSelectedSubcategories([]); // reset subcategories when main category changes
-              }}
-              className="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs font-bold text-gray-800 focus:outline-none focus:border-black transition"
-            >
-              {navbarCategories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
+                className="w-full bg-[#1e2532] border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs font-bold text-white focus:outline-none focus:border-gray-500 transition flex items-center justify-between"
+              >
+                <span>{category}</span>
+                <ChevronDown size={14} className="text-gray-400" />
+              </button>
+
+              {isCategoryDropdownOpen && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setIsCategoryDropdownOpen(false)}
+                  ></div>
+                  <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg py-1">
+                    {/* World nested dropdown trigger (MOVED TO TOP) */}
+                    <div
+                      className="relative group"
+                      onMouseEnter={() => setActiveHoverCategory("World")}
+                      onMouseLeave={() => setActiveHoverCategory(null)}
+                    >
+                      <div className={`w-full text-left px-4 py-2 text-xs flex items-center justify-between cursor-default transition-colors ${worldRegions.includes(category) ? "bg-red-50 text-[#ce1126] font-bold" : "text-gray-700 hover:bg-gray-50 font-medium"}`}>
+                        <span>World</span>
+                        <ChevronRight size={14} className="text-gray-400" />
+                      </div>
+
+                      {activeHoverCategory === "World" && (
+                        <div className="absolute top-0 right-full mr-1 w-40 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-[60] max-h-60 overflow-y-auto">
+                          {worldRegions.map((region) => (
+                            <button
+                              key={region}
+                              type="button"
+                              onClick={() => {
+                                setCategory(region);
+                                setIsCategoryDropdownOpen(false);
+                                setSelectedSubcategories([]);
+                              }}
+                              className={`w-full text-left px-4 py-2 text-xs transition-colors ${category === region ? "bg-red-50 text-[#ce1126] font-bold" : "text-gray-700 hover:bg-gray-50 font-medium"}`}
+                            >
+                              {region}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {navbarCategories.map((cat) => (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => {
+                          setCategory(cat);
+                          setIsCategoryDropdownOpen(false);
+                          setSelectedSubcategories([]);
+                        }}
+                        className={`w-full text-left px-4 py-2 text-xs transition-colors ${category === cat ? "bg-red-50 text-[#ce1126] font-bold" : "text-gray-700 hover:bg-gray-50 font-medium"}`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
 
           {/* Select Sub-categories (Max 5) */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-[11px] font-black uppercase tracking-wider text-gray-500">
-                SELECT SUB-CATEGORIES FOR {category.toUpperCase()} (OPTIONAL,
-                MAX 5)
+              <label className="text-[11px] font-black uppercase tracking-wider text-gray-400">
+                SELECT SUB-CATEGORIES (OPTIONAL, MAX 5)
               </label>
             </div>
 
-            <div className="border border-gray-200 rounded-xl p-3 max-h-52 overflow-y-auto bg-gray-50/50 space-y-2">
+            <div className="border border-gray-700 rounded-xl p-3 bg-[#1e2532] space-y-4">
               <div className="grid grid-cols-2 gap-2 text-xs">
                 {navbarCategories.filter(c => c !== category).map((sub) => {
                   const checked = selectedSubcategories.includes(sub);
@@ -753,10 +752,10 @@ export default function WriterEditor({
                       key={sub}
                       className={`flex items-center gap-2 p-1.5 rounded cursor-pointer transition ${
                         checked
-                          ? "bg-red-50 text-[#ce1126] font-bold"
+                          ? "bg-red-500/20 text-red-400 font-bold"
                           : disabled
-                            ? "opacity-40 cursor-not-allowed text-gray-400"
-                            : "hover:bg-white text-gray-700"
+                            ? "opacity-40 cursor-not-allowed text-gray-500"
+                            : "hover:bg-gray-800 text-gray-300"
                       }`}
                     >
                       <input
@@ -764,15 +763,47 @@ export default function WriterEditor({
                         checked={checked}
                         disabled={disabled}
                         onChange={() => toggleSubcategory(sub)}
-                        className="rounded border-gray-300 text-[#ce1126] focus:ring-0 w-3.5 h-3.5"
+                        className="rounded border-gray-600 bg-transparent text-[#ce1126] focus:ring-0 w-3.5 h-3.5"
                       />
                       <span className="truncate">{sub}</span>
                     </label>
                   );
                 })}
               </div>
+
+              <div>
+                <h4 className="text-[10px] font-black uppercase tracking-wider text-gray-500 mb-2 mt-2">WORLD</h4>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  {worldRegions.filter(c => c !== category).map((sub) => {
+                    const checked = selectedSubcategories.includes(sub);
+                    const disabled =
+                      !checked && selectedSubcategories.length >= 5;
+                    return (
+                      <label
+                        key={sub}
+                        className={`flex items-center gap-2 p-1.5 rounded cursor-pointer transition ${
+                          checked
+                            ? "bg-red-500/20 text-red-400 font-bold"
+                            : disabled
+                              ? "opacity-40 cursor-not-allowed text-gray-500"
+                              : "hover:bg-gray-800 text-gray-300"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          disabled={disabled}
+                          onChange={() => toggleSubcategory(sub)}
+                          className="rounded border-gray-600 bg-transparent text-[#ce1126] focus:ring-0 w-3.5 h-3.5"
+                        />
+                        <span className="truncate">{sub}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
-            <div className="text-[10px] font-bold text-gray-400 mt-1 text-right">
+            <div className="text-[10px] font-bold text-gray-500 mt-1 text-right">
               SELECTED: {selectedSubcategories.length} / 5
             </div>
           </div>
@@ -836,7 +867,7 @@ export default function WriterEditor({
             <button
               type="button"
               onClick={handleAutoGenerateSEO}
-              className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-[0.99]"
+              className="w-full py-3 px-4 rounded-xl bg-[#ce1126] hover:bg-[#a00c1c] text-white text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-[0.99]"
             >
               <Sparkles size={16} />
               <span>AUTO-GENERATE SEO</span>
@@ -980,7 +1011,7 @@ export default function WriterEditor({
   return (
     <div className="min-h-screen bg-[#f8f9fa] flex flex-col font-sans text-gray-900 select-text">
       {/* Top Navbar Header */}
-      <header className="h-14 sm:h-16 bg-white border-b border-gray-200 px-3 sm:px-6 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+      <header className="h-14 sm:h-16 bg-[#10141e] border-b border-gray-800 px-3 sm:px-6 flex items-center justify-between sticky top-0 z-40 shadow-sm text-white">
         {/* Left Side: Back Arrow & Tracking Headline */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
@@ -995,15 +1026,15 @@ export default function WriterEditor({
               }
               onCancel();
             }}
-            className="p-1 rounded-lg text-gray-500 hover:text-gray-900 transition-colors flex-shrink-0"
+            className="p-1 rounded-lg text-gray-400 hover:text-white transition-colors flex-shrink-0"
             title="Back / Cancel"
           >
             <ArrowLeft size={18} strokeWidth={2.5} />
           </button>
 
-          <div className="h-3.5 w-px bg-gray-300 flex-shrink-0" />
+          <div className="h-3.5 w-px bg-gray-700 flex-shrink-0" />
 
-          <span className="text-[11px] sm:text-xs font-mono font-bold tracking-wider text-gray-800 uppercase truncate max-w-[130px] sm:max-w-[220px] md:max-w-md">
+          <span className="text-[11px] sm:text-xs font-mono font-bold tracking-wider text-gray-200 uppercase truncate max-w-[130px] sm:max-w-[220px] md:max-w-md">
             {headerTrackerTitle}
           </span>
         </div>
@@ -1013,52 +1044,87 @@ export default function WriterEditor({
           {/* Preview Button (Eye) */}
           <button
             onClick={() => setPreviewOpen(true)}
-            className="flex items-center justify-center gap-1.5 p-2 sm:px-3 sm:py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 transition shadow-sm"
+            className="flex items-center justify-center gap-1.5 p-2 sm:px-3 sm:py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-gray-300 bg-[#1e2532] hover:bg-[#2d3748] border border-gray-700 transition shadow-sm"
             title="Preview Story"
           >
             <Eye size={16} />
             <span className="hidden md:inline">Preview</span>
           </button>
 
-          {/* Save Draft Button (Disk) */}
-          <button
-            disabled={isSavingDraft || isSubmitting}
-            onClick={() => saveArticle("draft")}
-            className="flex items-center justify-center gap-1.5 p-2 sm:px-3.5 sm:py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 disabled:opacity-70 transition shadow-sm"
-            title="Save Draft"
-          >
-            {isSavingDraft ? (
-              <>
-                <Loader2 size={16} className="animate-spin text-gray-400" />
-                <span className="hidden md:inline">Saving...</span>
-              </>
-            ) : (
-              <>
-                <Save size={16} />
-                <span className="hidden md:inline">Save Draft</span>
-              </>
-            )}
-          </button>
+          {isAdminMode ? (
+            <>
+              {/* Reject to Trash Button */}
+              <button
+                disabled={isSavingDraft || isSubmitting}
+                onClick={() => saveArticle("trash")}
+                className="flex items-center justify-center gap-1.5 p-2 sm:px-3.5 sm:py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-red-700 hover:bg-red-800 disabled:opacity-70 transition shadow-sm"
+                title="Reject to Trash"
+              >
+                {isSavingDraft ? (
+                  <Loader2 size={16} className="animate-spin text-white" />
+                ) : (
+                  <X size={16} />
+                )}
+                <span className="hidden md:inline">REJECT TO TRASH</span>
+              </button>
 
-          {/* Submit Button (Matching homepage red color) */}
-          <button
-            disabled={isSavingDraft || isSubmitting}
-            onClick={() => saveArticle("pending")}
-            className="flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider text-white bg-[#ce1126] hover:bg-[#a00c1c] active:scale-[0.98] disabled:opacity-75 transition shadow-sm"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 size={14} className="animate-spin text-white" />
-                <span>SAVING</span>
-              </>
-            ) : (
-              <>
-                <Send size={14} />
-                <span className="hidden sm:inline">SUBMIT FOR REVIEW</span>
-                <span className="sm:hidden">SUBMIT</span>
-              </>
-            )}
-          </button>
+              {/* Approve & Publish Button */}
+              <button
+                disabled={isSavingDraft || isSubmitting}
+                onClick={() => saveArticle("published")}
+                className="flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider text-white bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-75 transition shadow-sm"
+              >
+                {isSubmitting ? (
+                  <Loader2 size={14} className="animate-spin text-white" />
+                ) : (
+                  <CheckCircle size={14} />
+                )}
+                <span className="hidden sm:inline">APPROVE & PUBLISH</span>
+              </button>
+            </>
+          ) : (
+            <>
+              {/* Save Draft Button (Disk) */}
+              <button
+                disabled={isSavingDraft || isSubmitting}
+                onClick={() => saveArticle("draft")}
+                className="flex items-center justify-center gap-1.5 p-2 sm:px-3.5 sm:py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-gray-300 bg-[#1e2532] hover:bg-[#2d3748] border border-gray-700 disabled:opacity-70 transition shadow-sm"
+                title="Save Draft"
+              >
+                {isSavingDraft ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin text-gray-400" />
+                    <span className="hidden md:inline">Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save size={16} />
+                    <span className="hidden md:inline">Save Draft</span>
+                  </>
+                )}
+              </button>
+
+              {/* Submit Button (Matching homepage red color) */}
+              <button
+                disabled={isSavingDraft || isSubmitting}
+                onClick={() => saveArticle("pending")}
+                className="flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider text-white bg-[#ce1126] hover:bg-[#a00c1c] active:scale-[0.98] disabled:opacity-75 transition shadow-sm"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin text-white" />
+                    <span>SAVING</span>
+                  </>
+                ) : (
+                  <>
+                    <Send size={14} />
+                    <span className="hidden sm:inline">SUBMIT FOR REVIEW</span>
+                    <span className="sm:hidden">SUBMIT</span>
+                  </>
+                )}
+              </button>
+            </>
+          )}
         </div>
       </header>
 
@@ -1155,14 +1221,24 @@ export default function WriterEditor({
 
             <button
               onClick={handleInsertImage}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#fff7ed] text-[#ea580c] hover:bg-orange-100 text-xs font-bold transition border border-orange-200/80 shadow-xs ml-auto"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-50 text-[#ce1126] hover:bg-red-100 text-xs font-bold transition border border-red-200/80 shadow-xs ml-auto"
             >
-              <ImageIcon size={14} className="text-[#ea580c]" />
+              <ImageIcon size={14} className="text-[#ce1126]" />
               <span className="text-[11px] sm:text-xs tracking-wider">
                 INSERT IMAGE
               </span>
             </button>
           </div>
+
+          {/* Cover Image Preview (if uploaded but not in canvas) */}
+          {leadImage && !content.includes(leadImage) && (
+            <div className="mb-6 relative group border border-gray-200 rounded-2xl overflow-hidden">
+              <span className="absolute top-3 left-3 bg-black/70 backdrop-blur text-white text-[10px] font-black px-2.5 py-1 rounded-md uppercase tracking-wider z-10 shadow-sm">
+                Cover Image
+              </span>
+              <img src={leadImage} alt="Cover" className="w-full h-64 sm:h-80 object-cover" />
+            </div>
+          )}
 
           {/* Title Input Field */}
           <div className="mb-3 sm:mb-4">
@@ -1210,7 +1286,7 @@ export default function WriterEditor({
                   onClick={() => handleSetImageSize("w-full")}
                   className={`text-xs font-bold px-2 py-1 rounded hover:bg-slate-700 ${(selectedImageNode.closest("figure") ? selectedImageNode.closest("figure")!.classList.contains("w-full") : selectedImageNode.classList.contains("w-full")) ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
                 >
-                  F
+                  FULL
                 </button>
                 <button
                   onClick={() => handleSetImageSize("w-1/2")}
@@ -1290,6 +1366,14 @@ export default function WriterEditor({
             <div
               ref={editorRef}
               contentEditable
+              onClick={(e) => {
+                const target = e.target as HTMLElement;
+                if (target.tagName === "IMG") {
+                  setSelectedImageNode(target as HTMLImageElement);
+                } else if (!target.closest(".image-toolbar") && !target.closest(".image-resizer")) {
+                  setSelectedImageNode(null);
+                }
+              }}
               onInput={() => {
                 if (editorRef.current) {
                   setContent(editorRef.current.innerHTML);
@@ -1318,9 +1402,9 @@ export default function WriterEditor({
         </main>
 
         {/* Article Settings Card (Side-by-side on desktop, stacked underneath on mobile) */}
-        <aside className="w-full lg:w-[380px] xl:w-[410px] flex-shrink-0 bg-white border border-gray-200/90 rounded-2xl p-5 sm:p-6 shadow-xs lg:sticky lg:top-20 flex flex-col">
-          <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
-            <span className="text-xs font-black uppercase tracking-wider text-gray-900">
+        <aside className="w-full lg:w-[380px] xl:w-[410px] flex-shrink-0 bg-[#10141e] border border-gray-800 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col text-white">
+          <div className="flex items-center justify-between pb-3 border-b border-gray-800 mb-4">
+            <span className="text-xs font-black uppercase tracking-wider text-white">
               ⚙️ ARTICLE SETTINGS
             </span>
           </div>
@@ -1351,7 +1435,7 @@ export default function WriterEditor({
             {/* Modal Header */}
             <div className="h-14 px-6 border-b border-gray-200 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-orange-100 text-[#f25c05] flex items-center justify-center">
+                <div className="w-7 h-7 rounded-lg bg-red-50 text-[#ce1126] flex items-center justify-center">
                   <ImageIcon size={16} />
                 </div>
                 <h3 className="text-sm font-black text-gray-900 tracking-tight">
@@ -1405,7 +1489,7 @@ export default function WriterEditor({
                     className="text-xs text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-gray-200 file:text-gray-800 hover:file:bg-gray-300 cursor-pointer w-full"
                   />
                   {isUploadingImage && (
-                    <div className="flex items-center gap-2 text-xs text-[#f25c05] font-bold mt-2">
+                    <div className="flex items-center gap-2 text-xs text-[#ce1126] font-bold mt-2">
                       <Loader2 size={14} className="animate-spin" />
                       <span>Uploading & compressing image...</span>
                     </div>
@@ -1429,13 +1513,13 @@ export default function WriterEditor({
               </div>
 
               {/* Image SEO Keywords (Max 4 Keywords) */}
-              <div className="bg-orange-50/50 border border-orange-200/80 rounded-xl p-3.5">
+              <div className="bg-red-50/50 border border-red-200/80 rounded-xl p-3.5">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-gray-900">
-                    <Sparkles size={14} className="text-[#f25c05]" />
+                    <Sparkles size={14} className="text-[#ce1126]" />
                     <span>Image SEO Keywords (Max 4 Keywords)</span>
                   </div>
-                  <span className="text-[10px] font-bold text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full">
+                  <span className="text-[10px] font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded-full">
                     {imageKeywords.length} / 4 KEYWORDS
                   </span>
                 </div>
@@ -1446,7 +1530,7 @@ export default function WriterEditor({
                   onChange={(e) => setImageKeywordInput(e.target.value)}
                   onKeyDown={handleImageKeywordKeyDown}
                   placeholder="e.g. Donald Trump, White House, Election 2026"
-                  className="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-orange-500 transition"
+                  className="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-red-600 transition"
                 />
                 <p className="text-[10px] text-gray-500 mt-1.5 flex items-center gap-1">
                   <span>⚡</span>
@@ -1462,7 +1546,7 @@ export default function WriterEditor({
                       <span
                         key={kw}
                         onClick={() => removeImageKeyword(kw)}
-                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white text-gray-800 text-[11px] font-bold cursor-pointer border border-orange-200 hover:bg-red-50 hover:text-red-700 transition group"
+                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white text-gray-800 text-[11px] font-bold cursor-pointer border border-red-200 hover:bg-red-50 hover:text-red-700 transition group"
                       >
                         #{kw}
                         <X
@@ -1518,7 +1602,7 @@ export default function WriterEditor({
                 type="button"
                 onClick={handleConfirmInsertImage}
                 disabled={!imageUrl.trim() || isUploadingImage}
-                className="px-5 py-2.5 rounded-xl bg-[#f25c05] hover:bg-[#e05300] active:scale-[0.98] disabled:opacity-50 text-white text-xs font-black uppercase tracking-wider shadow-sm transition flex items-center gap-1.5 cursor-pointer"
+                className="px-5 py-2.5 rounded-xl bg-[#ce1126] hover:bg-[#a00c1c] active:scale-[0.98] disabled:opacity-50 text-white text-xs font-black uppercase tracking-wider shadow-sm transition flex items-center gap-1.5 cursor-pointer"
               >
                 <Plus size={15} strokeWidth={3} />
                 <span>+ INSERT IMAGE</span>
@@ -1532,9 +1616,9 @@ export default function WriterEditor({
       {previewOpen && (
         <div className="fixed inset-0 z-50 bg-white flex flex-col overflow-hidden">
           {/* Top Bar */}
-          <div className="flex items-center justify-between px-6 py-3 bg-[#0a1c2d] text-white flex-shrink-0">
+          <div className="flex items-center justify-between px-6 py-3 bg-[#10141e] text-white flex-shrink-0">
             <div className="flex items-center gap-4">
-              <span className="text-[10px] font-black tracking-wider text-orange-500 uppercase bg-orange-500/10 px-2 py-0.5 rounded">
+              <span className="text-[10px] font-black tracking-wider text-white uppercase bg-[#ce1126] px-2 py-0.5 rounded">
                 PREVIEW MODE
               </span>
               <span className="text-xs sm:text-sm text-gray-300">
@@ -1551,79 +1635,110 @@ export default function WriterEditor({
 
           {/* Scrollable Content */}
           <div className="flex-1 overflow-y-auto w-full">
-            <div className="max-w-[1200px] mx-auto w-full p-6 sm:p-10 grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-12">
+            <div className="max-w-[1200px] mx-auto w-full p-6 sm:p-10">
               
-              {/* Main Content Column */}
-              <div className="w-full min-w-0">
-                <div className="text-xs font-black text-[#0a304e] uppercase tracking-widest mb-6">
-                  {category}
-                </div>
 
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold text-gray-950 tracking-tight leading-tight mb-6">
-                  {title || "Untitled Article"}
-                </h1>
 
-                {/* Author Block */}
-                <div className="flex items-center gap-3 mb-10">
-                  <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
-                    <User size={20} className="text-gray-500" />
+              <div className="w-full max-w-4xl mx-auto">
+                {/* Main Content Column */}
+                <div className="w-full min-w-0">
+                  <div className="text-[11px] font-black text-gray-900 uppercase tracking-widest mb-4">
+                    {category}
                   </div>
-                  <div className="flex flex-col">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-sm font-bold text-gray-900">
-                        By {userName || userEmail.split("@")[0]}
+
+                  <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold text-gray-950 tracking-tight leading-tight mb-4">
+                    {title || "Untitled Article"}
+                  </h1>
+                  
+                  {deck && (
+                    <p className="text-lg text-gray-600 font-medium mb-6 leading-relaxed">
+                      {deck}
+                    </p>
+                  )}
+
+                  {/* Tags Section */}
+                  {tags.length > 0 && (
+                    <div className="mb-8 flex flex-wrap items-center gap-2">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mr-2">
+                        FILED UNDER:
                       </span>
-                      <div className="w-4 h-4 bg-blue-600 rounded text-white flex items-center justify-center text-[10px] font-bold">in</div>
+                      {tags.map((t) => (
+                        <span
+                          key={t}
+                          className="text-[11px] font-bold text-gray-700 bg-gray-100 px-3 py-1 rounded-full transition"
+                        >
+                          #{t}
+                        </span>
+                      ))}
                     </div>
-                    <span className="text-[11px] text-gray-400 mt-0.5 uppercase tracking-wide">
-                      Published {new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' })} AT {new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-                    </span>
+                  )}
+
+                  {/* Author Block */}
+                  <div className="flex items-center gap-3 mb-10 pb-6 border-b border-gray-100">
+                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                      <User size={20} className="text-gray-500" />
+                    </div>
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-black uppercase text-gray-900">
+                          By {userName || userEmail.split("@")[0]}
+                        </span>
+                        <div className="w-4 h-4 bg-blue-600 rounded text-white flex items-center justify-center text-[10px] font-bold">in</div>
+                      </div>
+                      <span className="text-[10px] text-gray-400 mt-1 uppercase tracking-wider font-bold">
+                        Published {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} • {new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} EDT
+                      </span>
+                    </div>
+                  </div>
+
+
+
+                  {/* Content */}
+                  <div
+                    className="prose prose-lg max-w-none text-gray-800 leading-relaxed font-serif prose-p:mb-6 prose-img:rounded-none prose-headings:font-sans prose-a:text-[#ce1126] break-words"
+                    dangerouslySetInnerHTML={{
+                      __html:
+                        editorRef.current?.innerHTML ||
+                        content ||
+                        "<p>No content written yet.</p>",
+                    }}
+                  />
+
+                  {/* Comments Section */}
+                  <div className="mt-16 pt-8 border-t border-gray-200">
+                    <h3 className="text-[17px] font-serif font-bold text-gray-900 mb-6">
+                      Comments (2)
+                    </h3>
+                    <div className="mb-10 flex flex-col items-end">
+                      <textarea 
+                        rows={4}
+                        placeholder="Leave a comment..."
+                        className="w-full bg-white border border-gray-300 rounded px-4 py-3 text-sm focus:outline-none focus:border-gray-500 mb-4 resize-none"
+                      />
+                      <button className="px-6 py-2.5 bg-[#ce1126] hover:bg-[#a00c1c] text-white text-xs font-bold uppercase rounded transition shadow-sm">
+                        POST COMMENT
+                      </button>
+                    </div>
+                    
+                    <div className="space-y-8">
+                      <div className="border-b border-gray-100 pb-6">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm font-bold text-gray-900">Jane Doe</span>
+                          <span className="text-xs text-gray-400">2 hours ago</span>
+                        </div>
+                        <p className="text-sm text-gray-700">This is a very insightful article. Thanks for sharing!</p>
+                      </div>
+                      <div className="pb-6">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm font-bold text-gray-900">John Smith</span>
+                          <span className="text-xs text-gray-400">5 hours ago</span>
+                        </div>
+                        <p className="text-sm text-gray-700">I completely disagree with the premise, but it's an interesting perspective.</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-
-                {/* Content */}
-                <div
-                  className="prose prose-lg max-w-none text-gray-800 leading-relaxed font-serif prose-p:mb-6 prose-img:rounded-none prose-headings:font-sans prose-a:text-[#ce1126]"
-                  dangerouslySetInnerHTML={{
-                    __html:
-                      editorRef.current?.innerHTML ||
-                      content ||
-                      "<p>No content written yet.</p>",
-                  }}
-                />
-
-                {/* Comments Section */}
-                <div className="mt-16 pt-8 border-t border-gray-200">
-                  <h3 className="text-sm font-black uppercase tracking-wider text-gray-900 flex items-center gap-2 mb-6">
-                    <MessageSquare size={16} />
-                    COMMENTS (0)
-                  </h3>
-                  <div className="flex gap-3 mb-6">
-                    <input 
-                      type="text" 
-                      placeholder="Add a comment..."
-                      className="flex-1 bg-white border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-gray-500"
-                    />
-                    <button className="px-6 py-2.5 bg-gray-500 hover:bg-gray-600 text-white text-sm font-bold rounded-lg transition">
-                      POST
-                    </button>
-                  </div>
-                  <p className="text-sm text-gray-400 italic">
-                    No comments yet. Be the first to share your thoughts.
-                  </p>
-                </div>
               </div>
-
-              {/* Sidebar Column */}
-              <div className="w-full hidden lg:block">
-                <h3 className="text-xs font-black uppercase tracking-widest text-[#0a304e] mb-4 pb-2 border-b border-gray-200">
-                  RECENT IN {category.toUpperCase()}
-                </h3>
-                <p className="text-sm text-gray-400 italic mt-6">
-                  No other recent articles in this category.
-                </p>
-              </div>
-
             </div>
           </div>
         </div>
