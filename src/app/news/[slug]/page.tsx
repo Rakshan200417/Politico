@@ -19,7 +19,13 @@ import { slugify } from "@/data/newsArticles";
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const article = await getArticleBySlug(params.slug);
-  if (!article) return { title: "Article Not Found - POLITICO" };
+  if (!article) {
+    const mockTitle = params.slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    return {
+      title: `${mockTitle} - POLITICO`,
+      description: "Mock article for demonstration"
+    };
+  }
   
   return {
     title: `${article.title} - POLITICO`,
@@ -36,17 +42,48 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
   // Simulate network delay to ensure the loading skeleton is visible
   await new Promise((resolve) => setTimeout(resolve, 800));
   
-  const article = await getArticleBySlug(params.slug);
-  if (!article) return notFound();
+  let article = await getArticleBySlug(params.slug);
+  if (!article) {
+    // Determine a fallback category from the slug if it starts with "mock-"
+    // e.g. "mock-china-0" -> "China"
+    let mockCategory = "Update";
+    const normalizedSlug = params.slug.replace(/\s+/g, '-');
+    if (normalizedSlug.startsWith("mock-")) {
+      const parts = normalizedSlug.split('-');
+      if (parts.length >= 3) {
+        mockCategory = parts[1].charAt(0).toUpperCase() + parts[1].slice(1);
+      } else {
+        mockCategory = parts[1] || "Update";
+      }
+    }
+
+    // Temporarily use a mock article for demo links instead of a 404
+    article = {
+      id: 9999,
+      writer_name: "POLITICO Staff",
+      title: params.slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      deck: "This is a temporary mock article page. The real content will be fetched from the admin dashboard once connected.",
+      content: "<p>This is a temporary mock article page designed to showcase the layout, typography, and functionality of the news pages.</p><p>Once the admin control panel is fully integrated, the actual content written by writers and approved by editors will appear here dynamically.</p><p>For now, you can navigate around and experience the user interface seamlessly.</p>",
+      category: mockCategory,
+      image: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=1200&q=80",
+      image_caption: "Demo layout placeholder image",
+      created_at: new Date().toISOString(),
+      tags: "Demo, Mock Article",
+      slug: params.slug
+    } as any;
+  }
+  
+  // Cast to ensure TypeScript knows it's not null from here on
+  const articleData = article!;
 
   // Fetch some dynamic latest stories for related/more news
   const allLatest = await getLatestPublishedArticles(10);
-  const relatedStories = allLatest.filter(a => a.id !== article.id).slice(0, 4);
-  const moreNews = allLatest.filter(a => a.id !== article.id).slice(4, 7);
+  const relatedStories = allLatest.filter(a => a.id !== articleData.id).slice(0, 4);
+  const moreNews = allLatest.filter(a => a.id !== articleData.id).slice(4, 7);
 
-  const tagsArray = article.tags ? article.tags.split(',').map(t => t.trim()) : [];
+  const tagsArray = articleData.tags ? articleData.tags.split(',').map(t => t.trim()) : [];
   
-  const formattedDate = new Date(article.created_at).toLocaleDateString('en-US', {
+  const formattedDate = new Date(articleData.created_at).toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',
     year: 'numeric',
@@ -90,19 +127,19 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
           {/* Category Tag */}
           <div className="mb-4">
             <a
-              href={`/category/${article.category.toLowerCase()}`}
+              href={`/category/${articleData.category.toLowerCase()}`}
               className="text-[12px] font-black uppercase tracking-[0.1em] text-[#1a202c] hover:underline"
             >
-              {article.category}
+              {articleData.category}
             </a>
           </div>
 
           <h1 className="text-[36px] sm:text-[46px] lg:text-[54px] font-bold font-serif leading-[1.1] tracking-[-0.02em] text-[#111]">
-            {article.title}
+            {articleData.title}
           </h1>
 
           <p className="mt-4 mb-4 max-w-[840px] font-sans text-[18px] sm:text-[20px] leading-[1.5] text-[#4a5568]">
-            {article.deck}
+            {articleData.deck}
           </p>
 
           {/* Tags Row */}
@@ -125,13 +162,13 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
           {/* New Author Template (with top/bottom borders) */}
           <div className="border-t border-b border-[#e3e3e3] py-5 flex items-center gap-4">
             <div className="flex items-center gap-4">
-              <a href={`/author/${slugify(article.writer_name)}`} className="group">
-                <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(article.writer_name)}&background=111111&color=fff`} className="w-12 h-12 rounded-full object-cover shadow-sm group-hover:opacity-90 transition-opacity" alt="Author" />
+              <a href={`/author/${slugify(articleData.writer_name)}`} className="group">
+                <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(articleData.writer_name)}&background=111111&color=fff`} className="w-12 h-12 rounded-full object-cover shadow-sm group-hover:opacity-90 transition-opacity" alt="Author" />
               </a>
               <div className="flex flex-col gap-0.5">
                 <div className="flex items-center gap-2">
-                  <a href={`/author/${slugify(article.writer_name)}`} className="text-[15px] font-bold text-[#111] hover:text-[#d71920] transition-colors">
-                    By {article.writer_name}
+                  <a href={`/author/${slugify(articleData.writer_name)}`} className="text-[15px] font-bold text-[#111] hover:text-[#d71920] transition-colors">
+                    By {articleData.writer_name}
                   </a>
                 </div>
                 <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wide font-sans">
@@ -149,23 +186,23 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
             {/* Hero Image */}
             <div className="aspect-[16/9] w-full overflow-hidden bg-[#f2f2f2] rounded-sm">
               <img
-                src={article.image || `https://picsum.photos/seed/${article.id}/800/600`}
-                alt={article.title}
+                src={articleData.image || `https://picsum.photos/seed/${articleData.id}/800/600`}
+                alt={articleData.title}
                 className="h-full w-full object-cover"
               />
             </div>
             <p className="mt-2 text-[11px] text-gray-500 italic leading-relaxed">
-              {article.image_caption || 'A representative photo'}
+              {articleData.image_caption || 'A representative photo'}
             </p>
 
             {/* Article Body Paragraphs */}
             <div 
               className="space-y-6 pt-8 font-sans text-[17px] sm:text-[18px] leading-[1.65] text-[#292929] article-content"
-              dangerouslySetInnerHTML={{ __html: article.content }}
+              dangerouslySetInnerHTML={{ __html: articleData.content }}
             />
 
             {/* Comments Section */}
-            <CommentsSection articleSlug={article.slug} />
+            <CommentsSection articleSlug={articleData.slug} />
           </article>
 
           {/* Sidebar Column identical to Category Pages */}

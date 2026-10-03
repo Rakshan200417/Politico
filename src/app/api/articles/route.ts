@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 
+let isArticlesTableEnsured = false;
+
 // Ensure table exists and has all required columns
 async function ensureArticlesTable() {
+  if (isArticlesTableEnsured) return;
+  
   try {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS articles (
@@ -54,6 +58,8 @@ async function ensureArticlesTable() {
         }
       }
     }
+    
+    isArticlesTableEnsured = true;
   } catch (err) {
     console.warn('[DB] Could not ensure articles table:', err);
   }

@@ -282,7 +282,7 @@ export default function MagazineCarousel() {
               href={`/news/${slugify(article.title)}`}
               className="flex-shrink-0 bg-[#f7f7f7] p-4 flex flex-col justify-between group cursor-pointer hover:shadow-md transition-shadow border border-transparent block text-left"
               style={{ width: `${cardWidth}px` }}
-             target="_blank">
+            >
               <div>
                 <div className="aspect-[16/10] bg-gray-200 overflow-hidden mb-4">
                   <img
@@ -347,3 +347,4 @@ export default function MagazineCarousel() {
     </section>
   );
 }
+

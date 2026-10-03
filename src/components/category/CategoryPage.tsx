@@ -35,14 +35,15 @@ function StoryMeta({
 }
 
 function StoryRow({ story }: { story: CategoryStory }) {
+  const storySlug = story.slug || story.slug || slugify(story.title);
   return (
     <article className="border-t border-[#e1e1e1] py-4 first:border-t-0 first:pt-0">
       <div className="grid grid-cols-[150px_minmax(0,1fr)] gap-5 sm:grid-cols-[208px_minmax(0,1fr)]">
-        <a href={`/news/${slugify(story.title)}`} className="aspect-[4/3] overflow-hidden bg-[#f2f2f2] block">
+        <a href={`/news/${storySlug}`} className="aspect-[4/3] overflow-hidden bg-[#f2f2f2] block">
           <img src={story.image} alt="" className="h-full w-full object-cover transition-transform duration-300 hover:scale-[1.02]" />
         </a>
         <div>
-          <a href={`/news/${slugify(story.title)}`} className="block">
+          <a href={`/news/${storySlug}`} className="block">
             <h3 className="text-[18px] font-bold leading-[1.08] tracking-[-0.02em] text-[#111] hover:text-[#d71920] sm:text-[21px]">
               {story.title}
             </h3>
@@ -51,7 +52,7 @@ function StoryRow({ story }: { story: CategoryStory }) {
           <StoryMeta
             byline={story.byline}
             title={story.title}
-            slug={slugify(story.title)}
+            slug={storySlug}
             image={story.image}
             deck={story.deck}
           />
@@ -89,7 +90,7 @@ export default function CategoryPage({ category }: { category: CategoryPageData 
       {/* Lead Section (Image 1 match) */}
       <section className="grid gap-8 pt-6 lg:grid-cols-[minmax(0,1.8fr)_minmax(300px,1fr)] mb-12">
         <article>
-          <a href={`/news/${slugify(category.lead.title)}`} className="block group">
+          <a href={`/news/${category.lead.slug || slugify(category.lead.title)}`} className="block group">
             <h2 className="max-w-[740px] text-[32px] font-sans font-bold leading-[1.1] tracking-[-0.03em] text-[#111] group-hover:text-[#d71920] sm:text-[42px]">
               {category.lead.title}
             </h2>
@@ -98,7 +99,7 @@ export default function CategoryPage({ category }: { category: CategoryPageData 
               <StoryMeta
                 byline={category.lead.byline}
                 title={category.lead.title}
-                slug={slugify(category.lead.title)}
+                slug={category.lead.slug || slugify(category.lead.title)}
                 image={category.lead.image}
                 deck={category.lead.deck}
                 category={category.name}
@@ -113,7 +114,7 @@ export default function CategoryPage({ category }: { category: CategoryPageData 
         <aside className="flex flex-col gap-6 lg:border-l border-[#e1e1e1] lg:pl-6">
           {category.sideStories.map((story) => (
             <article key={story.title} className="border-b border-[#e1e1e1] pb-6 last:border-0 last:pb-0">
-              <a href={`/news/${slugify(story.title)}`} className="flex flex-col gap-3 group">
+              <a href={`/news/${story.slug || slugify(story.title)}`} className="flex flex-col gap-3 group">
                 <div className="aspect-[3/2] overflow-hidden bg-[#f2f2f2]">
                   <img src={story.image} alt="" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
                 </div>
@@ -123,7 +124,7 @@ export default function CategoryPage({ category }: { category: CategoryPageData 
                     <StoryMeta
                       byline={story.byline}
                       title={story.title}
-                      slug={slugify(story.title)}
+                      slug={story.slug || slugify(story.title)}
                       image={story.image}
                       category={category.name}
                     />
@@ -162,7 +163,7 @@ export default function CategoryPage({ category }: { category: CategoryPageData 
            <aside className="flex flex-col gap-6 lg:border-l border-[#e1e1e1] lg:pl-6">
              {category.moreStories.slice(0, 3).map((story, i) => (
                 <article key={i} className="border-b border-[#e1e1e1] pb-6 last:border-0 last:pb-0">
-                  <a href={`/news/${slugify(story.title)}`} className="grid grid-cols-[100px_minmax(0,1fr)] gap-4 group">
+                  <a href={`/news/${story.slug || slugify(story.title)}`} className="grid grid-cols-[100px_minmax(0,1fr)] gap-4 group">
                     <div className="aspect-[4/3] overflow-hidden bg-[#f2f2f2]">
                       <img src={story.image} alt="" className="h-full w-full object-cover" />
                     </div>
@@ -200,7 +201,7 @@ export default function CategoryPage({ category }: { category: CategoryPageData 
            <aside className="flex flex-col gap-6 lg:border-l border-[#e1e1e1] lg:pl-6">
              {category.moreStories.slice(1, 3).map((story, i) => (
                 <article key={i} className="border-b border-[#e1e1e1] pb-6 last:border-0 last:pb-0">
-                  <a href={`/news/${slugify(story.title)}`} className="grid grid-cols-[100px_minmax(0,1fr)] gap-4 group">
+                  <a href={`/news/${story.slug || slugify(story.title)}`} className="grid grid-cols-[100px_minmax(0,1fr)] gap-4 group">
                     <div className="aspect-[4/3] overflow-hidden bg-[#f2f2f2]">
                       <img src={story.image} alt="" className="h-full w-full object-cover" />
                     </div>
@@ -244,7 +245,7 @@ export default function CategoryPage({ category }: { category: CategoryPageData 
            <aside className="flex flex-col gap-6 lg:border-l border-[#e1e1e1] lg:pl-6">
              {category.moreStories.slice(2, 5).map((story, i) => (
                 <article key={i} className="border-b border-[#e1e1e1] pb-6 last:border-0 last:pb-0">
-                  <a href={`/news/${slugify(story.title)}`} className="grid grid-cols-[100px_minmax(0,1fr)] gap-4 group">
+                  <a href={`/news/${story.slug || slugify(story.title)}`} className="grid grid-cols-[100px_minmax(0,1fr)] gap-4 group">
                     <div className="aspect-[4/3] overflow-hidden bg-[#f2f2f2]">
                       <img src={story.image} alt="" className="h-full w-full object-cover" />
                     </div>

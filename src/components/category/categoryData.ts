@@ -3,6 +3,7 @@ export interface CategoryStory {
   deck: string;
   byline: string;
   image: string;
+  slug?: string;
 }
 
 export interface CategoryPageData {

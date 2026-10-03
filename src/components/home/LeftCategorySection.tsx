@@ -1,9 +1,15 @@
 import { getPublishedArticlesByCategory } from "@/lib/articleService";
 
 export default async function LeftCategorySection({ category }: { category: string }) {
-  const articles = await getPublishedArticlesByCategory(category, 3);
+  let articles = await getPublishedArticlesByCategory(category, 3);
 
-  if (!articles || articles.length === 0) return null;
+  if (!articles || articles.length === 0) {
+    articles = [
+      { id: 901, slug: 'mock-1', title: `${category} initiatives spark debate in Congress`, writer_name: 'POLITICO STAFF', image: `https://picsum.photos/seed/${category}left1/800/600` },
+      { id: 902, slug: 'mock-2', title: `New bill introduced regarding ${category}`, writer_name: 'JOHN DOE', image: `https://picsum.photos/seed/${category}left2/800/600` },
+      { id: 903, slug: 'mock-3', title: `State-level ${category} reforms take shape`, writer_name: 'JANE SMITH', image: `https://picsum.photos/seed/${category}left3/800/600` }
+    ] as any;
+  }
 
   return (
     <div className="w-full">
@@ -31,3 +37,4 @@ export default async function LeftCategorySection({ category }: { category: stri
     </div>
   );
 }
+

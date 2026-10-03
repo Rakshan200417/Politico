@@ -7,17 +7,10 @@ import MoreTopHeadlines from "@/components/home/MoreTopHeadlines";
 import MoreTopSidebar from "@/components/home/MoreTopSidebar";
 import TopSidebarWidgets from "@/components/home/TopSidebarWidgets";
 import MagazineCarousel from "@/components/home/MagazineCarousel";
-import CongressSection from "@/components/home/CongressSection";
-import WhiteHouseSection from "@/components/home/WhiteHouseSection";
-import LegalSection from "@/components/home/LegalSection";
-import StatesSection from "@/components/home/StatesSection";
-import ElectionsSection from "@/components/home/ElectionsSection";
-import ForeignAffairsSection from "@/components/home/ForeignAffairsSection";
-import EarlierSection from "@/components/home/EarlierSection";
-import ThreeColumnSection from "@/components/home/ThreeColumnSection";
 import AdvertisementSlot from "@/components/common/AdvertisementSlot";
 import MainCategorySection from "@/components/home/MainCategorySection";
 import LeftCategorySection from "@/components/home/LeftCategorySection";
+import WorldHomeSection from "@/components/home/WorldHomeSection";
 
 export default async function Home() {
   // Simulate network delay to ensure the loading skeleton is visible
@@ -303,7 +296,7 @@ export default async function Home() {
               <MainCategorySection category="Markets" />
               <MainCategorySection category="Industries" />
               <MainCategorySection category="Finance" />
-              <MainCategorySection category="World" />
+              <WorldHomeSection />
             </div>
 
             {/* Right Column: LEADERS, MOST READ, ECONOMY, VIDEO */}

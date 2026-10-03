@@ -26,11 +26,19 @@ export interface Article {
 
 export async function getPublishedArticlesByCategory(category: string, limit: number = 5): Promise<Article[]> {
   try {
-    const [rows] = await pool.query(
-      "SELECT * FROM articles WHERE status = 'published' AND category = ? ORDER BY created_at DESC LIMIT ?",
-      [category, limit]
-    );
-    return rows as Article[];
+    if (category.toLowerCase() === "world") {
+      const [rows] = await pool.query(
+        "SELECT * FROM articles WHERE status = 'published' AND category IN ('World', 'Middle East', 'Asia', 'Europe', 'Africa', 'Americas', 'Oceania', 'Russia', 'China', 'United Kingdom', 'Global') ORDER BY created_at DESC LIMIT ?",
+        [limit]
+      );
+      return rows as Article[];
+    } else {
+      const [rows] = await pool.query(
+        "SELECT * FROM articles WHERE status = 'published' AND category = ? ORDER BY created_at DESC LIMIT ?",
+        [category, limit]
+      );
+      return rows as Article[];
+    }
   } catch (error) {
     console.error(`Error fetching articles for category ${category}:`, error);
     return [];

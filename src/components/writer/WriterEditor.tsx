@@ -578,25 +578,6 @@ export default function WriterEditor({
         );
       }
 
-      // 2. Also keep localStorage synchronized for instant offline cache
-      const storedArticlesStr = localStorage.getItem("writer_articles");
-      let storedArticles: ArticleData[] = storedArticlesStr
-        ? JSON.parse(storedArticlesStr)
-        : [];
-
-      if (savedArticle.id) {
-        const index = storedArticles.findIndex((a) => a.id === savedArticle.id);
-        if (index >= 0) {
-          storedArticles[index] = savedArticle;
-        } else {
-          storedArticles.unshift(savedArticle);
-        }
-      } else {
-        savedArticle.id = Date.now();
-        storedArticles.unshift(savedArticle);
-      }
-      localStorage.setItem("writer_articles", JSON.stringify(storedArticles));
-
       // 3. Show loading animation feedback as requested
       setTimeout(() => {
         if (status === "draft") {

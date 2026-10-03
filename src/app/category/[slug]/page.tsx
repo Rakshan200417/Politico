@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
 import CategoryPage from "@/components/category/CategoryPage";
+import WorldCategoryPage from "@/components/category/WorldCategoryPage";
 import { getPublishedArticlesByCategory } from "@/lib/articleService";
 import type { CategoryPageData, CategoryStory } from "@/components/category/categoryData";
 
@@ -18,25 +19,26 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 export default async function CategoryRoute({ params }: { params: { slug: string } }) {
+  if (params.slug.toLowerCase() === "world") {
+    return <WorldCategoryPage />;
+  }
+
   // Convert slug back to proper category string (e.g. 'technology' -> 'Technology')
   const categoryName = params.slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   
-  const articles = await getPublishedArticlesByCategory(categoryName, 50);
+  let articles = await getPublishedArticlesByCategory(categoryName, 50);
 
   if (!articles || articles.length === 0) {
-    // We could either notFound() or just show an empty category page
-    return (
-      <div className="min-h-screen bg-white">
-        <Header />
-        <main className="mx-auto w-full max-w-[1080px] px-4 py-16 font-sans sm:px-6">
-          <h1 className="text-[40px] font-sans text-[#111] sm:text-[48px] mb-4 text-center">
-            {categoryName}
-          </h1>
-          <p className="text-center text-gray-500">No articles found for this category yet.</p>
-        </main>
-        <Footer />
-      </div>
-    );
+    // Generate beautiful mock fallback data for empty categories
+    const mockArticles = Array.from({ length: 7 }).map((_, i) => ({
+      id: 9000 + i,
+      slug: `mock-${params.slug}-${i}`,
+      title: `${categoryName} Update: Major Developments By POLITICO Staff Part ${i + 1}`,
+      deck: `This is a comprehensive overview of the latest events in ${categoryName}, bringing you the details that matter most.`,
+      writer_name: 'POLITICO STAFF',
+      image: `https://picsum.photos/seed/${params.slug}${i}/800/600`
+    })) as any;
+    articles = mockArticles;
   }
 
   const mapToStory = (article: any): CategoryStory => ({
@@ -44,6 +46,7 @@ export default async function CategoryRoute({ params }: { params: { slug: string
     deck: article.deck,
     byline: article.writer_name,
     image: article.image || `https://picsum.photos/seed/${article.id}/800/600`,
+    slug: article.slug,
   });
 
   const leadArticle = mapToStory(articles[0]);

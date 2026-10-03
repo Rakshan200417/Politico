@@ -76,34 +76,12 @@ export default function WriterDashboard() {
         const data = await res.json();
         if (data.articles && data.articles.length > 0) {
           setArticles(data.articles);
-          localStorage.setItem(
-            "writer_articles",
-            JSON.stringify(data.articles),
-          );
           setIsLoading(false);
           return;
         }
       }
     } catch (err) {
-      console.warn(
-        "Could not fetch articles from DB, checking local storage:",
-        err,
-      );
-    }
-
-    // Fallback to localStorage
-    const local = localStorage.getItem("writer_articles");
-    if (local) {
-      try {
-        const parsed = JSON.parse(local);
-        if (parsed.length > 0) {
-          setArticles(parsed);
-          setIsLoading(false);
-          return;
-        }
-      } catch (e) {
-        console.error("Failed to parse local articles:", e);
-      }
+      console.warn("Could not fetch articles from DB:", err);
     }
 
     // Default mock seed article
@@ -133,7 +111,6 @@ export default function WriterDashboard() {
     ];
 
     setArticles(initialSeed);
-    localStorage.setItem("writer_articles", JSON.stringify(initialSeed));
     setIsLoading(false);
   };
 
@@ -305,7 +282,6 @@ export default function WriterDashboard() {
     // 1. Optimistic UI update
     const updated = articles.filter((a) => a.id !== article.id);
     setArticles(updated);
-    localStorage.setItem("writer_articles", JSON.stringify(updated));
 
     // 2. Persist to DB
     try {
@@ -334,7 +310,6 @@ export default function WriterDashboard() {
       } else {
         updated = [savedArticle, ...prev];
       }
-      localStorage.setItem("writer_articles", JSON.stringify(updated));
       return updated;
     });
 
