@@ -24,11 +24,16 @@ import {
   X
 } from "lucide-react";
 import WriterEditor, { ArticleData } from "@/components/writer/WriterEditor";
+import ManageAds from "@/components/admin/ManageAds";
+import ContactUsSubmissions from "@/components/admin/ContactUsSubmissions";
+import AdvertiseLeads from "@/components/admin/AdvertiseLeads";
 
 interface AdminArticleData extends ArticleData {
   writer_name?: string;
   writer_email?: string;
   updated_at?: string;
+  views?: number;
+  comments_count?: number;
 }
 
 const adminNavItems: NavItem[] = [
@@ -45,7 +50,7 @@ const adminNavItems: NavItem[] = [
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
-  const [user, setUser] = useState<{ name?: string; email?: string } | null>(null);
+  const [user, setUser] = useState<{ id?: number | string; name?: string; email?: string; role?: string } | null>(null);
   
   const [pendingReviews, setPendingReviews] = useState<AdminArticleData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -169,17 +174,34 @@ export default function AdminDashboard() {
   const handleUserSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const isEditing = userModalState === "edit" && selectedSystemUser;
       const res = await fetch("/api/users", {
-        method: "POST",
+        method: isEditing ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...userForm, loggedInEmail: user?.email })
+        body: JSON.stringify({
+          ...(isEditing ? { id: selectedSystemUser.id } : {}),
+          ...userForm,
+          loggedInEmail: user?.email,
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error || "Failed to save user");
+        alert(data.error || `Failed to ${isEditing ? "update" : "save"} user`);
         return;
       }
+
+      if (isEditing && user && (user.id === selectedSystemUser.id || user.email === selectedSystemUser.email)) {
+        const updatedCurrentUser = {
+          ...user,
+          name: userForm.name || user.name,
+          role: userForm.role || user.role,
+        };
+        setUser(updatedCurrentUser);
+        localStorage.setItem("user", JSON.stringify(updatedCurrentUser));
+      }
+
       setUserModalState("closed");
+      setSelectedSystemUser(null);
       setUserForm({ name: "", email: "", password: "", role: "writer" });
       loadSystemUsers();
     } catch (err) {
@@ -226,6 +248,45 @@ export default function AdminDashboard() {
     } catch (err) {
       console.error("Failed to delete newsletters:", err);
     }
+  };
+
+  const handleExportCSV = () => {
+    if (newsletters.length === 0) {
+      alert("No data to export");
+      return;
+    }
+
+    // Prepare CSV header
+    const headers = ["id", "email", "newsletters", "subscribedAt"];
+    
+    // Prepare CSV rows
+    const rows = newsletters.map(sub => {
+      const formattedDate = new Date(sub.subscribed_at || Date.now()).toLocaleDateString('en-US', { 
+        month: 'short', day: '2-digit', year: 'numeric' 
+      });
+      // Replace commas in newsletter strings with pipes to prevent CSV column breaking, just in case
+      const topics = sub.newsletters ? sub.newsletters.split(",").map((t: string) => t.trim()).filter(Boolean).join("|") : "";
+      
+      return [
+        `nl-${sub.id || Date.now()}`, // ID
+        sub.email,                    // Email
+        `"${topics}"`,                // Newsletters
+        `"${formattedDate}"`          // Date
+      ].join(",");
+    });
+
+    // Combine headers and rows
+    const csvContent = [headers.join(","), ...rows].join("\n");
+    
+    // Create Blob and trigger download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `politico_subscribers_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleDeleteSingleNewsletter = async (id: number) => {
@@ -343,7 +404,7 @@ export default function AdminDashboard() {
           <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#10b981] transition-all group-hover:w-2"></div>
           <div>
             <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Completed Releases</div>
-            <div className="text-3xl font-black text-gray-900">420</div>
+            <div className="text-3xl font-black text-gray-900">{publishedPosts.length > 0 ? publishedPosts.length : 0}</div>
           </div>
           <div className="w-12 h-12 rounded-full bg-[#d1fae5] flex items-center justify-center text-[#10b981]">
             <CheckCircle2 size={22} />
@@ -479,7 +540,10 @@ export default function AdminDashboard() {
                   <Trash2 size={14} /> DELETE SELECTED ({selectedNewsletters.length})
                 </button>
               )}
-              <button className="text-[11px] font-bold text-gray-700 bg-white border border-gray-200 px-4 py-2 rounded flex items-center gap-2 hover:bg-gray-50 transition shadow-sm uppercase tracking-wider">
+              <button 
+                onClick={handleExportCSV}
+                className="text-[11px] font-bold text-gray-700 bg-white border border-gray-200 px-4 py-2 rounded flex items-center gap-2 hover:bg-gray-50 transition shadow-sm uppercase tracking-wider"
+              >
                 <Inbox size={14} /> EXPORT CSV
               </button>
               <div className="text-[10px] font-bold text-gray-500 bg-gray-50 px-3 py-2 rounded-full border border-gray-100">
@@ -541,7 +605,7 @@ export default function AdminDashboard() {
                         </div>
                       </td>
                       <td className="py-4 px-4">
-                        <span className="text-xs text-gray-500 font-mono">
+                        <span className="text-xs text-gray-500 font-mono whitespace-nowrap">
                           {new Date(sub.subscribed_at || Date.now()).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}
                         </span>
                       </td>
@@ -570,19 +634,7 @@ export default function AdminDashboard() {
       )}
 
       {/* Placeholders for other tabs */}
-      {activeTab !== "overview" && activeTab !== "newsletter" && activeTab !== "published" && (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden p-12 text-center">
-          <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100">
-            <Settings size={28} className="text-gray-400" />
-          </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2 capitalize">{activeTab.replace("-", " ")} Workspace</h2>
-          <p className="text-sm text-gray-500 max-w-md mx-auto">
-            This module is currently under construction and will be deployed in the next phase of the admin dashboard release.
-          </p>
-        </div>
-      )}
 
-      {/* Published Posts Tab */}
       {activeTab === "published" && (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden p-6 sm:p-8 relative">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6 pb-6">
@@ -595,7 +647,7 @@ export default function AdminDashboard() {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <button className="text-[11px] font-bold text-[#ea580c] bg-white border border-gray-200 px-4 py-2 rounded flex items-center gap-2 hover:bg-orange-50 transition shadow-sm uppercase tracking-wider whitespace-nowrap">
+              <button className="text-[11px] font-bold text-[#ce1126] bg-white border border-gray-200 px-4 py-2 rounded flex items-center gap-2 hover:bg-red-50 transition shadow-sm uppercase tracking-wider whitespace-nowrap">
                 <Database size={14} /> BACKUP ARTICLES (ZIP)
               </button>
               <div className="text-[10px] font-bold text-gray-500 bg-gray-50 px-3 py-2 rounded-full border border-gray-100 whitespace-nowrap">
@@ -677,22 +729,29 @@ export default function AdminDashboard() {
                       </td>
                       <td className="py-4 px-4">
                         <span className="text-[9px] font-bold text-blue-700 bg-blue-50 border border-blue-100 px-2.5 py-0.5 rounded-sm uppercase tracking-widest">
-                          {article.category || 'World'}
+                          {(() => {
+                            try {
+                              let subs = article.subcategories;
+                              if (typeof subs === 'string') {
+                                subs = JSON.parse(subs || '[]');
+                              }
+                              if (Array.isArray(subs) && subs.length > 0) return subs[0];
+                            } catch(e) {}
+                            return article.category || 'World';
+                          })()}
                         </span>
                       </td>
                       <td className="py-4 px-4">
                         <span className="text-xs font-bold text-gray-800">{article.writer_name || article.writer_email?.split('@')[0] || "Unknown"}</span>
                       </td>
                       <td className="py-4 px-4">
-                        <span className="text-[10px] font-bold text-[#2563eb]">253 Views</span>
+                        <span className="text-[10px] font-bold text-[#2563eb]">{article.views || 0} Views</span>
                         <span className="text-[10px] text-gray-400 mx-1">•</span>
-                        <span className="text-[10px] font-bold text-gray-500">0 Comments</span>
+                        <span className="text-[10px] font-bold text-gray-500">{article.comments_count || 0} Comments</span>
                       </td>
                       <td className="py-4 px-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <button className="text-[10px] font-bold text-[#ea580c] bg-orange-50 px-2.5 py-1 rounded-md border border-orange-200 flex items-center gap-1.5 whitespace-nowrap">
-                            <span className="w-1.5 h-1.5 bg-[#ea580c] rounded-full"></span> Google Index
-                          </button>
+
                           <button 
                             onClick={() => handleOpenArticle(article)}
                             className="w-7 h-7 rounded bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center hover:bg-blue-100 transition-colors"
@@ -869,6 +928,18 @@ export default function AdminDashboard() {
         </div>
       )}
 
+      {activeTab === "ads" && (
+        <ManageAds />
+      )}
+
+      {activeTab === "contact" && (
+        <ContactUsSubmissions />
+      )}
+
+      {activeTab === "leads" && (
+        <AdvertiseLeads />
+      )}
+
       {/* User Modals */}
       {(userModalState === "add" || userModalState === "edit") && (
         <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
@@ -939,7 +1010,7 @@ export default function AdminDashboard() {
                 </button>
                 <button 
                   type="submit" 
-                  className="flex-1 py-3 bg-[#ea580c] hover:bg-[#c2410c] text-white text-[11px] font-bold uppercase tracking-widest rounded-lg transition-colors"
+                  className="flex-1 py-3 bg-[#ce1126] hover:bg-[#a00d1d] text-white text-[11px] font-bold uppercase tracking-widest rounded-lg transition-colors"
                 >
                   {userModalState === "add" ? "Create User" : "Update User"}
                 </button>

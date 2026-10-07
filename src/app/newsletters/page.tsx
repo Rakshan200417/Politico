@@ -124,10 +124,10 @@ export default function NewslettersPage() {
 
   const [email, setEmail] = useState("");
 
-  const handleSignUp = () => {
-    const hasSelection = Object.values(selected).some((val) => val === true);
+  const handleSignUp = async () => {
+    const selectedNewsletters = Object.keys(selected).filter(key => selected[key]);
     
-    if (!hasSelection) {
+    if (selectedNewsletters.length === 0) {
       alert("Please select at least one newsletter to sign up.");
       return;
     }
@@ -136,8 +136,26 @@ export default function NewslettersPage() {
       alert("Please enter your email to sign up.");
       return;
     }
-    // Redirect to success page
-    window.location.href = "/newsletters/success";
+    
+    try {
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          email: email.trim(), 
+          newsletters: selectedNewsletters.join(",") 
+        })
+      });
+      
+      if (res.ok) {
+        window.location.href = "/newsletters/success";
+      } else {
+        alert("Failed to sign up. Please try again later.");
+      }
+    } catch (err) {
+      console.error("Error signing up:", err);
+      alert("An error occurred while signing up.");
+    }
   };
 
   return (

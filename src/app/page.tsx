@@ -10,6 +10,7 @@ import MagazineCarousel from "@/components/home/MagazineCarousel";
 import AdvertisementSlot from "@/components/common/AdvertisementSlot";
 import MainCategorySection from "@/components/home/MainCategorySection";
 import LeftCategorySection from "@/components/home/LeftCategorySection";
+import RightListCategorySection from "@/components/home/RightListCategorySection";
 import WorldHomeSection from "@/components/home/WorldHomeSection";
 
 export default async function Home() {
@@ -50,103 +51,7 @@ export default async function Home() {
 
             {/* Center: Top News */}
             <div className="order-1 lg:order-2 pt-4 lg:pt-0 lg:px-4">
-              <div className="flex items-center gap-2 pb-2 mb-3 border-b border-[#d9d9d9]">
-                <span className="w-2.5 h-2.5 rounded-full border-2 border-[#d32f2f] bg-transparent inline-block"></span>
-                <h2 className="text-[10px] font-extrabold tracking-[0.12em] text-[#222222] uppercase font-sans">
-                  TOP NEWS
-                </h2>
-              </div>
-              <a href={`/news/${slugify("'The US can't lose': Pentagon plows ahead on AI despite warnings")}`}  className="mb-6 group cursor-pointer block">
-                <h1 className="text-[40px] md:text-[52px] font-bold leading-[1] tracking-[-0.03em] text-[#111111] group-hover:text-[#d32f2f] transition-colors mb-4 font-sans">
-                  &apos;The US can&apos;t lose&apos;: Pentagon plows ahead on AI despite warnings
-                </h1>
-                <p className="text-[17px] leading-[1.4] text-[#333333] font-sans mb-2">
-                  Military leaders warn the risks of falling behind adversaries in artificial intelligence research outweigh the potential risks of the technology.
-                </p>
-                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest font-sans mb-4">
-                  BY LEE SHANE
-                </div>
-                <div className="w-full aspect-[16/9] bg-gray-200 mb-6 overflow-hidden">
-                  <img src="https://picsum.photos/seed/1/800/600" alt="Pentagon" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
-                </div>
-              </a>
-              
-              {/* Row of 3 small articles */}
-              <div className="grid grid-cols-3 gap-4 mb-8 pb-8 border-b border-gray-200">
-                  <a href={`/news/${slugify("GOP's gas tax holiday push falters in House")}`} className="group cursor-pointer block">
-                    <div className="w-full aspect-video bg-gray-200 mb-2 overflow-hidden">
-                       <img src="https://picsum.photos/seed/2/800/600" alt="News" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
-                    </div>
-                    <h3 className="text-[14px] font-bold leading-[1.2] tracking-[-0.02em] text-[#111111] group-hover:text-[#d32f2f] transition-colors mb-1 font-sans">
-                      GOP&apos;s gas tax holiday push falters in House
-                    </h3>
-                    <div className="text-[9px] font-bold text-gray-500 uppercase tracking-wider font-sans">
-                      BY PAVAN ACHARYA, ANTHONY CRUZ AND MICO PORTUONDO
-                    </div>
-                  </a>
-
-                  <a href={`/news/${slugify("Trump administration paid federal workers $6.7B to quit, GAO audit says")}`} className="group cursor-pointer block">
-                    <div className="w-full aspect-video bg-gray-200 mb-2 overflow-hidden">
-                       <img src="https://picsum.photos/seed/3/800/600" alt="News" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
-                    </div>
-                    <h3 className="text-[14px] font-bold leading-[1.2] tracking-[-0.02em] text-[#111111] group-hover:text-[#d32f2f] transition-colors mb-1 font-sans">
-                      Trump administration paid federal workers $6.7B to quit, GAO audit says
-                    </h3>
-                    <div className="text-[9px] font-bold text-gray-500 uppercase tracking-wider font-sans">
-                      BY CASEY HE
-                    </div>
-                  </a>
-
-                  <a href={`/news/${slugify("Poll: Americans say there's a serious risk of AI destroying humanity")}`} className="group cursor-pointer block">
-                    <div className="w-full aspect-video bg-gray-200 mb-2 overflow-hidden">
-                       <img src="https://picsum.photos/seed/4/800/600" alt="News" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
-                    </div>
-                    <div className="text-[10px] font-extrabold text-[#d32f2f] uppercase tracking-widest mb-1 font-sans">
-                      THE POLITICO POLL
-                    </div>
-                    <h3 className="text-[14px] font-bold leading-[1.2] tracking-[-0.02em] text-[#111111] group-hover:text-[#d32f2f] transition-colors mb-1 font-sans">
-                      Poll: Americans say there&apos;s a serious risk of AI destroying humanity
-                    </h3>
-                    <div className="text-[9px] font-bold text-gray-500 uppercase tracking-wider font-sans">
-                      BY ERIN DOHERTY
-                    </div>
-                  </a>
-              </div>
-
-              <a href={`/news/${slugify("Fears of AI sparked a moment of unity. Now that's over.")}`} className="group cursor-pointer block mb-6">
-                <h2 className="text-[28px] font-bold leading-[1.2] tracking-[-0.02em] text-[#111111] group-hover:text-[#d32f2f] transition-colors mb-2 font-sans">
-                  Fears of AI sparked a moment of unity. Now that&apos;s over.
-                </h2>
-                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest font-sans mb-4">
-                  BY KATHERINE LONG, GABBY MILLER AND OWEN DAHLKAMP
-                </div>
-              </a>
-              
-              {/* Row of 2 articles */}
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                  <a href={`/news/${slugify("Rand Paul kills Kennedy's AI 'kill switch' bill 1")}`} className="group cursor-pointer block">
-                    <div className="w-full aspect-video bg-gray-200 mb-2 overflow-hidden">
-                       <img src="https://picsum.photos/seed/5/800/600" alt="News" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
-                    </div>
-                    <h3 className="text-[18px] font-bold leading-[1.2] tracking-[-0.02em] text-[#111111] group-hover:text-[#d32f2f] transition-colors mb-2 font-sans">
-                      Rand Paul kills Kennedy&apos;s AI &apos;kill switch&apos; bill
-                    </h3>
-                    <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest font-sans">
-                      BY JORDAIN CARNEY
-                    </div>
-                  </a>
-                  <a href={`/news/${slugify("Rand Paul kills Kennedy's AI 'kill switch' bill 2")}`} className="group cursor-pointer block">
-                    <div className="w-full aspect-video bg-gray-200 mb-2 overflow-hidden">
-                       <img src="https://picsum.photos/seed/5/800/600" alt="News" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
-                    </div>
-                    <h3 className="text-[18px] font-bold leading-[1.2] tracking-[-0.02em] text-[#111111] group-hover:text-[#d32f2f] transition-colors mb-2 font-sans">
-                      Rand Paul kills Kennedy&apos;s AI &apos;kill switch&apos; bill
-                    </h3>
-                    <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest font-sans">
-                      BY JORDAIN CARNEY
-                    </div>
-                  </a>
-              </div>
+              <TopNewsGrid />
 
             </div>
 
@@ -307,131 +212,11 @@ export default async function Home() {
               </div>
 
               {/* MOST READ */}
-              <div className="w-full border-t border-gray-200 pt-6">
-                <div className="flex items-center gap-2 pb-2 mb-3 border-b border-[#d9d9d9]">
-                  <span className="w-2.5 h-2.5 rounded-full border-2 border-[#d32f2f] bg-transparent inline-block"></span>
-                  <h2 className="text-[10px] font-extrabold tracking-[0.12em] text-[#222222] uppercase font-sans">
-                    MOST READ
-                  </h2>
-                </div>
-                <a href={`/news/${slugify("Election watchers brace for Trump's next move after Supreme Court ruling")}`}  className="group cursor-pointer mb-6 block border-b border-gray-200 pb-4">
-                  <div className="w-full aspect-video bg-gray-200 mb-3 overflow-hidden">
-                    <img src="https://picsum.photos/seed/19/800/600" alt="Most Read" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
-                  </div>
-                </a>
-                <ul className="space-y-4">
-                  <li className="flex gap-4 group cursor-pointer items-start border-b border-gray-100 pb-4">
-                    <span className="text-[#d32f2f] font-bold text-[14px] mt-0.5">1</span>
-                    <h3 className="text-[15px] font-bold leading-[1.3] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans">
-                      Election watchers brace for Trump&apos;s next move after Supreme Court ruling
-                    </h3>
-                  </li>
-                  <li className="flex gap-4 group cursor-pointer items-start border-b border-gray-100 pb-4">
-                    <span className="text-[#d32f2f] font-bold text-[14px] mt-0.5">2</span>
-                    <h3 className="text-[15px] font-bold leading-[1.3] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans">
-                      &apos;That&apos;s not a strong suit&apos;: Trump&apos;s lack of message discipline shows one week post convention
-                    </h3>
-                  </li>
-                  <li className="flex gap-4 group cursor-pointer items-start border-b border-gray-100 pb-4">
-                    <span className="text-[#d32f2f] font-bold text-[14px] mt-0.5">3</span>
-                    <h3 className="text-[15px] font-bold leading-[1.3] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans">
-                      Rebel Democrats again help House GOP advance floor agenda
-                    </h3>
-                  </li>
-                  <li className="flex gap-4 group cursor-pointer items-start border-b border-gray-100 pb-4">
-                    <span className="text-[#d32f2f] font-bold text-[14px] mt-0.5">4</span>
-                    <h3 className="text-[15px] font-bold leading-[1.3] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans">
-                      Trump threatens to impose &apos;serious tariffs&apos; on Europe if Canada joins EU as associate member
-                    </h3>
-                  </li>
-                  <li className="flex gap-4 group cursor-pointer items-start border-b border-gray-100 pb-4">
-                    <span className="text-[#d32f2f] font-bold text-[14px] mt-0.5">5</span>
-                    <h3 className="text-[15px] font-bold leading-[1.3] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans">
-                      Texas Republicans are scrambling after Bo French&apos;s outburst
-                    </h3>
-                  </li>
-                </ul>
-              </div>
-
+              <RightListCategorySection category="" isMostRead={true} />
               {/* ECONOMY */}
-              <div className="w-full border-t border-gray-200 pt-6">
-                <div className="flex items-center gap-2 pb-2 mb-3 border-b border-[#d9d9d9]">
-                  <span className="w-2.5 h-2.5 rounded-full border-2 border-[#d32f2f] bg-transparent inline-block"></span>
-                  <h2 className="text-[10px] font-extrabold tracking-[0.12em] text-[#222222] uppercase font-sans">
-                    ECONOMY
-                  </h2>
-                </div>
-                <ul className="space-y-4">
-                  <li className="pt-4 border-t border-gray-100 first:border-0 first:pt-0">
-                    <a href={`/news/${slugify("Hegseth allies campaign to put loyalist in Army secretary job")}`}  className="flex gap-3 group block">
-                      <div className="w-[80px] h-[55px] bg-gray-200 shrink-0 overflow-hidden relative">
-                         <img src="https://picsum.photos/seed/80/800/600" alt="News" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
-                      </div>
-                      <h3 className="text-[14px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mt-1">
-                        Hegseth allies campaign to put loyalist in Army secretary job
-                      </h3>
-                    </a>
-                  </li>
-                  <li className="pt-4 border-t border-gray-100">
-                    <a href={`/news/${slugify("Bernie Sanders Lets Loose on the Democratic Party, the Midterms and 2028")}`}  className="flex gap-3 group block">
-                      <div className="w-[80px] h-[55px] bg-gray-200 shrink-0 overflow-hidden relative">
-                         <img src="https://picsum.photos/seed/81/800/600" alt="News" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
-                      </div>
-                      <h3 className="text-[14px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mt-1">
-                        Bernie Sanders Lets Loose on the Democratic Party, the Midterms and 2028
-                      </h3>
-                    </a>
-                  </li>
-                  <li className="pt-4 border-t border-gray-100">
-                    <a href={`/news/${slugify("The Iranian Regime's Dynamics Are Fooling Trump")}`}  className="flex gap-3 group block">
-                      <div className="w-[80px] h-[55px] bg-gray-200 shrink-0 overflow-hidden relative">
-                         <img src="https://picsum.photos/seed/82/800/600" alt="News" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
-                      </div>
-                      <h3 className="text-[14px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mt-1">
-                        The Iranian Regime&apos;s Dynamics Are Fooling Trump
-                      </h3>
-                    </a>
-                  </li>
-                  <li className="pt-4 border-t border-gray-100">
-                    <a href={`/news/${slugify("Trump's ballroom Tush Push")}`}  className="flex gap-3 group block">
-                      <div className="w-[80px] h-[55px] bg-gray-200 shrink-0 overflow-hidden relative">
-                         <img src="https://picsum.photos/seed/83/800/600" alt="News" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
-                      </div>
-                      <h3 className="text-[14px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mt-1">
-                        Trump&apos;s ballroom Tush Push
-                      </h3>
-                    </a>
-                  </li>
-                </ul>
-              </div>
-
+              <RightListCategorySection category="Economy" />
               {/* VIDEO */}
-              <div className="w-full border-t border-gray-200 pt-6">
-                <div className="flex items-center gap-2 pb-2 mb-3 border-b border-[#d9d9d9]">
-                  <span className="w-2.5 h-2.5 rounded-full border-2 border-[#d32f2f] bg-transparent inline-block"></span>
-                  <h2 className="text-[10px] font-extrabold tracking-[0.12em] text-[#222222] uppercase font-sans">
-                    VIDEO
-                  </h2>
-                </div>
-                <ul className="space-y-4">
-                  <li className="pt-4 border-t border-gray-100 first:border-0 first:pt-0">
-                    <a href={`/news/${slugify("David Sacks talks AI 'fearmongering', Trump administration's policy approach and more")}`}  className="flex gap-3 group block">
-                      <div className="w-[80px] h-[55px] bg-gray-200 shrink-0 overflow-hidden relative">
-                         <img src="https://picsum.photos/seed/90/800/600" alt="Video" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
-                         <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/10 transition-colors">
-                           <div className="w-6 h-6 rounded-full bg-[#d32f2f] flex items-center justify-center">
-                             <div className="w-0 h-0 border-t-[3px] border-l-[5px] border-b-[3px] border-transparent border-l-white ml-0.5"></div>
-                           </div>
-                         </div>
-                      </div>
-                      <h3 className="text-[14px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mt-1">
-                        David Sacks talks AI &apos;fearmongering&apos;, Trump administration&apos;s policy approach and more
-                      </h3>
-                    </a>
-                  </li>
-                </ul>
-              </div>
-
+              <RightListCategorySection category="Interview" />
               {/* Sticky Block Right */}
               <div className="flex-1 w-full space-y-6 tall-sticky self-start mt-4 lg:mt-6 border-t border-gray-100 lg:border-t-0 pt-4 lg:pt-0">
                 <ul className="space-y-4">

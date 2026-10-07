@@ -35,3 +35,27 @@ export async function DELETE(request: Request) {
     );
   }
 }
+
+export async function POST(request: Request) {
+  try {
+    const { email, newsletters } = await request.json();
+    if (!email || !newsletters) {
+      return NextResponse.json({ error: "Email and newsletters are required" }, { status: 400 });
+    }
+    
+    // Attempt to insert or update the newsletter subscriptions for the email
+    await pool.query(
+      "INSERT INTO newsletter_subscribers (email, newsletters) VALUES (?, ?) ON DUPLICATE KEY UPDATE newsletters = ?",
+      [email, newsletters, newsletters]
+    );
+    
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error subscribing to newsletters:", error);
+    return NextResponse.json(
+      { error: "Failed to subscribe" },
+      { status: 500 }
+    );
+  }
+}
+

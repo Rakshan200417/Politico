@@ -39,6 +39,7 @@ import {
 export interface ArticleData {
   id?: number;
   title: string;
+  writer_name?: string;
   deck: string;
   content: string;
   category: string;
@@ -77,6 +78,38 @@ export const navbarCategories = [
   "Industries",
   "Technology",
   "Interview",
+  // Companies
+  "Corporate Announcements",
+  "Mergers & Acquisitions",
+  "Leadership Changes",
+  // Startups
+  "Funding & Investment",
+  "Founder Stories",
+  "Venture Capital",
+  "Startup Failures",
+  // Markets
+  "Stock Market",
+  "Bonds",
+  "Mutual Funds",
+  // Economy
+  "GDP & Economic Growth",
+  "Employment",
+  "Government Economic Policies",
+  // Finance
+  "Digital Banking",
+  "FinTech",
+  "Banking Industry",
+  "Loans & Lending",
+  // Technology
+  "Artificial Intelligence",
+  "Cybersecurity",
+  "Gadgets & Devices",
+  "Software",
+  // Industries
+  "Manufacturing",
+  "Energy",
+  "Pharmaceuticals",
+  "Automobile",
 ];
 
 export const worldRegions = [
@@ -153,7 +186,18 @@ export default function WriterEditor({
   >(null);
   const [leadImage, setLeadImage] = useState(initialArticle?.image || "");
   const [pendingImages, setPendingImages] = useState<any[]>([]);
+  const [writerAvatar, setWriterAvatar] = useState("");
 
+  useEffect(() => {
+    fetch(`/api/profile?email=${encodeURIComponent(userEmail)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.profile?.avatar_url) {
+          setWriterAvatar(data.profile.avatar_url);
+        }
+      })
+      .catch(console.error);
+  }, [userEmail]);
 
   // Floating Image Toolbar States
   const [selectedImageNode, setSelectedImageNode] =
@@ -164,40 +208,67 @@ export default function WriterEditor({
 
   const editorRef = useRef<HTMLDivElement>(null);
 
-  // Manage ResizeObserver for the selected image
+  // Manage ResizeObserver and scroll/window resize for the selected image
   useEffect(() => {
     let ro: ResizeObserver | null = null;
+    const updateRects = () => {
+      const wrapper = editorRef.current?.parentElement;
+      if (!wrapper || !selectedImageNode) return;
+      const wrapperRect = wrapper.getBoundingClientRect();
+      const imgRect = selectedImageNode.getBoundingClientRect();
+      if (wrapperRect) {
+        setToolbarPosition({
+          top: Math.max(10, imgRect.top - wrapperRect.top - 55),
+          left: Math.max(10, imgRect.left - wrapperRect.left + (imgRect.width / 2) - 150),
+        });
+        setImageRect({
+          top: imgRect.top - wrapperRect.top,
+          left: imgRect.left - wrapperRect.left,
+          width: imgRect.width,
+          height: imgRect.height,
+        });
+      }
+    };
+
     if (selectedImageNode) {
-      const updateRects = () => {
-        const wrapperRect = editorRef.current?.parentElement?.getBoundingClientRect();
-        const imgRect = selectedImageNode.getBoundingClientRect();
-        if (wrapperRect) {
-          setToolbarPosition({
-            top: imgRect.top - wrapperRect.top - 50,
-            left: imgRect.left - wrapperRect.left + imgRect.width / 2 - 150,
-          });
-          setImageRect({
-            top: imgRect.top - wrapperRect.top,
-            left: imgRect.left - wrapperRect.left,
-            width: imgRect.width,
-            height: imgRect.height,
-          });
-        }
-      };
       updateRects();
       ro = new ResizeObserver(updateRects);
       ro.observe(selectedImageNode);
+      window.addEventListener("scroll", updateRects, true);
+      window.addEventListener("resize", updateRects);
     }
     return () => {
       if (ro) ro.disconnect();
+      window.removeEventListener("scroll", updateRects, true);
+      window.removeEventListener("resize", updateRects);
     };
   }, [selectedImageNode, imageRenderTick]);
 
-  // Initialize editor content
+  // Initialize editor content & embed lead image if not already in content
   useEffect(() => {
-    if (editorRef.current && initialArticle?.content) {
-      editorRef.current.innerHTML = initialArticle.content;
+    if (editorRef.current) {
+      let initialHtml = initialArticle?.content || "";
+      const initialImg = initialArticle?.image || (initialArticle?.pending_images && initialArticle.pending_images[0]?.url);
+      
+      // If there is an image but not yet inserted as an img tag in the canvas, embed it as interactive figure
+      if (initialImg && !initialHtml.includes("<img")) {
+        const figureHtml = `
+          <figure class="my-6 mx-auto w-full clear-both">
+            <img src="${initialImg}" alt="${initialArticle?.title || 'Article image'}" class="w-full rounded-2xl shadow-sm object-cover mx-auto cursor-pointer" />
+            ${(initialArticle?.image_caption || initialArticle?.image_credit) ? `<figcaption class="text-base flex justify-between items-center text-gray-500 mt-2.5 font-medium italic px-1"><span class="text-left">${initialArticle.image_caption || ''}</span> ${initialArticle.image_credit ? `<span class="text-right not-italic text-gray-400 text-[0.8em]">(${initialArticle.image_credit})</span>` : ''}</figcaption>` : ''}
+          </figure>
+          <p><br></p>
+        `;
+        initialHtml = figureHtml + initialHtml;
+      }
+
+      editorRef.current.innerHTML = initialHtml;
+      setContent(initialHtml);
     }
+
+    if (initialArticle?.image) setLeadImage(initialArticle.image);
+    if (initialArticle?.image_caption) setImageCaption(initialArticle.image_caption);
+    if (initialArticle?.image_credit) setImageCredit(initialArticle.image_credit);
   }, [initialArticle]);
 
   // Auto-calculate read time based on word count
@@ -214,11 +285,14 @@ export default function WriterEditor({
     setReadDuration(`${minutes} min read`);
   }, [title, deck, content]);
 
-  // Execute rich text commands
+  // Execute rich text commands with focus preservation
   const handleFormat = (
     command: string,
     value: string | undefined = undefined,
   ) => {
+    if (editorRef.current) {
+      editorRef.current.focus();
+    }
     document.execCommand(command, false, value);
     if (editorRef.current) {
       setContent(editorRef.current.innerHTML);
@@ -379,11 +453,11 @@ export default function WriterEditor({
        const isLeftEdge = corner.includes('w');
        const newWidth = isLeftEdge ? startWidth - deltaX : startWidth + deltaX;
        
-       if (newWidth > 50) {
+       if (newWidth > 60) {
           targetElement.style.width = `${newWidth}px`;
-          if (targetElement === selectedImageNode) {
-             selectedImageNode.style.height = "auto";
-          }
+          selectedImageNode.style.width = "100%";
+          selectedImageNode.style.height = "auto";
+          setImageRenderTick(t => t + 1);
        }
     };
     
@@ -405,6 +479,7 @@ export default function WriterEditor({
         figure.style.width = ''; // clear any inline style width set by drag
         figure.classList.remove("w-1/3", "w-1/2", "w-full");
         figure.classList.add(size);
+        selectedImageNode.style.width = "100%";
         const caption = figure.querySelector("figcaption");
         if (caption) {
             caption.classList.remove("text-xs", "text-sm", "text-base", "text-lg");
@@ -512,12 +587,19 @@ export default function WriterEditor({
 
     const currentHtml = editorRef.current?.innerHTML || content;
 
+    // Extract first image in canvas if available to keep leadImage synced
+    let resolvedImage = leadImage || imageUrl;
+    const imgMatch = currentHtml.match(/<img[^>]+src=["']([^"']+)["']/i);
+    if (imgMatch && imgMatch[1]) {
+      resolvedImage = imgMatch[1];
+    }
+
     if (status === "pending") {
       const hasInlineImage = currentHtml.toLowerCase().includes("<img");
-      const hasCoverImage = !!leadImage || !!imageUrl;
+      const hasCoverImage = !!resolvedImage;
       
       if (!hasInlineImage && !hasCoverImage) {
-        alert("Every article must contain at least one image (either a Cover Image or an inline image) before it can be submitted for review.");
+        alert("Every article must contain at least one image before it can be submitted for review.");
         return;
       }
     }
@@ -539,7 +621,7 @@ export default function WriterEditor({
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, ""),
-      image: leadImage || imageUrl,
+      image: resolvedImage,
       image_caption: imageCaption,
       image_credit: imageCredit,
       pending_images: pendingImages,
@@ -561,8 +643,8 @@ export default function WriterEditor({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...articlePayload,
-          writer_email: userEmail,
-          userName: userName || userEmail.split("@")[0],
+          writer_email: (initialArticle as any)?.writer_email || userEmail,
+          userName: (initialArticle as any)?.writer_name || userName || userEmail.split("@")[0],
         }),
       });
 
@@ -577,6 +659,11 @@ export default function WriterEditor({
           await res.text(),
         );
       }
+
+      // Signal instant update across tabs
+      try {
+        localStorage.setItem("article_updated", Date.now().toString());
+      } catch {}
 
       // 3. Show loading animation feedback as requested
       setTimeout(() => {
@@ -662,20 +749,35 @@ export default function WriterEditor({
                     className="fixed inset-0 z-40" 
                     onClick={() => setIsCategoryDropdownOpen(false)}
                   ></div>
-                  <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg py-1">
-                    {/* World nested dropdown trigger (MOVED TO TOP) */}
-                    <div
-                      className="relative group"
-                      onMouseEnter={() => setActiveHoverCategory("World")}
-                      onMouseLeave={() => setActiveHoverCategory(null)}
+                  <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg py-1 max-h-60 overflow-y-auto">
+                    {/* 1. Business (Default Option) */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCategory("Business");
+                        setIsCategoryDropdownOpen(false);
+                        setSelectedSubcategories([]);
+                      }}
+                      className={`w-full text-left px-4 py-2 text-xs transition-colors ${category === "Business" ? "bg-red-50 text-[#ce1126] font-bold" : "text-gray-700 hover:bg-gray-50 font-medium"}`}
                     >
-                      <div className={`w-full text-left px-4 py-2 text-xs flex items-center justify-between cursor-default transition-colors ${worldRegions.includes(category) ? "bg-red-50 text-[#ce1126] font-bold" : "text-gray-700 hover:bg-gray-50 font-medium"}`}>
+                      Business
+                    </button>
+
+                    {/* 2. World (Click to expand accordion) */}
+                    <div>
+                      <div 
+                        className={`w-full text-left px-4 py-2 text-xs flex items-center justify-between cursor-pointer transition-colors ${worldRegions.includes(category) ? "bg-red-50 text-[#ce1126] font-bold" : "text-gray-700 hover:bg-gray-50 font-medium"}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveHoverCategory(activeHoverCategory === "World" ? null : "World");
+                        }}
+                      >
                         <span>World</span>
-                        <ChevronRight size={14} className="text-gray-400" />
+                        <ChevronDown size={14} className={`text-gray-400 transition-transform ${activeHoverCategory === "World" ? "rotate-180" : ""}`} />
                       </div>
 
                       {activeHoverCategory === "World" && (
-                        <div className="absolute top-0 right-full mr-1 w-40 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-[60] max-h-60 overflow-y-auto">
+                        <div className="bg-gray-50 py-1 border-y border-gray-100">
                           {worldRegions.map((region) => (
                             <button
                               key={region}
@@ -684,8 +786,9 @@ export default function WriterEditor({
                                 setCategory(region);
                                 setIsCategoryDropdownOpen(false);
                                 setSelectedSubcategories([]);
+                                setActiveHoverCategory(null);
                               }}
-                              className={`w-full text-left px-4 py-2 text-xs transition-colors ${category === region ? "bg-red-50 text-[#ce1126] font-bold" : "text-gray-700 hover:bg-gray-50 font-medium"}`}
+                              className={`w-full text-left px-6 py-2 text-xs transition-colors ${category === region ? "bg-red-100 text-[#ce1126] font-bold" : "text-gray-600 hover:bg-gray-200 font-medium"}`}
                             >
                               {region}
                             </button>
@@ -694,7 +797,8 @@ export default function WriterEditor({
                       )}
                     </div>
 
-                    {navbarCategories.map((cat) => (
+                    {/* 3. The rest of the categories */}
+                    {navbarCategories.filter(c => c !== "Business").map((cat) => (
                       <button
                         key={cat}
                         type="button"
@@ -722,7 +826,7 @@ export default function WriterEditor({
               </label>
             </div>
 
-            <div className="border border-gray-700 rounded-xl p-3 bg-[#1e2532] space-y-4">
+            <div className="border border-gray-700 rounded-xl p-3 bg-[#1e2532] space-y-4 max-h-[300px] overflow-y-auto custom-scrollbar">
               <div className="grid grid-cols-2 gap-2 text-xs">
                 {navbarCategories.filter(c => c !== category).map((sub) => {
                   const checked = selectedSubcategories.includes(sub);
@@ -996,18 +1100,13 @@ export default function WriterEditor({
         {/* Left Side: Back Arrow & Tracking Headline */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
-            onClick={() => {
-              if (
-                title.trim() &&
-                !window.confirm(
-                  "Are you sure you want to exit? Any unsaved edits will be lost.",
-                )
-              ) {
-                return;
-              }
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
               onCancel();
             }}
-            className="p-1 rounded-lg text-gray-400 hover:text-white transition-colors flex-shrink-0"
+            className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors flex-shrink-0 cursor-pointer"
             title="Back / Cancel"
           >
             <ArrowLeft size={18} strokeWidth={2.5} />
@@ -1637,32 +1736,21 @@ export default function WriterEditor({
                     </p>
                   )}
 
-                  {/* Tags Section */}
-                  {tags.length > 0 && (
-                    <div className="mb-8 flex flex-wrap items-center gap-2">
-                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mr-2">
-                        FILED UNDER:
-                      </span>
-                      {tags.map((t) => (
-                        <span
-                          key={t}
-                          className="text-[11px] font-bold text-gray-700 bg-gray-100 px-3 py-1 rounded-full transition"
-                        >
-                          #{t}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+
 
                   {/* Author Block */}
                   <div className="flex items-center gap-3 mb-10 pb-6 border-b border-gray-100">
                     <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
-                      <User size={20} className="text-gray-500" />
+                      {writerAvatar ? (
+                        <img src={writerAvatar} alt="Author" className="w-full h-full object-cover" />
+                      ) : (
+                        <User size={20} className="text-gray-500" />
+                      )}
                     </div>
                     <div className="flex flex-col">
                       <div className="flex items-center gap-1.5">
                         <span className="text-xs font-black uppercase text-gray-900">
-                          By {userName || userEmail.split("@")[0]}
+                          By {initialArticle?.writer_name || userName || userEmail.split("@")[0]}
                         </span>
                         <div className="w-4 h-4 bg-blue-600 rounded text-white flex items-center justify-center text-[10px] font-bold">in</div>
                       </div>
@@ -1685,39 +1773,22 @@ export default function WriterEditor({
                     }}
                   />
 
-                  {/* Comments Section */}
-                  <div className="mt-16 pt-8 border-t border-gray-200">
-                    <h3 className="text-[17px] font-serif font-bold text-gray-900 mb-6">
-                      Comments (2)
-                    </h3>
-                    <div className="mb-10 flex flex-col items-end">
-                      <textarea 
-                        rows={4}
-                        placeholder="Leave a comment..."
-                        className="w-full bg-white border border-gray-300 rounded px-4 py-3 text-sm focus:outline-none focus:border-gray-500 mb-4 resize-none"
-                      />
-                      <button className="px-6 py-2.5 bg-[#ce1126] hover:bg-[#a00c1c] text-white text-xs font-bold uppercase rounded transition shadow-sm">
-                        POST COMMENT
-                      </button>
+                  {/* Tags Section */}
+                  {tags.length > 0 && (
+                    <div className="mt-16 flex flex-wrap items-center gap-2">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mr-2">
+                        FILED UNDER:
+                      </span>
+                      {tags.map((t) => (
+                        <span
+                          key={t}
+                          className="text-[11px] font-bold text-gray-700 bg-gray-100 px-3 py-1 rounded-full transition"
+                        >
+                          #{t}
+                        </span>
+                      ))}
                     </div>
-                    
-                    <div className="space-y-8">
-                      <div className="border-b border-gray-100 pb-6">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm font-bold text-gray-900">Jane Doe</span>
-                          <span className="text-xs text-gray-400">2 hours ago</span>
-                        </div>
-                        <p className="text-sm text-gray-700">This is a very insightful article. Thanks for sharing!</p>
-                      </div>
-                      <div className="pb-6">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm font-bold text-gray-900">John Smith</span>
-                          <span className="text-xs text-gray-400">5 hours ago</span>
-                        </div>
-                        <p className="text-sm text-gray-700">I completely disagree with the premise, but it's an interesting perspective.</p>
-                      </div>
-                    </div>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>

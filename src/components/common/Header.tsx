@@ -143,6 +143,13 @@ export default function Header() {
       { name: "Banking Industry", href: "/category/banking-industry" },
       { name: "Loans & Lending", href: "/category/loans-lending" },
     ],
+    technology: [
+      { name: "Artificial Intelligence", href: "/category/artificial-intelligence" },
+      { name: "Cybersecurity", href: "/category/cybersecurity" },
+      { name: "Gadgets & Devices", href: "/category/gadgets-devices" },
+      { name: "Software", href: "/category/software" },
+      { name: "Startups", href: "/category/startups" },
+    ],
     industries: [
       { name: "Manufacturing", href: "/category/manufacturing" },
       { name: "Energy", href: "/category/energy" },

@@ -1,8 +1,12 @@
 import mysql from 'mysql2/promise';
 
+declare global {
+  var _mysqlPool: mysql.Pool | undefined;
+}
+
 // Create a connection pool to XAMPP MySQL database
 // Default XAMPP credentials are user: 'root' with no password
-const pool = mysql.createPool({
+const pool = global._mysqlPool || mysql.createPool({
   host: 'localhost',
   user: 'root',
   password: '', // Default XAMPP password is empty
@@ -11,5 +15,9 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0,
 });
+
+if (process.env.NODE_ENV !== 'production') {
+  global._mysqlPool = pool;
+}
 
 export default pool;

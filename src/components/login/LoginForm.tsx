@@ -124,8 +124,9 @@ export default function LoginForm() {
                   placeholder="Email or username"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full border-b border-gray-300 py-2 text-[13px] text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#ce1126] transition-colors bg-transparent"
+                  className="w-full border-b border-gray-300 py-2 text-[13px] text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#ce1126] transition-colors bg-transparent selection:bg-gray-200 selection:text-gray-900"
                   required
+                  autoComplete="off"
                 />
               </div>
 
@@ -137,8 +138,9 @@ export default function LoginForm() {
                   placeholder="Password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full border-b border-gray-300 py-2 text-[13px] text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#ce1126] transition-colors pr-8 bg-transparent"
+                  className="w-full border-b border-gray-300 py-2 text-[13px] text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#ce1126] transition-colors pr-8 bg-transparent selection:bg-gray-200 selection:text-gray-900"
                   required
+                  autoComplete="new-password"
                 />
                 <button
                   type="button"

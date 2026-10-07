@@ -50,6 +50,16 @@ export default function DashboardShell({
     const stored = localStorage.getItem("user");
     if (stored) {
       const parsed = JSON.parse(stored);
+      
+      if (parsed.role !== role) {
+        // Fallback to exactly match the dashboard owner if roles are crossed
+        const fallback = role === "admin" 
+          ? { name: "admin", email: "admin@example.com", role: "admin", avatar_url: "" }
+          : { name: "writer", email: "writer@example.com", role: "writer", avatar_url: "" };
+        setUser(fallback);
+        return;
+      }
+
       setUser(parsed);
 
       fetch(`/api/profile?email=${encodeURIComponent(parsed.email)}`)
@@ -66,6 +76,12 @@ export default function DashboardShell({
           }
         })
         .catch(() => {});
+    } else {
+      // Fallback if no user is found
+      const fallback = role === "admin" 
+        ? { name: "admin", email: "admin@example.com", role: "admin", avatar_url: "" }
+        : { name: "writer", email: "writer@example.com", role: "writer", avatar_url: "" };
+      setUser(fallback);
     }
   };
 

@@ -359,7 +359,7 @@ export default function WriterDashboard() {
 
   return (
     <DashboardShell
-      portalTitle="My Workspace"
+      portalTitle="My Writer Workspace"
       portalBadge="Writer"
       role="writer"
       navItems={writerNavItems}

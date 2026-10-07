@@ -50,10 +50,13 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
     const normalizedSlug = params.slug.replace(/\s+/g, '-');
     if (normalizedSlug.startsWith("mock-")) {
       const parts = normalizedSlug.split('-');
+      // mock-corporate-announcements-0 -> ['mock', 'corporate', 'announcements', '0']
       if (parts.length >= 3) {
-        mockCategory = parts[1].charAt(0).toUpperCase() + parts[1].slice(1);
+        // extract the parts between 'mock' and the last digit
+        const categoryParts = parts.slice(1, parts.length - 1);
+        mockCategory = categoryParts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
       } else {
-        mockCategory = parts[1] || "Update";
+        mockCategory = parts[1] ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : "Update";
       }
     }
 
@@ -142,22 +145,7 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
             {articleData.deck}
           </p>
 
-          {/* Tags Row */}
-          <div className="mb-8">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mr-2">
-                FILED UNDER:
-              </span>
-              {tagsArray.map((tag) => (
-                <span
-                  key={tag}
-                  className="text-[11px] font-bold bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1 rounded-full transition-colors cursor-pointer"
-                >
-                  #{tag}
-                </span>
-              ))}
-            </div>
-          </div>
+
 
           {/* New Author Template (with top/bottom borders) */}
           <div className="border-t border-b border-[#e3e3e3] py-5 flex items-center gap-4">
@@ -201,8 +189,29 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
               dangerouslySetInnerHTML={{ __html: articleData.content }}
             />
 
+            {/* Tags Row */}
+            <div className="mt-8 mb-8">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mr-2">
+                  FILED UNDER:
+                </span>
+                {tagsArray.map((tag) => (
+                  <span
+                    key={tag}
+                    className="text-[11px] font-bold bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1 rounded-full transition-colors cursor-pointer"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+
             {/* Comments Section */}
-            <CommentsSection articleSlug={articleData.slug} />
+            <CommentsSection 
+              articleSlug={articleData.slug} 
+              category={articleData.category}
+              articleAuthor={articleData.writer_name}
+            />
           </article>
 
           {/* Sidebar Column identical to Category Pages */}

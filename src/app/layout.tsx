@@ -14,6 +14,7 @@ export const metadata: Metadata = {
 
 import GlobalArticleLinkHandler from "@/components/common/GlobalArticleLinkHandler";
 
+
 export default function RootLayout({
   children,
 }: Readonly<{

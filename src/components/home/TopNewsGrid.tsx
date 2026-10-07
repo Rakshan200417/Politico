@@ -24,7 +24,7 @@ export default function TopNewsGrid() {
             <h1 className="text-[44px] sm:text-[52px] lg:text-[60px] font-bold leading-[0.95] tracking-[-0.03em] text-[#111111] group-hover:text-[#333333] transition-colors duration-150 mb-3 font-sans">
               {story1}
             </h1>
-            
+
             <div className="flex items-center justify-between mb-4">
               <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.18em] font-sans">
                 BY LISA KASHINSKY
