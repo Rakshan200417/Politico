@@ -4,6 +4,7 @@ export interface CategoryStory {
   byline: string;
   image: string;
   slug?: string;
+  date?: string;
 }
 
 export interface CategoryPageData {
@@ -13,6 +14,8 @@ export interface CategoryPageData {
   lead: CategoryStory;
   sideStories: CategoryStory[];
   moreStories: CategoryStory[];
+  totalPages?: number;
+  currentPage?: number;
 }
 
 const images = {

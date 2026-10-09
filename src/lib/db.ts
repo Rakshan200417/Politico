@@ -6,7 +6,8 @@ declare global {
 
 // Create a connection pool to XAMPP MySQL database
 // Default XAMPP credentials are user: 'root' with no password
-const pool = global._mysqlPool || mysql.createPool({
+// Force recreate the pool to pick up the new 1GB max_allowed_packet limit
+const pool = mysql.createPool({
   host: 'localhost',
   user: 'root',
   password: '', // Default XAMPP password is empty

@@ -4,7 +4,7 @@ import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
 import Link from "next/link";
 import BackButton from "@/components/common/BackButton";
-import { getArticlesByAuthorSlug } from "@/lib/articleService";
+import { getArticlesByAuthorSlug, getAuthorProfile, getAuthorProfileByName } from "@/lib/articleService";
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const authorName = params.slug
@@ -18,11 +18,12 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default async function AuthorProfilePage({ params }: { params: { slug: string } }) {
+export default async function AuthorProfilePage({ params, searchParams }: { params: { slug: string }, searchParams: { page?: string } }) {
   // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 800));
   
-  const articles = await getArticlesByAuthorSlug(params.slug, 20);
+  const currentPageParam = Number(searchParams.page) || 1;
+  const { articles, totalPages, currentPage } = await getArticlesByAuthorSlug(params.slug, 20, currentPageParam);
 
   let authorName = params.slug
     .split('-')
@@ -30,9 +31,25 @@ export default async function AuthorProfilePage({ params }: { params: { slug: st
     .join(' ');
   let authorRole = "WRITER";
   let authorBio = "A dedicated journalist with a passion for delivering accurate, timely, and impactful news. Committed to ethical reporting and in-depth storytelling, she covers a wide range of topics with professionalism, integrity, and a focus on informing audiences through credible journalism.";
+  let authorAvatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(authorName)}&background=111111&color=fff&size=200`;
+
+  // Always try to fetch profile by name first (even if 0 articles)
+  const profile = await getAuthorProfileByName(authorName);
+  if (profile) {
+    authorBio = profile.bio || authorBio;
+    authorAvatarUrl = profile.avatar_url || authorAvatarUrl;
+  }
 
   if (articles && articles.length > 0) {
     authorName = articles[0].writer_name;
+    // If by name failed, try by email from the first article
+    if (!profile && articles[0].writer_email) {
+      const profileByEmail = await getAuthorProfile(articles[0].writer_email);
+      if (profileByEmail) {
+        authorBio = profileByEmail.bio || authorBio;
+        authorAvatarUrl = profileByEmail.avatar_url || authorAvatarUrl;
+      }
+    }
   }
 
   const mostRead = [
@@ -42,6 +59,22 @@ export default async function AuthorProfilePage({ params }: { params: { slug: st
     { title: "Phillip Johnston: The Entrepreneur Building the Future of AI in Space", views: "18 views" },
     { title: "Trump's Hormuz Retreat Highlights Struggles to End Iran Conflict", views: "17 views" }
   ];
+
+  const generatePageLinks = () => {
+    const pages = [];
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      if (currentPage <= 3) {
+        pages.push(1, 2, 3, 4, '...', totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+      } else {
+        pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+      }
+    }
+    return pages;
+  };
 
   return (
     <div className="min-h-screen bg-white font-sans text-[#111] flex flex-col">
@@ -58,7 +91,7 @@ export default async function AuthorProfilePage({ params }: { params: { slug: st
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 border-b border-[#e1e1e1] pb-10 mb-10">
           <div className="w-24 h-24 sm:w-[100px] sm:h-[100px] shrink-0 overflow-hidden rounded-full border border-gray-200">
             <img 
-              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(authorName)}&background=111111&color=fff&size=200`} 
+              src={authorAvatarUrl} 
               alt={authorName}
               className="w-full h-full object-cover"
             />
@@ -89,7 +122,7 @@ export default async function AuthorProfilePage({ params }: { params: { slug: st
               {articles.length === 0 ? (
                 <p className="text-gray-500">No published articles found for this author yet.</p>
               ) : (
-                articles.map((article) => (
+                articles.map((article: any) => (
                   <article key={article.slug} className="border-b border-[#e1e1e1] pb-8 last:border-b-0">
                     <a href={`/news/${article.slug}`} className="group grid grid-cols-1 sm:grid-cols-[240px_minmax(0,1fr)] gap-6 items-start">
                       <div className="aspect-[16/10] overflow-hidden bg-gray-100 w-full rounded-sm">
@@ -119,21 +152,40 @@ export default async function AuthorProfilePage({ params }: { params: { slug: st
               )}
             </div>
 
-            {/* Pagination Mockup */}
-            {articles.length > 0 && (
+            {/* Pagination */}
+            {totalPages > 1 && (
               <div className="mt-12 pt-8 flex items-center justify-center gap-1.5 sm:gap-2">
-                <button className="px-3 sm:px-4 py-2 text-[11px] font-bold tracking-wider text-gray-400 border border-gray-200 rounded cursor-not-allowed">
+                <Link
+                  href={currentPage > 1 ? `/author/${params.slug}?page=${currentPage - 1}` : '#'}
+                  className={`px-3 sm:px-4 py-2 text-[11px] font-bold tracking-wider rounded transition-colors ${currentPage > 1 ? 'text-[#111] border border-gray-300 hover:bg-gray-50' : 'text-gray-400 border border-gray-200 cursor-not-allowed'}`}
+                  aria-disabled={currentPage <= 1}
+                >
                   PREV
-                </button>
-                <button className="w-8 h-8 flex items-center justify-center text-[12px] font-bold bg-[#820000] text-white rounded">
-                  1
-                </button>
-                <button className="w-8 h-8 flex items-center justify-center text-[12px] font-bold text-gray-600 hover:bg-gray-100 rounded transition-colors">
-                  2
-                </button>
-                <button className="px-3 sm:px-4 py-2 text-[11px] font-bold tracking-wider text-[#111] border border-gray-300 rounded hover:bg-gray-50 transition-colors">
+                </Link>
+                
+                {generatePageLinks().map((pageNum, idx) => {
+                  if (pageNum === '...') {
+                    return <span key={`dots-${idx}`} className="text-gray-400 font-bold px-1">...</span>;
+                  }
+                  const isCurrent = pageNum === currentPage;
+                  return (
+                    <Link
+                      key={pageNum}
+                      href={`/author/${params.slug}?page=${pageNum}`}
+                      className={`w-8 h-8 flex items-center justify-center text-[12px] font-bold rounded transition-colors ${isCurrent ? 'bg-[#820000] text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+                    >
+                      {pageNum}
+                    </Link>
+                  );
+                })}
+
+                <Link
+                  href={currentPage < totalPages ? `/author/${params.slug}?page=${currentPage + 1}` : '#'}
+                  className={`px-3 sm:px-4 py-2 text-[11px] font-bold tracking-wider rounded transition-colors ${currentPage < totalPages ? 'text-[#111] border border-gray-300 hover:bg-gray-50' : 'text-gray-400 border border-gray-200 cursor-not-allowed'}`}
+                  aria-disabled={currentPage >= totalPages}
+                >
                   NEXT
-                </button>
+                </Link>
               </div>
             )}
           </div>

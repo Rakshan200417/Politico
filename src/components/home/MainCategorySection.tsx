@@ -1,21 +1,31 @@
 import { getPublishedArticlesByCategory } from "@/lib/articleService";
+import { formatPublishDate } from "@/utils/dateFormatter";
 
-export default async function MainCategorySection({ category }: { category: string }) {
-  let articles = await getPublishedArticlesByCategory(category, 4);
+export default async function MainCategorySection({ category, count = 4 }: { category: string, count?: number }) {
+  let { articles } = await getPublishedArticlesByCategory(category, count, true);
 
   if (!articles || articles.length === 0) {
-    // Generate beautiful mock fallback data for empty categories to preserve homepage layout
-    const mockArticles = [
-      { id: 901, slug: 'mock-1', title: `New developments in ${category} shake the industry`, writer_name: 'POLITICO STAFF', image: `https://picsum.photos/seed/${category}1/800/600` },
-      { id: 902, slug: 'mock-2', title: `Global leaders react to recent ${category} trends`, writer_name: 'JOHN DOE', image: `https://picsum.photos/seed/${category}2/800/600` },
-      { id: 903, slug: 'mock-3', title: `What the future holds for ${category} innovations`, writer_name: 'JANE SMITH', image: `https://picsum.photos/seed/${category}3/800/600` },
-      { id: 904, slug: 'mock-4', title: `Expert analysis: ${category} policies under review`, writer_name: 'ALEX JOHNSON', image: `https://picsum.photos/seed/${category}4/800/600` }
-    ] as any;
-    articles = mockArticles;
+    articles = [];
+  }
+  
+  if (articles.length < count) {
+    const fallbackArticles = Array.from({ length: count }).map((_, i) => ({
+      id: 900 + i + 1,
+      slug: `mock-${i + 1}`,
+      title: `New developments in ${category} shake the industry ${i + 1}`,
+      writer_name: 'Writer',
+      image: `https://picsum.photos/seed/${category}${i + 1}/800/600`
+    })) as any[];
+    
+    let fallbackIndex = 0;
+    while (articles.length < count && fallbackIndex < fallbackArticles.length) {
+      articles.push(fallbackArticles[fallbackIndex]);
+      fallbackIndex++;
+    }
   }
 
   const mainArticle = articles[0];
-  const sideArticles = articles.slice(1, 4);
+  const sideArticles = articles.slice(1, count);
 
   return (
     <div className="w-full mb-10 border-t border-gray-200 pt-8 first:border-t-0 first:pt-0">
@@ -33,7 +43,7 @@ export default async function MainCategorySection({ category }: { category: stri
           {mainArticle.title}
         </h3>
         <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mt-2 font-sans">
-          BY {mainArticle.writer_name}
+          BY {mainArticle.writer_name} <span className="mx-1">|</span> {formatPublishDate(mainArticle.updated_at || mainArticle.created_at)}
         </p>
       </a>
 
@@ -48,7 +58,9 @@ export default async function MainCategorySection({ category }: { category: stri
                 <h3 className="text-[17px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mb-1">
                   {article.title}
                 </h3>
-                <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mt-2 font-sans">BY {article.writer_name}</p>
+                <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mt-2 font-sans">
+                  BY {article.writer_name} <span className="mx-1">|</span> {formatPublishDate(article.updated_at || article.created_at)}
+                </p>
               </div>
             </a>
           ))}

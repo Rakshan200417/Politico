@@ -1,23 +1,37 @@
-import { getPublishedArticlesByCategory, getLatestPublishedArticles } from "@/lib/articleService";
+import { getPublishedArticlesByCategory, getLatestPublishedArticles, getArticlesByPlacement } from "@/lib/articleService";
 import { slugify } from "@/data/newsArticles";
+import { formatPublishDate } from "@/utils/dateFormatter";
 
 export default async function RightListCategorySection({ category, isMostRead = false }: { category: string, isMostRead?: boolean }) {
-  let articles;
+  let articles: any[] = [];
   
   if (isMostRead) {
-    articles = await getLatestPublishedArticles(4);
+    articles = await getArticlesByPlacement('Home - Most Read', 4);
+    if (!articles || articles.length === 0) {
+      articles = await getLatestPublishedArticles(4, true);
+    }
   } else {
-    articles = await getPublishedArticlesByCategory(category, 4);
+    const result = await getPublishedArticlesByCategory(category, 4, true);
+    articles = result.articles;
   }
 
   if (!articles || articles.length === 0) {
-    // Mock fallback
-    articles = [
+    articles = [];
+  }
+  
+  if (articles.length < 4) {
+    const fallbackArticles = [
       { id: 801, title: `Mock article 1 for ${category}`, slug: 'mock-1', image: `https://picsum.photos/seed/${category}1/800/600` },
       { id: 802, title: `Mock article 2 for ${category}`, slug: 'mock-2', image: `https://picsum.photos/seed/${category}2/800/600` },
       { id: 803, title: `Mock article 3 for ${category}`, slug: 'mock-3', image: `https://picsum.photos/seed/${category}3/800/600` },
       { id: 804, title: `Mock article 4 for ${category}`, slug: 'mock-4', image: `https://picsum.photos/seed/${category}4/800/600` },
     ] as any;
+    
+    let fallbackIndex = 0;
+    while (articles.length < 4 && fallbackIndex < fallbackArticles.length) {
+      articles.push(fallbackArticles[fallbackIndex]);
+      fallbackIndex++;
+    }
   }
 
   return (
@@ -50,11 +64,16 @@ export default async function RightListCategorySection({ category, isMostRead = 
                    <img src={article.image || `https://picsum.photos/seed/${article.id}/800/600`} alt={article.title} className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
                 </div>
               )}
-              <h3 className="text-[14px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mt-1">
-                <a href={`/news/${article.slug || slugify(article.title)}`} className="block">
-                  {article.title}
-                </a>
-              </h3>
+              <div>
+                <h3 className="text-[14px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mt-1">
+                  <a href={`/news/${article.slug || slugify(article.title)}`} className="block">
+                    {article.title}
+                  </a>
+                </h3>
+                <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mt-2 font-sans">
+                  {formatPublishDate(article.updated_at || article.created_at)}
+                </p>
+              </div>
             </li>
           );
         })}

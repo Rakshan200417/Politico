@@ -12,10 +12,15 @@ import MainCategorySection from "@/components/home/MainCategorySection";
 import LeftCategorySection from "@/components/home/LeftCategorySection";
 import RightListCategorySection from "@/components/home/RightListCategorySection";
 import WorldHomeSection from "@/components/home/WorldHomeSection";
+import HomeBottomPanel from "@/components/home/HomeBottomPanel";
+import HomeRightPanel from "@/components/home/HomeRightPanel";
+
+import { getArticlesByPlacement } from "@/lib/articleService";
 
 export default async function Home() {
   // Simulate network delay to ensure the loading skeleton is visible
   await new Promise((resolve) => setTimeout(resolve, 800));
+  const spotlightArticles = await getArticlesByPlacement("Home - Spotlight", 12);
   
   return (
     <div className="min-h-screen flex flex-col font-sans">
@@ -52,51 +57,13 @@ export default async function Home() {
             {/* Center: Top News */}
             <div className="order-1 lg:order-2 pt-4 lg:pt-0 lg:px-4">
               <TopNewsGrid />
+              <HomeBottomPanel />
 
             </div>
 
             {/* Right: Top Article + 3 Links + Ad1 */}
             <div className="order-3 pt-4 lg:pt-0 lg:mt-0 h-full pb-4 flex flex-col relative lg:pl-4">
-              <div className="mb-6 space-y-4">
-                <a href={`/news/${slugify("Trump threatens to impose 'serious tariffs' on Europe if Canada joins EU as associate member")}`}  className="group cursor-pointer mb-6 border-b border-gray-200 pb-4 block">
-                  <div className="w-full aspect-video bg-gray-200 mb-3 overflow-hidden">
-                    <img src="https://picsum.photos/seed/6/800/600" alt="Trump" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
-                  </div>
-                  <h3 className="text-[17px] font-bold leading-[1.1] tracking-[-0.02em] text-[#111111] group-hover:text-[#d32f2f] transition-colors mb-2 font-sans">
-                    Trump threatens to impose &apos;serious tariffs&apos; on Europe if Canada joins EU as associate member
-                  </h3>
-                  <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest font-sans">
-                    BY JALEN BECKFORD
-                  </div>
-                </a>
-                
-                <a href={`/news/${slugify("House passes Russia sanctions bill, handing Trump more leverage against Moscow")}`}  className="group cursor-pointer border-b border-gray-100 pb-4 block">
-                  <h3 className="text-[17px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans">
-                    House passes Russia sanctions bill, handing Trump more leverage against Moscow
-                  </h3>
-                </a>
-
-                <a href={`/news/${slugify("House passes Russia sanctions bill, handing Trump more leverage against Moscow 2")}`}  className="group cursor-pointer border-b border-gray-100 pb-4 block">
-                  <h3 className="text-[17px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors mb-2 font-sans">
-                    House passes Russia sanctions bill, handing Trump more leverage against Moscow
-                  </h3>
-                  <p className="text-[13px] leading-[1.3] text-[#333333] font-sans mb-2">
-                    The vote ends a nearly two-year pause in Ukraine assistance from Congress.
-                  </p>
-                  <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest font-sans">
-                    BY GISELLE RUBIYYIH EWING
-                  </div>
-                </a>
-
-                <a href={`/news/${slugify("House overwhelmingly passes bill to shield ratepayers from data centers")}`}  className="group cursor-pointer border-b border-gray-100 pb-4 block last:border-0">
-                  <h3 className="text-[17px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors mb-2 font-sans">
-                    House overwhelmingly passes bill to shield ratepayers from data centers
-                  </h3>
-                  <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest font-sans">
-                    BY MICO PORTUONDO AND AMELIA DAVIDSON
-                  </div>
-                </a>
-              </div>
+              <HomeRightPanel />
 
               {/* Ad 01 */}
               <div className="w-full mt-4 border-t border-gray-200 pt-6 lg:sticky lg:top-[120px] z-10">
@@ -160,7 +127,7 @@ export default async function Home() {
 
           {/* ── POLITICO MAGAZINE Carousel ── */}
           <div className="w-full border-t border-b border-gray-200 py-4">
-            <MagazineCarousel />
+            <MagazineCarousel articles={spotlightArticles} />
           </div>
 
           {/* ── MIDDLE FOLD: Below Carousel ── */}
@@ -196,12 +163,12 @@ export default async function Home() {
             {/* Center Column: DYNAMIC CATEGORIES */}
             <div className="flex flex-col lg:px-6 border-l border-r border-gray-200 h-full">
               <MainCategorySection category="Technology" />
-              <MainCategorySection category="Startups" />
+              <MainCategorySection category="Leadership Strategies" />
               <MainCategorySection category="Economy" />
               <MainCategorySection category="Markets" />
               <MainCategorySection category="Industries" />
               <MainCategorySection category="Finance" />
-              <WorldHomeSection />
+              <MainCategorySection category="World" count={12} />
             </div>
 
             {/* Right Column: LEADERS, MOST READ, ECONOMY, VIDEO */}
@@ -213,12 +180,20 @@ export default async function Home() {
 
               {/* MOST READ */}
               <RightListCategorySection category="" isMostRead={true} />
-              {/* ECONOMY */}
-              <RightListCategorySection category="Economy" />
+              {/* STARTUPS */}
+              <RightListCategorySection category="Startups" />
               {/* VIDEO */}
-              <RightListCategorySection category="Interview" />
+              <div>
+                <RightListCategorySection category="Interview" />
+              </div>
               {/* Sticky Block Right */}
               <div className="flex-1 w-full space-y-6 tall-sticky self-start mt-4 lg:mt-6 border-t border-gray-100 lg:border-t-0 pt-4 lg:pt-0">
+                <div className="flex items-center gap-2 pb-2 mb-4 border-b border-[#d9d9d9]">
+                  <span className="w-2.5 h-2.5 rounded-full border-2 border-[#d32f2f] bg-transparent inline-block"></span>
+                  <h2 className="text-[10px] font-extrabold tracking-[0.12em] text-[#222222] uppercase font-sans">
+                    VIDEO
+                  </h2>
+                </div>
                 <ul className="space-y-4">
                   <li className="group block">
                     <a href={`/news/${slugify("Anthropic's Sarah Heck discusses the AI race, American voters and more")}`}  className="flex gap-3 group block">

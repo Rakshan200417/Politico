@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 
@@ -43,9 +44,10 @@ async function ensureArticlesTable() {
       { name: 'card_summary', definition: 'TEXT' },
       { name: 'focus_keyword', definition: 'VARCHAR(255) DEFAULT ""' },
       { name: 'meta_description', definition: 'VARCHAR(500) DEFAULT ""' },
-      { name: 'image', definition: 'VARCHAR(1000) DEFAULT ""' },
+      { name: 'image', definition: 'LONGTEXT' },
       { name: 'image_caption', definition: 'TEXT' },
       { name: 'image_credit', definition: 'VARCHAR(255) DEFAULT ""' },
+      { name: 'is_sponsored', definition: 'BOOLEAN DEFAULT FALSE' },
     ];
 
     for (const col of optionalColumns) {
@@ -152,6 +154,9 @@ export async function POST(request: Request) {
       image_caption = '',
       image_credit = '',
       pending_images = [],
+      homepage_placement = '',
+      targeted_email_distribution = '',
+      is_sponsored = false,
     } = body;
 
     if (!writer_email || !title) {
@@ -170,8 +175,8 @@ export async function POST(request: Request) {
         writer_email, writer_name, title, slug, deck, content,
         category, subcategories, tags, read_time, status,
         card_summary, focus_keyword, meta_description,
-        image, image_caption, image_credit
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        image, image_caption, image_credit, homepage_placement, targeted_email_distribution, is_sponsored
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         writer_email,
         writer_name,
@@ -190,6 +195,9 @@ export async function POST(request: Request) {
         image,
         image_caption,
         image_credit,
+        homepage_placement,
+        targeted_email_distribution,
+        is_sponsored,
       ]
     );
 
@@ -237,6 +245,9 @@ export async function POST(request: Request) {
     );
   } catch (error: any) {
     console.error('[POST /api/articles Error]:', error);
+    try {
+      require('fs').appendFileSync('C:/Users/EX BOOK/Desktop/Jadetimes Internship/Politico/db_error.log', new Date().toISOString() + ' ' + error.message + '\n');
+    } catch (e) {}
     return NextResponse.json(
       { error: 'Failed to create article in database', details: error.message },
       { status: 500 }
@@ -271,6 +282,9 @@ export async function PUT(request: Request) {
       image_caption,
       image_credit,
       pending_images = [],
+      homepage_placement,
+      targeted_email_distribution,
+      is_sponsored,
     } = body;
 
     if (!id) {
@@ -304,6 +318,9 @@ export async function PUT(request: Request) {
     if (image !== undefined) { updates.push('image = ?'); values.push(image); }
     if (image_caption !== undefined) { updates.push('image_caption = ?'); values.push(image_caption); }
     if (image_credit !== undefined) { updates.push('image_credit = ?'); values.push(image_credit); }
+    if (homepage_placement !== undefined) { updates.push('homepage_placement = ?'); values.push(homepage_placement); }
+    if (targeted_email_distribution !== undefined) { updates.push('targeted_email_distribution = ?'); values.push(targeted_email_distribution); }
+    if (is_sponsored !== undefined) { updates.push('is_sponsored = ?'); values.push(is_sponsored); }
 
     if (updates.length === 0) {
       return NextResponse.json({ error: 'No fields provided for update' }, { status: 400 });

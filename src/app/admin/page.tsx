@@ -84,7 +84,7 @@ export default function AdminDashboard() {
   const loadPendingArticles = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("/api/articles?status=pending");
+      const res = await fetch(`/api/articles?status=pending&_t=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
         if (data.articles) {
@@ -125,7 +125,7 @@ export default function AdminDashboard() {
   const loadPublishedPosts = async () => {
     setIsPublishedLoading(true);
     try {
-      const res = await fetch("/api/articles?status=published");
+      const res = await fetch(`/api/articles?status=published&_t=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
         if (data.articles) {

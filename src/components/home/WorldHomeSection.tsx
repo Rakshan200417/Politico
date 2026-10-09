@@ -1,7 +1,7 @@
 import { getPublishedArticlesByCategory } from "@/lib/articleService";
 
 export default async function WorldHomeSection() {
-  let articles = await getPublishedArticlesByCategory("World", 12);
+  let { articles } = await getPublishedArticlesByCategory("World", 12);
 
   if (!articles || articles.length === 0) {
     const regions = ["Asia", "Middle East", "Europe", "Britain", "Africa", "China", "United States"];

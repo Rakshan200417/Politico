@@ -75,3 +75,6 @@
     position: static !important;
   }
 }
+
+.article-content img { max-width: 100% !important; height: auto !important; display: block; margin: 0 auto; }
+.article-content figure { max-width: 100% !important; margin: 0 !important; }

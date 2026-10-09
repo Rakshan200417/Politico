@@ -34,6 +34,7 @@ import {
   Edit,
   User,
   MessageSquare,
+  Mail,
 } from "lucide-react";
 
 export interface ArticleData {
@@ -56,6 +57,9 @@ export interface ArticleData {
   image_caption?: string;
   image_credit?: string;
   pending_images?: any[];
+  homepage_placement?: string;
+  is_sponsored?: boolean;
+  targeted_emails?: string;
 }
 
 interface WriterEditorProps {
@@ -150,6 +154,15 @@ export default function WriterEditor({
   const [tagInput, setTagInput] = useState("");
   const [readDuration, setReadDuration] = useState(
     initialArticle?.read_time || "5 min read",
+  );
+  const [homepagePlacement, setHomepagePlacement] = useState(
+    initialArticle?.homepage_placement || "None"
+  );
+  const [targetedEmails, setTargetedEmails] = useState(
+    initialArticle?.targeted_emails || ""
+  );
+  const [isSponsored, setIsSponsored] = useState(
+    !!initialArticle?.is_sponsored
   );
 
   // SEO States
@@ -381,6 +394,7 @@ export default function WriterEditor({
     const altText = imageKeywords.join(", ") || imageCaption || "Article image";
 
     if (selectedImageNode) {
+      const oldSrc = selectedImageNode.src;
       selectedImageNode.src = imageUrl;
       selectedImageNode.alt = altText;
       const figure = selectedImageNode.closest("figure");
@@ -395,24 +409,54 @@ export default function WriterEditor({
           figure.appendChild(figcaption);
         }
       }
+      
+      if (leadImage === oldSrc) {
+        setLeadImage(imageUrl);
+      }
+      
       setSelectedImageNode(null);
     } else {
-      const figureHtml = `
-        <figure class="my-6 mx-auto w-full clear-both">
-          <img src="${imageUrl}" alt="${altText}" class="w-full rounded-2xl shadow-sm object-cover mx-auto cursor-pointer" />
-          ${(imageCaption || imageCredit) ? `<figcaption class="text-base flex justify-between items-center text-gray-500 mt-2.5 font-medium italic px-1"><span class="text-left">${imageCaption}</span> ${imageCredit ? `<span class="text-right not-italic text-gray-400 text-[0.8em]">(${imageCredit})</span>` : ""}</figcaption>` : ""}
-        </figure>
-        <p><br></p>
-      `;
-      if (editorRef.current) {
-        editorRef.current.focus();
-        document.execCommand("insertHTML", false, figureHtml);
+      const firstImg = editorRef.current?.querySelector("img");
+      if (firstImg) {
+        const oldSrc = firstImg.src;
+        firstImg.src = imageUrl;
+        firstImg.alt = altText;
+        const figure = firstImg.closest("figure");
+        if (figure) {
+          const existingFigCaption = figure.querySelector("figcaption");
+          if (existingFigCaption) existingFigCaption.remove();
+          if (imageCaption || imageCredit) {
+            const figcaption = document.createElement("figcaption");
+            figcaption.className =
+              "text-base flex justify-between items-center text-gray-500 mt-2.5 font-medium italic px-1";
+            figcaption.innerHTML = `<span class="text-left">${imageCaption}</span> ${imageCredit ? `<span class="text-right not-italic text-gray-400 text-[0.8em]">(${imageCredit})</span>` : ""}`;
+            figure.appendChild(figcaption);
+          }
+        }
+        
+        if (leadImage === oldSrc) {
+          setLeadImage(imageUrl);
+        }
+      } else {
+        const figureHtml = `
+          <figure class="my-6 mx-auto w-full clear-both">
+            <img src="${imageUrl}" alt="${altText}" class="w-full rounded-2xl shadow-sm object-cover mx-auto cursor-pointer" />
+            ${(imageCaption || imageCredit) ? `<figcaption class="text-base flex justify-between items-center text-gray-500 mt-2.5 font-medium italic px-1"><span class="text-left">${imageCaption}</span> ${imageCredit ? `<span class="text-right not-italic text-gray-400 text-[0.8em]">(${imageCredit})</span>` : ""}</figcaption>` : ""}
+          </figure>
+          <p><br></p>
+        `;
+        if (editorRef.current) {
+          editorRef.current.focus();
+          document.execCommand("insertHTML", false, figureHtml);
+        }
       }
     }
 
     if (editorRef.current) setContent(editorRef.current.innerHTML);
 
-    if (!leadImage) {
+    // If there was no lead image, OR we just inserted the very first image into the canvas, update leadImage
+    // (We know we inserted the first image if firstImg was null in the else block above)
+    if (!leadImage || (!selectedImageNode && !editorRef.current?.querySelectorAll("img")[1])) {
       setLeadImage(imageUrl);
     }
 
@@ -625,6 +669,9 @@ export default function WriterEditor({
       image_caption: imageCaption,
       image_credit: imageCredit,
       pending_images: pendingImages,
+      homepage_placement: homepagePlacement,
+      targeted_emails: targetedEmails,
+      is_sponsored: isSponsored,
     };
 
     if (status === "draft") {
@@ -644,7 +691,7 @@ export default function WriterEditor({
         body: JSON.stringify({
           ...articlePayload,
           writer_email: (initialArticle as any)?.writer_email || userEmail,
-          userName: (initialArticle as any)?.writer_name || userName || userEmail.split("@")[0],
+          writer_name: (initialArticle as any)?.writer_name || userName || userEmail.split("@")[0],
         }),
       });
 
@@ -700,14 +747,14 @@ export default function WriterEditor({
   const renderSettingsContent = () => (
     <div className="space-y-6">
       {/* DETAILS vs SEO Tab Switcher */}
-      <div className="bg-[#1e2532] p-1 rounded-xl grid grid-cols-2 gap-1">
+      <div className="bg-gray-100 p-1 rounded-xl grid grid-cols-2 gap-1">
         <button
           type="button"
           onClick={() => setSidebarTab("details")}
           className={`py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition ${
             sidebarTab === "details"
-              ? "bg-[#2d3748] text-white shadow-xs"
-              : "text-gray-400 hover:text-white"
+              ? "bg-white text-gray-900 shadow-xs"
+              : "text-gray-500 hover:text-gray-900"
           }`}
         >
           DETAILS
@@ -717,8 +764,8 @@ export default function WriterEditor({
           onClick={() => setSidebarTab("seo")}
           className={`py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition ${
             sidebarTab === "seo"
-              ? "bg-[#2d3748] text-white shadow-xs"
-              : "text-gray-400 hover:text-white"
+              ? "bg-white text-gray-900 shadow-xs"
+              : "text-gray-500 hover:text-gray-900"
           }`}
         >
           SEO
@@ -737,7 +784,7 @@ export default function WriterEditor({
               <button
                 type="button"
                 onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
-                className="w-full bg-[#1e2532] border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs font-bold text-white focus:outline-none focus:border-gray-500 transition flex items-center justify-between"
+                className="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs font-bold text-gray-900 focus:outline-none focus:border-gray-500 transition flex items-center justify-between"
               >
                 <span>{category}</span>
                 <ChevronDown size={14} className="text-gray-400" />
@@ -826,7 +873,7 @@ export default function WriterEditor({
               </label>
             </div>
 
-            <div className="border border-gray-700 rounded-xl p-3 bg-[#1e2532] space-y-4 max-h-[300px] overflow-y-auto custom-scrollbar">
+            <div className="border border-gray-300 rounded-xl p-3 bg-white space-y-4 max-h-[300px] overflow-y-auto custom-scrollbar">
               <div className="grid grid-cols-2 gap-2 text-xs">
                 {navbarCategories.filter(c => c !== category).map((sub) => {
                   const checked = selectedSubcategories.includes(sub);
@@ -837,10 +884,10 @@ export default function WriterEditor({
                       key={sub}
                       className={`flex items-center gap-2 p-1.5 rounded cursor-pointer transition ${
                         checked
-                          ? "bg-red-500/20 text-red-400 font-bold"
+                          ? "bg-red-50 text-red-700 font-bold"
                           : disabled
-                            ? "opacity-40 cursor-not-allowed text-gray-500"
-                            : "hover:bg-gray-800 text-gray-300"
+                            ? "opacity-40 cursor-not-allowed text-gray-400"
+                            : "hover:bg-gray-100 text-gray-700"
                       }`}
                     >
                       <input
@@ -868,10 +915,10 @@ export default function WriterEditor({
                         key={sub}
                         className={`flex items-center gap-2 p-1.5 rounded cursor-pointer transition ${
                           checked
-                            ? "bg-red-500/20 text-red-400 font-bold"
+                            ? "bg-red-50 text-red-700 font-bold"
                             : disabled
-                              ? "opacity-40 cursor-not-allowed text-gray-500"
-                              : "hover:bg-gray-800 text-gray-300"
+                              ? "opacity-40 cursor-not-allowed text-gray-400"
+                              : "hover:bg-gray-100 text-gray-700"
                         }`}
                       >
                         <input
@@ -942,6 +989,74 @@ export default function WriterEditor({
               onChange={(e) => setReadDuration(e.target.value)}
               className="w-full bg-gray-50 border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs font-bold text-gray-800 focus:outline-none"
             />
+          </div>
+
+          {/* Homepage Placement */}
+          {isAdminMode && (
+            <div>
+              <label className="block text-[11px] font-black uppercase tracking-wider text-[#d38b29] mb-2">
+                HOMEPAGE PLACEMENT
+              </label>
+              <div className="relative">
+                <select
+                  value={homepagePlacement}
+                  onChange={(e) => setHomepagePlacement(e.target.value)}
+                  className="w-full bg-white border border-[#f5dca3] rounded-xl px-3.5 py-3 text-[13px] font-semibold text-gray-800 focus:outline-none appearance-none shadow-sm"
+                >
+                  <option value="None">None (category & search only)</option>
+                  <option value="Home - Latest News">Home - Latest News</option>
+                  <option value="Home - A+ Section">Home - A+ Section</option>
+                  <option value="Home - Right Panel">Home - Right Panel</option>
+                  <option value="Home - Bottom Panel">Home - Bottom Panel</option>
+                  <option value="Home - More Top Headlines">Home - More Top Headlines</option>
+                  <option value="Home - Spotlight">Home - Spotlight</option>
+                  <option value="Home - Most Read">Home - Most Read</option>
+                </select>
+                <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none" />
+              </div>
+              
+              {homepagePlacement.includes("Latest News") && (
+                <div className="mt-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={isSponsored}
+                      onChange={(e) => setIsSponsored(e.target.checked)}
+                      className="rounded border-gray-300 text-[#ce1126] focus:ring-0 w-4 h-4"
+                    />
+                    <span className="text-xs font-bold text-gray-700">Mark as Sponsored Content</span>
+                  </label>
+                </div>
+              )}
+              
+              <p className="text-[10px] text-gray-500 mt-2 font-mono leading-relaxed">
+                Select where this story will be curated on the homepage layout. Any list slots will automatically push the newest article to rank #1 and shift older items down.
+              </p>
+            </div>
+          )}
+
+          {/* Targeted Email Distribution */}
+          <div className="bg-[#f2f8fc] border border-[#d6e5f3] rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Mail size={14} className="text-[#003da5]" />
+              <label className="block text-[11px] font-black uppercase tracking-wider text-[#003da5]">
+                TARGETED EMAIL DISTRIBUTION
+              </label>
+            </div>
+            <p className="text-[11px] text-gray-500 mb-4 font-mono leading-relaxed">
+              Add specific VIP, partner, or client emails to receive this story upon publication.
+            </p>
+            <div className="flex items-center bg-white border border-[#b8d1ea] rounded-xl px-3 py-2.5 shadow-sm">
+              <Mail size={14} className="text-[#003da5] mr-2" />
+              <span className="text-xs font-bold text-[#003da5] mr-2">Mail Box</span>
+              <input
+                type="text"
+                placeholder="(Add Recipients)"
+                value={targetedEmails}
+                onChange={(e) => setTargetedEmails(e.target.value)}
+                className="flex-1 bg-transparent border-none text-[13px] text-gray-800 placeholder-gray-400 focus:outline-none"
+              />
+            </div>
           </div>
         </div>
       ) : (
@@ -1482,9 +1597,9 @@ export default function WriterEditor({
         </main>
 
         {/* Article Settings Card (Side-by-side on desktop, stacked underneath on mobile) */}
-        <aside className="w-full lg:w-[380px] xl:w-[410px] flex-shrink-0 bg-[#10141e] border border-gray-800 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col text-white">
-          <div className="flex items-center justify-between pb-3 border-b border-gray-800 mb-4">
-            <span className="text-xs font-black uppercase tracking-wider text-white">
+        <aside className="w-full lg:w-[380px] xl:w-[410px] flex-shrink-0 bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col text-gray-900">
+          <div className="flex items-center justify-between pb-3 border-b border-gray-200 mb-4">
+            <span className="text-xs font-black uppercase tracking-wider text-gray-900">
               ⚙️ ARTICLE SETTINGS
             </span>
           </div>

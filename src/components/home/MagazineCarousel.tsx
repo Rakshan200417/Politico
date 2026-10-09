@@ -169,9 +169,8 @@ const magazineArticles = [
   },
 ];
 
-const displayedArticles = magazineArticles.slice(0, 12);
-
-export default function MagazineCarousel() {
+export default function MagazineCarousel({ articles }: { articles?: any[] }) {
+  const displayedArticles = articles || magazineArticles.slice(0, 12);
   const [startIndex, setStartIndex] = useState(0);
   const [visibleCount, setVisibleCount] = useState(3);
   const [cardWidth, setCardWidth] = useState(280);
@@ -292,7 +291,7 @@ export default function MagazineCarousel() {
                   />
                 </div>
                 <span className="text-[11px] font-black uppercase text-[#ce1126] tracking-wider block mb-2">
-                  {article.tag}
+                  {article.category || article.tag || "MAGAZINE"}
                 </span>
                 <h3 className="font-sans text-[23px] font-black leading-[1.05] text-gray-900 group-hover:text-[#ce1126] transition-colors mb-3 tracking-[-0.03em]">
                   {article.title}
@@ -302,7 +301,7 @@ export default function MagazineCarousel() {
                 </p>
               </div>
               <p className="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider">
-                {article.author}
+                {article.writer_name ? `BY ${article.writer_name}` : article.author}
               </p>
             </a>
           ))}

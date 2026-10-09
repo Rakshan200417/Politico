@@ -10,6 +10,7 @@ function StoryMeta({
   image,
   deck,
   category,
+  date,
 }: {
   byline: string;
   title?: string;
@@ -17,10 +18,13 @@ function StoryMeta({
   image?: string;
   deck?: string;
   category?: string;
+  date?: string;
 }) {
   return (
     <div className="mt-2 flex items-center justify-between">
-      <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-[#666]">{byline}</p>
+      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#666]">
+        BY {byline} {date && <span className="mx-1">|</span>} {date}
+      </p>
       <SaveShareButtons
         title={title}
         slug={slug}
@@ -35,19 +39,19 @@ function StoryMeta({
 }
 
 function StoryRow({ story }: { story: CategoryStory }) {
-  const storySlug = story.slug || story.slug || slugify(story.title);
+  const storySlug = story.slug || slugify(story.title);
   return (
-    <article className="border-t border-[#e1e1e1] py-4 first:border-t-0 first:pt-0">
-      <div className="grid grid-cols-[150px_minmax(0,1fr)] gap-5 sm:grid-cols-[208px_minmax(0,1fr)]">
+    <article className="border-t border-[#e1e1e1] py-6 first:border-t-0 first:pt-0">
+      <div className="grid grid-cols-[180px_minmax(0,1fr)] gap-6 sm:grid-cols-[240px_minmax(0,1fr)]">
         <a href={`/news/${storySlug}`} className="aspect-[4/3] overflow-hidden bg-[#f2f2f2] block">
           <img src={story.image} alt="" className="h-full w-full object-cover transition-transform duration-300 hover:scale-[1.02]" />
         </a>
         <div>
           <a href={`/news/${storySlug}`} className="block">
-            <h3 className="text-[18px] font-bold leading-[1.08] tracking-[-0.02em] text-[#111] hover:text-[#d71920] sm:text-[21px]">
+            <h3 className="text-[18px] font-serif font-bold leading-[1.1] text-[#111] hover:text-[#d71920] sm:text-[22px]">
               {story.title}
             </h3>
-            <p className="mt-2 font-sans text-[15px] leading-[1.2] text-[#666] sm:text-[17px]">{story.deck}</p>
+            <p className="mt-2 font-sans text-[15px] leading-[1.3] text-[#555] sm:text-[16px]">{story.deck}</p>
           </a>
           <StoryMeta
             byline={story.byline}
@@ -55,6 +59,7 @@ function StoryRow({ story }: { story: CategoryStory }) {
             slug={storySlug}
             image={story.image}
             deck={story.deck}
+            date={story.date}
           />
         </div>
       </div>
@@ -77,25 +82,26 @@ export default function CategoryPage({ category }: { category: CategoryPageData 
 
       {/* Category Header */}
       <div className="text-center mb-10 pb-8 border-b border-[#ededed]">
-        <h1 className="text-[40px] font-sans text-[#111] sm:text-[48px] mb-4">
+        <h1 className="text-[32px] font-sans text-[#111] sm:text-[44px] mb-3 font-medium">
           {category.name}
         </h1>
         {category.description && (
-          <p className="font-sans text-[16px] text-[#333] max-w-3xl mx-auto">
+          <p className="font-sans text-[15px] sm:text-[16px] font-bold text-[#333] max-w-3xl mx-auto">
             {category.description}
           </p>
         )}
       </div>
 
       {/* Lead Section (Image 1 match) */}
-      <section className="grid gap-8 pt-6 lg:grid-cols-[minmax(0,1.8fr)_minmax(300px,1fr)] mb-12">
+      <section className="grid gap-8 pt-2 lg:grid-cols-[5fr_4fr] lg:gap-12 mb-10 pb-10 border-b border-[#ededed]">
+        {/* Left: Lead Article */}
         <article>
           <a href={`/news/${category.lead.slug || slugify(category.lead.title)}`} className="block group">
-            <h2 className="max-w-[740px] text-[32px] font-sans font-bold leading-[1.1] tracking-[-0.03em] text-[#111] group-hover:text-[#d71920] sm:text-[42px]">
+            <h2 className="text-[34px] font-sans font-bold leading-[1.05] tracking-[-0.01em] text-[#111] group-hover:text-[#d71920] sm:text-[42px]">
               {category.lead.title}
             </h2>
-            <p className="mt-3 max-w-[740px] font-sans text-[18px] leading-[1.4] text-[#555] sm:text-[20px]">{category.lead.deck}</p>
-            <div className="mt-1 mb-5">
+            <p className="mt-4 font-serif text-[18px] leading-[1.4] text-[#555] sm:text-[20px]">{category.lead.deck}</p>
+            <div className="mt-3 mb-6">
               <StoryMeta
                 byline={category.lead.byline}
                 title={category.lead.title}
@@ -103,30 +109,35 @@ export default function CategoryPage({ category }: { category: CategoryPageData 
                 image={category.lead.image}
                 deck={category.lead.deck}
                 category={category.name}
+                date={category.lead.date}
               />
             </div>
-            <div className="aspect-[3/2] overflow-hidden bg-[#f2f2f2]">
+            <div className="aspect-[4/3] sm:aspect-[16/9] w-full overflow-hidden bg-[#f2f2f2]">
               <img src={category.lead.image} alt="" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
             </div>
           </a>
         </article>
 
-        <aside className="flex flex-col gap-6 lg:border-l border-[#e1e1e1] lg:pl-6">
-          {category.sideStories.map((story) => (
-            <article key={story.title} className="border-b border-[#e1e1e1] pb-6 last:border-0 last:pb-0">
-              <a href={`/news/${story.slug || slugify(story.title)}`} className="flex flex-col gap-3 group">
+        {/* Right: Side Stories */}
+        <aside className="flex flex-col gap-8 lg:pl-2 lg:pt-[130px]">
+          {category.sideStories.slice(0, 2).map((story, i) => (
+            <article key={i} className="border-b border-[#e1e1e1] pb-8 last:border-0 last:pb-0">
+              <a href={`/news/${story.slug || slugify(story.title)}`} className="grid grid-cols-[48%_minmax(0,1fr)] gap-6 group">
                 <div className="aspect-[3/2] overflow-hidden bg-[#f2f2f2]">
                   <img src={story.image} alt="" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
                 </div>
                 <div>
-                  <h3 className="text-[18px] font-sans font-bold leading-[1.2] text-[#111] group-hover:text-[#d71920] sm:text-[20px]">{story.title}</h3>
-                  <div className="mt-1">
+                  <h3 className="text-[20px] font-sans font-bold leading-[1.1] text-[#111] group-hover:text-[#d71920] sm:text-[24px]">
+                    {story.title}
+                  </h3>
+                  <div className="mt-3">
                     <StoryMeta
                       byline={story.byline}
                       title={story.title}
                       slug={story.slug || slugify(story.title)}
                       image={story.image}
                       category={category.name}
+                      date={story.date}
                     />
                   </div>
                 </div>
@@ -136,181 +147,102 @@ export default function CategoryPage({ category }: { category: CategoryPageData 
         </aside>
       </section>
 
-      {/* Middle Banner Advertisement */}
-      <div className="py-6 border-t border-[#ededed] mb-8">
-        <div className="flex justify-center items-center h-[90px] lg:h-[120px]">
-          <AdvertisementSlot variant="banner" />
-        </div>
-      </div>
-
-      {/* Thematic Section 1: Trade War */}
+      {/* Middle Newsletters & Survey Ad (Image 2 match) */}
       <section className="mb-12">
-        <h2 className="text-[32px] font-serif font-bold tracking-[-0.02em] text-[#111] border-b border-[#111] pb-4 mb-6">
-          U.S.-Canada Trade War
-        </h2>
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.8fr)_minmax(300px,1fr)]">
-           <article>
-             <a href={`/news/${slugify(category.moreStories[0]?.title || "Trade War")}`} className="block group">
-               <div className="aspect-[16/9] overflow-hidden bg-[#f2f2f2] mb-5">
-                 <img src="https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=800&q=80" alt="" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
-               </div>
-               <h3 className="text-[26px] font-serif font-bold leading-[1.1] text-[#111] group-hover:text-[#d71920] sm:text-[32px]">
-                 'We are going in the wrong direction': Republican convention dogged by the cost of living
-               </h3>
-               <StoryMeta byline="BY SUE ALLAN" title="Trade War" />
-             </a>
-           </article>
-           <aside className="flex flex-col gap-6 lg:border-l border-[#e1e1e1] lg:pl-6">
-             {category.moreStories.slice(0, 3).map((story, i) => (
-                <article key={i} className="border-b border-[#e1e1e1] pb-6 last:border-0 last:pb-0">
-                  <a href={`/news/${story.slug || slugify(story.title)}`} className="grid grid-cols-[100px_minmax(0,1fr)] gap-4 group">
-                    <div className="aspect-[4/3] overflow-hidden bg-[#f2f2f2]">
-                      <img src={story.image} alt="" className="h-full w-full object-cover" />
-                    </div>
-                    <div>
-                      <h4 className="text-[16px] font-serif font-bold leading-[1.15] text-[#111] group-hover:text-[#d71920]">{story.title}</h4>
-                      <div className="mt-1">
-                        <StoryMeta byline={story.byline} />
-                      </div>
-                    </div>
-                  </a>
-                </article>
-             ))}
-           </aside>
+        <div className="grid md:grid-cols-2 gap-8 mb-10">
+          <div className="pr-4 md:border-r border-[#e1e1e1]">
+            <h3 className="text-[20px] font-sans text-[#111] mb-2 font-medium">Global Security</h3>
+            <p className="text-[14px] text-[#444] mb-3 leading-snug">
+              This POLITICO Pro newsletter preview explores the people, policies and power shifts shaping today's international security landscape.
+            </p>
+            <p className="text-[12px] font-bold text-[#d71920]">
+              Sign up for the preview <span className="text-gray-400 font-normal mx-1">|</span> <span className="text-[#111] font-normal hover:underline cursor-pointer">Read the latest edition</span>
+            </p>
+          </div>
+          <div className="pl-0 md:pl-4">
+            <h3 className="text-[20px] font-sans text-[#111] mb-2 font-medium">National Security Daily</h3>
+            <p className="text-[14px] text-[#444] mb-3 leading-snug">
+              From the SitRoom to the E-Ring, the inside scoop on defense, national security and foreign policy.
+            </p>
+            <p className="text-[12px] font-bold text-[#d71920]">
+              Sign up <span className="text-gray-400 font-normal mx-1">|</span> <span className="text-[#111] font-normal hover:underline cursor-pointer">Read today's edition</span>
+            </p>
+          </div>
         </div>
-      </section>
 
-      {/* Thematic Section 2: Elections & Politics */}
-      <section className="mb-12">
-        <h2 className="text-[32px] font-serif font-bold tracking-[-0.02em] text-[#111] border-b border-[#111] pb-4 mb-6">
-          {category.name} Elections & Politics
-        </h2>
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.8fr)_minmax(300px,1fr)]">
-           <article>
-             <a href={`/news/${slugify(category.moreStories[1]?.title || "Elections")}`} className="block group">
-               <div className="aspect-[16/9] overflow-hidden bg-[#f2f2f2] mb-5">
-                 <img src="https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=800&q=80" alt="" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
-               </div>
-               <h3 className="text-[26px] font-serif font-bold leading-[1.1] text-[#111] group-hover:text-[#d71920] sm:text-[32px]">
-                 'Very Hard to See How This Ends'
-               </h3>
-               <p className="mt-2 text-[16px] text-[#555]">Where the U.S.-Canada trade war goes next, according to POLITICO's reporters.</p>
-               <StoryMeta byline="BY SUE ALLAN" title="Elections" />
-             </a>
-           </article>
-           <aside className="flex flex-col gap-6 lg:border-l border-[#e1e1e1] lg:pl-6">
-             {category.moreStories.slice(1, 3).map((story, i) => (
-                <article key={i} className="border-b border-[#e1e1e1] pb-6 last:border-0 last:pb-0">
-                  <a href={`/news/${story.slug || slugify(story.title)}`} className="grid grid-cols-[100px_minmax(0,1fr)] gap-4 group">
-                    <div className="aspect-[4/3] overflow-hidden bg-[#f2f2f2]">
-                      <img src={story.image} alt="" className="h-full w-full object-cover" />
-                    </div>
-                    <div>
-                      <h4 className="text-[16px] font-serif font-bold leading-[1.15] text-[#111] group-hover:text-[#d71920]">{story.title}</h4>
-                      <div className="mt-1">
-                        <StoryMeta byline={story.byline} />
-                      </div>
-                    </div>
-                  </a>
-                </article>
-             ))}
-             {/* POLITICOPRO Box */}
-             <div className="bg-[#f9f9f9] p-5 border-t border-[#e1e1e1] mt-2">
-                <div className="text-[14px] font-black text-[#d71920] mb-2 tracking-wide">POLITICOPRO</div>
-                <p className="text-[13px] text-[#555] leading-[1.4] mb-2">Exclusive news, intelligence and tools for professionals on the front lines of policy.</p>
-                <a href="#" className="text-[13px] font-bold text-[#111] hover:underline">Learn more »</a>
-             </div>
-           </aside>
-        </div>
-      </section>
-
-      {/* Thematic Section 3: Magazine */}
-      <section className="mb-12">
-        <h2 className="text-[32px] font-serif font-bold tracking-[-0.02em] text-[#111] border-b border-[#111] pb-4 mb-6">
-          Magazine
-        </h2>
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.8fr)_minmax(300px,1fr)]">
-           <article>
-             <a href={`/news/${slugify(category.moreStories[2]?.title || "Magazine")}`} className="block group">
-               <div className="aspect-[16/9] overflow-hidden bg-[#f2f2f2] mb-5">
-                 <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80" alt="" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
-               </div>
-               <h3 className="text-[26px] font-serif font-bold leading-[1.1] text-[#111] group-hover:text-[#d71920] sm:text-[32px]">
-                 Is Danielle Smith About to Break Up Canada?
-               </h3>
-               <p className="mt-2 text-[16px] text-[#555]">The Alberta premier called a referendum that could begin the process of secession from Canada. Will she regret it?</p>
-               <StoryMeta byline="BY CATHERINE KIM" title="Magazine" />
-             </a>
-           </article>
-           <aside className="flex flex-col gap-6 lg:border-l border-[#e1e1e1] lg:pl-6">
-             {category.moreStories.slice(2, 5).map((story, i) => (
-                <article key={i} className="border-b border-[#e1e1e1] pb-6 last:border-0 last:pb-0">
-                  <a href={`/news/${story.slug || slugify(story.title)}`} className="grid grid-cols-[100px_minmax(0,1fr)] gap-4 group">
-                    <div className="aspect-[4/3] overflow-hidden bg-[#f2f2f2]">
-                      <img src={story.image} alt="" className="h-full w-full object-cover" />
-                    </div>
-                    <div>
-                      <h4 className="text-[16px] font-serif font-bold leading-[1.15] text-[#111] group-hover:text-[#d71920]">{story.title}</h4>
-                      <div className="mt-1">
-                        <StoryMeta byline={story.byline} />
-                      </div>
-                    </div>
-                  </a>
-                </article>
-             ))}
-           </aside>
-        </div>
-      </section>
-
-      {/* More Coverage Section */}
-      <section className="mt-12 border-t-[3px] border-[#111] pt-6">
-        <div className="mb-6 pb-2">
-          <h2 className="text-[14px] font-bold uppercase tracking-[0.1em] text-[#111]">More of Politico's Coverage of {category.name} Politics and Policy</h2>
-        </div>
-        
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
-          {/* Left Column: Long Feed of Stories */}
-          <div className="flex flex-col gap-6">
-            {allMoreStories.map((story, idx) => (
-              <StoryRow key={`${story.title}-${idx}`} story={story} />
-            ))}
-
-            {/* Pagination Mockup */}
-            <div className="mt-12 pt-8 flex items-center justify-center gap-1.5 sm:gap-2">
-              <button className="px-3 sm:px-4 py-2 text-[11px] font-bold tracking-wider text-gray-400 border border-gray-200 rounded cursor-not-allowed">
-                PREV
-              </button>
-              <button className="w-8 h-8 flex items-center justify-center text-[12px] font-bold bg-[#820000] text-white rounded">
-                1
-              </button>
-              <button className="w-8 h-8 flex items-center justify-center text-[12px] font-bold text-gray-600 hover:bg-gray-100 rounded transition-colors">
-                2
-              </button>
-              <button className="w-8 h-8 flex items-center justify-center text-[12px] font-bold text-gray-600 hover:bg-gray-100 rounded transition-colors">
-                3
-              </button>
-              <button className="w-8 h-8 hidden sm:flex items-center justify-center text-[12px] font-bold text-gray-600 hover:bg-gray-100 rounded transition-colors">
-                4
-              </button>
-              <span className="text-gray-400 px-1">...</span>
-              <button className="w-8 h-8 hidden sm:flex items-center justify-center text-[12px] font-bold text-gray-600 hover:bg-gray-100 rounded transition-colors">
-                11
-              </button>
-              <button className="px-3 sm:px-4 py-2 text-[11px] font-bold tracking-wider text-[#111] border border-gray-300 rounded hover:bg-gray-50 transition-colors">
-                NEXT
-              </button>
+        {/* Survey Ad */}
+        <div className="w-full flex flex-col items-center">
+          <p className="text-[10px] text-gray-500 mb-2">Advertisement</p>
+          <div className="w-full max-w-[800px] bg-[#f5f5f5] p-8 text-center flex flex-col items-center justify-center">
+            <p className="text-[11px] font-bold text-[#457b9d] tracking-wider uppercase mb-6">Sponsored Survey | Question 1/3</p>
+            <p className="text-[16px] font-sans text-[#111] font-medium mb-8 max-w-[500px]">
+              In the past month, have you seen or heard messaging around <span className="font-bold">long-acting injectable treatments (LAIs)</span> for <span className="font-bold">opioid use disorder?</span>
+            </p>
+            <div className="flex gap-4 w-full max-w-[600px]">
+              <button className="flex-1 bg-[#e0e0e0] hover:bg-[#d5d5d5] text-[#111] font-medium py-3 rounded text-[15px] transition">Yes</button>
+              <button className="flex-1 bg-[#e0e0e0] hover:bg-[#d5d5d5] text-[#111] font-medium py-3 rounded text-[15px] transition">No</button>
+              <button className="flex-1 bg-[#e0e0e0] hover:bg-[#d5d5d5] text-[#111] font-medium py-3 rounded text-[15px] transition">Not sure</button>
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* Right Column: Sticky Advertisement */}
-          <aside className="hidden lg:block lg:border-l border-[#e1e1e1] lg:pl-6">
-            <div className="sticky top-[120px] self-start">
-              <div className="bg-[#f4f4f4] h-[600px] w-full flex flex-col items-center justify-center text-gray-400 p-4 text-center">
-                 <p className="text-[10px] uppercase tracking-wider font-bold mb-4">Advertisement</p>
-                 <AdvertisementSlot variant="sidebar" />
-              </div>
+      {/* More Coverage Section (Image 3 match) */}
+      <section className="mt-16">
+        <div className="mb-6 pb-2 border-b-2 border-[#111]">
+          <h2 className="text-[12px] font-bold uppercase tracking-[0.1em] text-[#111]">More of Politico's Coverage of {category.name}</h2>
+        </div>
+        
+        <div className="flex flex-col">
+          {allMoreStories.slice(0, 15).map((story, idx) => (
+            <StoryRow key={`${story.title}-${idx}`} story={story} />
+          ))}
+
+          {category.totalPages && category.totalPages > 1 && (
+            <div className="mt-12 pt-8 flex items-center justify-center gap-1.5 sm:gap-2">
+              <a 
+                href={category.currentPage && category.currentPage > 1 ? `?page=${category.currentPage - 1}` : '#'}
+                className={`px-3 sm:px-4 py-2 text-[11px] font-bold tracking-wider rounded border transition-colors ${
+                  category.currentPage && category.currentPage > 1 
+                    ? "text-[#111] border-gray-300 hover:bg-gray-50 cursor-pointer" 
+                    : "text-gray-400 border-gray-200 cursor-not-allowed"
+                }`}
+              >
+                PREV
+              </a>
+              
+              {Array.from({ length: Math.min(5, category.totalPages) }, (_, i) => {
+                const pageNum = i + 1;
+                const isCurrent = pageNum === (category.currentPage || 1);
+                return (
+                  <a 
+                    key={pageNum}
+                    href={`?page=${pageNum}`}
+                    className={`w-8 h-8 flex items-center justify-center text-[12px] font-bold rounded transition-colors ${
+                      isCurrent 
+                        ? "bg-[#820000] text-white" 
+                        : "text-gray-600 hover:bg-gray-100"
+                    }`}
+                  >
+                    {pageNum}
+                  </a>
+                );
+              })}
+              
+              {category.totalPages > 5 && <span className="text-gray-400 px-1">...</span>}
+              
+              <a 
+                href={category.currentPage && category.currentPage < category.totalPages ? `?page=${category.currentPage + 1}` : '#'}
+                className={`px-3 sm:px-4 py-2 text-[11px] font-bold tracking-wider rounded border transition-colors ${
+                  category.currentPage && category.currentPage < category.totalPages 
+                    ? "text-[#111] border-gray-300 hover:bg-gray-50 cursor-pointer" 
+                    : "text-gray-400 border-gray-200 cursor-not-allowed"
+                }`}
+              >
+                NEXT
+              </a>
             </div>
-          </aside>
+          )}
         </div>
       </section>
     </main>

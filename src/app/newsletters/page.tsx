@@ -5,7 +5,7 @@ import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
 
 const mainCategories = [
-  { id: "breakingNews", name: "Breaking News" },
+  { id: "world", name: "World" },
   { id: "companies", name: "Companies" },
   { id: "startups", name: "Startups" },
   { id: "markets", name: "Markets" },
@@ -13,11 +13,20 @@ const mainCategories = [
   { id: "finance", name: "Finance" },
   { id: "technology", name: "Technology" },
   { id: "industries", name: "Industries" },
-  { id: "global", name: "Global" },
   { id: "leaders", name: "Leaders" },
 ];
 
 const megaMenuData: Record<string, { name: string; id: string }[]> = {
+  world: [
+    { name: "China", id: "china" },
+    { name: "United States", id: "united-states" },
+    { name: "Europe", id: "europe" },
+    { name: "Britain", id: "britain" },
+    { name: "Middle East", id: "middle-east" },
+    { name: "Africa", id: "africa" },
+    { name: "Asia", id: "asia" },
+    { name: "Interview", id: "interview" },
+  ],
   companies: [
     { name: "Corporate Announcements", id: "corporate-announcements" },
     { name: "Mergers & Acquisitions", id: "mergers-acquisitions" },
@@ -44,6 +53,13 @@ const megaMenuData: Record<string, { name: string; id: string }[]> = {
     { name: "FinTech", id: "fintech" },
     { name: "Banking Industry", id: "banking-industry" },
     { name: "Loans & Lending", id: "loans-lending" },
+  ],
+  technology: [
+    { name: "Artificial Intelligence", id: "artificial-intelligence" },
+    { name: "Cybersecurity", id: "cybersecurity" },
+    { name: "Gadgets & Devices", id: "gadgets-devices" },
+    { name: "Software", id: "software" },
+    { name: "Startups", id: "startups" },
   ],
   industries: [
     { name: "Manufacturing", id: "manufacturing" },

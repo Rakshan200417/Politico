@@ -1,7 +1,8 @@
 import { getPublishedArticlesByCategory } from "@/lib/articleService";
+import { formatPublishDate } from "@/utils/dateFormatter";
 
 export default async function LeftCategorySection({ category }: { category: string }) {
-  let articles = await getPublishedArticlesByCategory(category, 3);
+  let { articles } = await getPublishedArticlesByCategory(category, 3, true);
 
   if (!articles || articles.length === 0) {
     articles = [
@@ -29,7 +30,9 @@ export default async function LeftCategorySection({ category }: { category: stri
               <h3 className="text-[16px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mb-1">
                 {article.title}
               </h3>
-              <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mt-2 font-sans">BY {article.writer_name}</p>
+              <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mt-2 font-sans">
+                BY {article.writer_name} <span className="mx-1">|</span> {formatPublishDate(article.updated_at || article.created_at)}
+              </p>
             </a>
           </li>
         ))}

@@ -23,7 +23,22 @@ type TabType =
 
 export default function WriterDashboard() {
   // Navigation State
-  const [activeTab, setActiveTab] = useState<TabType>("published");
+  const [activeTab, setActiveTabState] = useState<TabType>("published");
+  
+  const setActiveTab = (tab: TabType) => {
+    setActiveTabState(tab);
+    try {
+      localStorage.setItem("writerActiveTab", tab);
+    } catch (e) {}
+  };
+
+  useEffect(() => {
+    const savedTab = localStorage.getItem("writerActiveTab") as TabType;
+    if (savedTab) {
+      setActiveTabState(savedTab);
+    }
+  }, []);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [editingArticle, setEditingArticle] = useState<ArticleData | null>(
@@ -70,7 +85,7 @@ export default function WriterDashboard() {
 
     try {
       const res = await fetch(
-        `/api/articles?email=${encodeURIComponent(email)}`,
+        `/api/articles?email=${encodeURIComponent(email)}&_t=${Date.now()}`,
       );
       if (res.ok) {
         const data = await res.json();

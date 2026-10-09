@@ -7,7 +7,7 @@ import Footer from "@/components/common/Footer";
 import BackButton from "@/components/common/BackButton";
 import SaveShareButtons from "@/components/common/SaveShareButtons";
 import AdvertisementSlot from "@/components/common/AdvertisementSlot";
-import { getArticleBySlug, getLatestPublishedArticles } from "@/lib/articleService";
+import { getArticleBySlug, getLatestPublishedArticles, getAuthorProfile } from "@/lib/articleService";
 import {
   Clock,
   Calendar,
@@ -45,31 +45,27 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
   let article = await getArticleBySlug(params.slug);
   if (!article) {
     // Determine a fallback category from the slug if it starts with "mock-"
-    // e.g. "mock-china-0" -> "China"
-    let mockCategory = "Update";
+    let mockCategory = "Leadership Strategies";
     const normalizedSlug = params.slug.replace(/\s+/g, '-');
     if (normalizedSlug.startsWith("mock-")) {
       const parts = normalizedSlug.split('-');
-      // mock-corporate-announcements-0 -> ['mock', 'corporate', 'announcements', '0']
       if (parts.length >= 3) {
-        // extract the parts between 'mock' and the last digit
         const categoryParts = parts.slice(1, parts.length - 1);
         mockCategory = categoryParts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
-      } else {
-        mockCategory = parts[1] ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : "Update";
       }
     }
 
     // Temporarily use a mock article for demo links instead of a 404
     article = {
       id: 9999,
-      writer_name: "POLITICO Staff",
+      writer_email: "writer@example.com",
+      writer_name: "Writer",
       title: params.slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
       deck: "This is a temporary mock article page. The real content will be fetched from the admin dashboard once connected.",
       content: "<p>This is a temporary mock article page designed to showcase the layout, typography, and functionality of the news pages.</p><p>Once the admin control panel is fully integrated, the actual content written by writers and approved by editors will appear here dynamically.</p><p>For now, you can navigate around and experience the user interface seamlessly.</p>",
       category: mockCategory,
-      image: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=1200&q=80",
-      image_caption: "Demo layout placeholder image",
+      image: "https://ui-avatars.com/api/?name=Writer&background=111111&color=fff&size=800",
+      image_caption: "Writer Avatar",
       created_at: new Date().toISOString(),
       tags: "Demo, Mock Article",
       slug: params.slug
@@ -78,6 +74,9 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
   
   // Cast to ensure TypeScript knows it's not null from here on
   const articleData = article!;
+
+  const authorProfile = await getAuthorProfile(articleData.writer_email);
+  const authorAvatarUrl = authorProfile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(articleData.writer_name)}&background=111111&color=fff`;
 
   // Fetch some dynamic latest stories for related/more news
   const allLatest = await getLatestPublishedArticles(10);
@@ -151,7 +150,7 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
           <div className="border-t border-b border-[#e3e3e3] py-5 flex items-center gap-4">
             <div className="flex items-center gap-4">
               <a href={`/author/${slugify(articleData.writer_name)}`} className="group">
-                <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(articleData.writer_name)}&background=111111&color=fff`} className="w-12 h-12 rounded-full object-cover shadow-sm group-hover:opacity-90 transition-opacity" alt="Author" />
+                <img src={authorAvatarUrl} className="w-12 h-12 rounded-full object-cover shadow-sm group-hover:opacity-90 transition-opacity" alt="Author" />
               </a>
               <div className="flex flex-col gap-0.5">
                 <div className="flex items-center gap-2">
@@ -171,21 +170,11 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
         <section className="grid gap-8 pt-8 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
           {/* Main Editorial Column */}
           <article className="min-w-0">
-            {/* Hero Image */}
-            <div className="aspect-[16/9] w-full overflow-hidden bg-[#f2f2f2] rounded-sm">
-              <img
-                src={articleData.image || `https://picsum.photos/seed/${articleData.id}/800/600`}
-                alt={articleData.title}
-                className="h-full w-full object-cover"
-              />
-            </div>
-            <p className="mt-2 text-[11px] text-gray-500 italic leading-relaxed">
-              {articleData.image_caption || 'A representative photo'}
-            </p>
+            {/* Hero Image is rendered as part of articleData.content */}
 
             {/* Article Body Paragraphs */}
             <div 
-              className="space-y-6 pt-8 font-sans text-[17px] sm:text-[18px] leading-[1.65] text-[#292929] article-content"
+              className="space-y-6 pt-8 font-sans text-[17px] sm:text-[18px] leading-[1.65] text-[#292929] article-content overflow-x-hidden"
               dangerouslySetInnerHTML={{ __html: articleData.content }}
             />
 
