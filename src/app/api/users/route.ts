@@ -4,7 +4,19 @@ import pool from '@/lib/db';
 // GET /api/users
 export async function GET() {
   try {
-    const [rows] = await pool.query('SELECT id, name, email, role, avatar_url FROM users ORDER BY created_at DESC');
+    const [rows] = await pool.query(`
+      SELECT 
+        u.id, 
+        u.name, 
+        u.email, 
+        u.role, 
+        COALESCE(NULLIF(pd.avatar_url, ''), NULLIF(u.avatar_url, ''), '') AS avatar_url,
+        COALESCE(pd.bio, '') AS bio,
+        COALESCE(pd.linkedin_profile, '') AS linkedin_profile
+      FROM users u
+      LEFT JOIN profile_details pd ON u.email = pd.email
+      ORDER BY u.created_at DESC
+    `);
     return NextResponse.json({ users: rows });
   } catch (error) {
     console.error('Error fetching users:', error);

@@ -33,23 +33,36 @@ export default async function AuthorProfilePage({ params, searchParams }: { para
   let authorBio = "A dedicated journalist with a passion for delivering accurate, timely, and impactful news. Committed to ethical reporting and in-depth storytelling, she covers a wide range of topics with professionalism, integrity, and a focus on informing audiences through credible journalism.";
   let authorAvatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(authorName)}&background=111111&color=fff&size=200`;
 
+  let authorLinkedIn = "";
+
   // Always try to fetch profile by name first (even if 0 articles)
   const profile = await getAuthorProfileByName(authorName);
   if (profile) {
     authorBio = profile.bio || authorBio;
     authorAvatarUrl = profile.avatar_url || authorAvatarUrl;
+    if (profile.linkedin_profile) authorLinkedIn = profile.linkedin_profile;
   }
 
   if (articles && articles.length > 0) {
     authorName = articles[0].writer_name;
-    // If by name failed, try by email from the first article
-    if (!profile && articles[0].writer_email) {
+    // If by name failed or missing linkedin, try by email from the first article
+    if (articles[0].writer_email) {
       const profileByEmail = await getAuthorProfile(articles[0].writer_email);
       if (profileByEmail) {
         authorBio = profileByEmail.bio || authorBio;
         authorAvatarUrl = profileByEmail.avatar_url || authorAvatarUrl;
+        if (profileByEmail.linkedin_profile) authorLinkedIn = profileByEmail.linkedin_profile;
       }
     }
+  }
+
+  let authorLinkedInUrl = authorLinkedIn.trim();
+  if (authorLinkedInUrl) {
+    if (!authorLinkedInUrl.startsWith("http://") && !authorLinkedInUrl.startsWith("https://")) {
+      authorLinkedInUrl = "https://" + authorLinkedInUrl;
+    }
+  } else {
+    authorLinkedInUrl = `https://www.linkedin.com/search/results/all/?keywords=${encodeURIComponent(authorName)}`;
   }
 
   const mostRead = [
@@ -97,9 +110,20 @@ export default async function AuthorProfilePage({ params, searchParams }: { para
             />
           </div>
           <div className="text-center sm:text-left flex-1">
-            <h1 className="text-[32px] sm:text-[38px] font-serif font-bold text-[#1a202c] mb-1 leading-tight">
-              {authorName}
-            </h1>
+            <div className="flex items-center gap-3 justify-center sm:justify-start mb-1">
+              <h1 className="text-[32px] sm:text-[38px] font-serif font-bold text-[#1a202c] leading-tight">
+                {authorName}
+              </h1>
+              <a
+                href={authorLinkedInUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center w-[20px] h-[20px] rounded-[3px] bg-[#0077b5] hover:bg-[#005582] text-white font-bold text-[11px] leading-none transition-transform hover:scale-110 shadow-sm"
+                title={`${authorName}'s LinkedIn Profile`}
+              >
+                in
+              </a>
+            </div>
             <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#d71920] mb-4">
               {authorRole}
             </p>

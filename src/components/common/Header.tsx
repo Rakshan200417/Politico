@@ -51,7 +51,7 @@ export default function Header() {
             setUser(updated);
           }
         })
-        .catch(() => {});
+        .catch(() => { });
     }
   };
 
@@ -196,8 +196,8 @@ export default function Header() {
           <a href="/" className="pointer-events-auto">
             <span
               className={`font-black tracking-[-0.04em] text-[#d71920] uppercase leading-none transition-all duration-300 ease-out ${isCompact
-                  ? "text-[28px] font-medium"
-                  : "text-[40px] min-[1280px]:text-[56px] font-bold"
+                ? "text-[28px] font-medium"
+                : "text-[40px] min-[1280px]:text-[56px] font-bold"
                 }`}
             >
               POLITICO
@@ -269,9 +269,8 @@ export default function Header() {
                             : "/reader"
                         }
                         onClick={() => setProfileMenuOpen(false)}
-                        className={`flex items-center gap-3 px-4 py-2.5 text-xs md:text-sm font-semibold hover:bg-gray-50 transition-colors ${
-                          user.role === "writer" ? "text-blue-600 hover:text-blue-700" : "text-gray-800 hover:text-[#ce1126]"
-                        }`}
+                        className={`flex items-center gap-3 px-4 py-2.5 text-xs md:text-sm font-semibold hover:bg-gray-50 transition-colors ${user.role === "writer" ? "text-blue-600 hover:text-blue-700" : "text-gray-800 hover:text-[#ce1126]"
+                          }`}
                       >
                         {user.role === "writer" ? (
                           <PenTool className="w-4 h-4 flex-shrink-0" strokeWidth={2} />
@@ -343,9 +342,9 @@ export default function Header() {
       </div>
 
       {/* Global Search Modal */}
-      <GlobalSearchModal 
-        isOpen={searchOpen} 
-        onClose={() => setSearchOpen(false)} 
+      <GlobalSearchModal
+        isOpen={searchOpen}
+        onClose={() => setSearchOpen(false)}
       />
 
       {/* Mobile/Tablet Responsive Category Nav */}

@@ -7,7 +7,7 @@ import Footer from "@/components/common/Footer";
 import BackButton from "@/components/common/BackButton";
 import SaveShareButtons from "@/components/common/SaveShareButtons";
 import AdvertisementSlot from "@/components/common/AdvertisementSlot";
-import { getArticleBySlug, getLatestPublishedArticles, getAuthorProfile } from "@/lib/articleService";
+import { getArticleBySlug, getLatestPublishedArticles, getAuthorProfile, getAuthorProfileByName } from "@/lib/articleService";
 import {
   Clock,
   Calendar,
@@ -75,8 +75,24 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
   // Cast to ensure TypeScript knows it's not null from here on
   const articleData = article!;
 
-  const authorProfile = await getAuthorProfile(articleData.writer_email);
+  let authorProfile = await getAuthorProfile(articleData.writer_email);
+  if (!authorProfile || (!authorProfile.avatar_url && !authorProfile.linkedin_profile)) {
+    const profileByName = await getAuthorProfileByName(articleData.writer_name);
+    if (profileByName) {
+      authorProfile = { ...(authorProfile || {}), ...profileByName };
+    }
+  }
   const authorAvatarUrl = authorProfile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(articleData.writer_name)}&background=111111&color=fff`;
+
+  // Format exact LinkedIn URL saved in DB (ensuring https:// prefix so it opens in new tab properly)
+  let authorLinkedInUrl = authorProfile?.linkedin_profile?.trim() || "";
+  if (authorLinkedInUrl) {
+    if (!authorLinkedInUrl.startsWith("http://") && !authorLinkedInUrl.startsWith("https://")) {
+      authorLinkedInUrl = "https://" + authorLinkedInUrl;
+    }
+  } else {
+    authorLinkedInUrl = `https://www.linkedin.com/search/results/all/?keywords=${encodeURIComponent(articleData.writer_name)}`;
+  }
 
   // Fetch some dynamic latest stories for related/more news
   const allLatest = await getLatestPublishedArticles(10);
@@ -154,8 +170,17 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
               </a>
               <div className="flex flex-col gap-0.5">
                 <div className="flex items-center gap-2">
-                  <a href={`/author/${slugify(articleData.writer_name)}`} className="text-[15px] font-bold text-[#111] hover:text-[#d71920] transition-colors">
-                    By {articleData.writer_name}
+                  <a href={`/author/${slugify(articleData.writer_name)}`} className="text-[15px] font-black uppercase text-[#111] hover:text-[#d71920] transition-colors">
+                    BY {articleData.writer_name}
+                  </a>
+                  <a
+                    href={authorLinkedInUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center w-[18px] h-[18px] rounded-[3px] bg-[#0077b5] hover:bg-[#005582] text-white font-bold text-[10px] leading-none transition-transform hover:scale-110 shadow-sm"
+                    title={`${articleData.writer_name}'s LinkedIn Profile`}
+                  >
+                    in
                   </a>
                 </div>
                 <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wide font-sans">

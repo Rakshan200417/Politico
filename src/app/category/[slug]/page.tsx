@@ -35,9 +35,9 @@ export default async function CategoryRoute({ params, searchParams }: { params: 
     articles = [];
   }
 
-  // Ensure we always have at least 15 articles for the new layout (1 lead + 2 side + 12 more)
-  if (articles.length < 15) {
-    const missingCount = 15 - articles.length;
+  // If there are fewer than 3 articles in this category, fill with mock stories so the page doesn't look empty
+  if (articles.length < 3) {
+    const missingCount = 3 - articles.length;
     const mockArticles = Array.from({ length: missingCount }).map((_, i) => ({
       id: 9000 + articles.length + i,
       slug: `mock-${params.slug}-${articles.length + i}`,
@@ -59,8 +59,8 @@ export default async function CategoryRoute({ params, searchParams }: { params: 
   });
 
   const leadArticle = mapToStory(articles[0]);
-  const sideStories = articles.slice(1, 4).map(mapToStory);
-  const moreStories = articles.slice(4).map(mapToStory);
+  const sideStories = articles.slice(1, 3).map(mapToStory);
+  const moreStories = articles.slice(3).map(mapToStory);
 
   const categoryData: CategoryPageData = {
     slug: params.slug,

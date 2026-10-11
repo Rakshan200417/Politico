@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import pool from '@/lib/db';
 
 let isArticlesTableEnsured = false;
@@ -48,6 +49,8 @@ async function ensureArticlesTable() {
       { name: 'image_caption', definition: 'TEXT' },
       { name: 'image_credit', definition: 'VARCHAR(255) DEFAULT ""' },
       { name: 'is_sponsored', definition: 'BOOLEAN DEFAULT FALSE' },
+      { name: 'homepage_placement', definition: 'VARCHAR(255) DEFAULT ""' },
+      { name: 'targeted_email_distribution', definition: 'TEXT' },
     ];
 
     for (const col of optionalColumns) {
@@ -329,10 +332,11 @@ export async function PUT(request: Request) {
     values.push(id);
     let whereClause = 'WHERE id = ?';
 
-    if (writer_email) {
-      whereClause += ' AND writer_email = ?';
-      values.push(writer_email);
-    }
+    // Remove writer_email restriction so admins can edit it without needing the exact original email
+    // if (writer_email) {
+    //   whereClause += ' AND writer_email = ?';
+    //   values.push(writer_email);
+    // }
 
     const sql = `UPDATE articles SET ${updates.join(', ')} ${whereClause}`;
     const [result]: any = await pool.execute(sql, values);
@@ -357,6 +361,9 @@ export async function PUT(request: Request) {
         }
       }
     }
+
+    // Invalidate the cache for the home page and categories so changes show up immediately
+    revalidatePath('/', 'layout');
 
     return NextResponse.json({
       message: 'Article updated successfully in database',
@@ -386,23 +393,13 @@ export async function DELETE(request: Request) {
     }
 
     if (action === 'permanent') {
-      let sql = 'DELETE FROM articles WHERE id = ?';
-      const params: any[] = [id];
-      if (email) {
-        sql += ' AND writer_email = ?';
-        params.push(email);
-      }
-      await pool.execute(sql, params);
+      await pool.execute('DELETE FROM articles WHERE id = ?', [id]);
+      revalidatePath('/', 'layout');
       return NextResponse.json({ message: 'Article permanently deleted from database', id });
     } else {
       // Soft delete: move to trash status
-      let sql = 'UPDATE articles SET status = "trash" WHERE id = ?';
-      const params: any[] = [id];
-      if (email) {
-        sql += ' AND writer_email = ?';
-        params.push(email);
-      }
-      await pool.execute(sql, params);
+      await pool.execute('UPDATE articles SET status = "trash" WHERE id = ?', [id]);
+      revalidatePath('/', 'layout');
       return NextResponse.json({ message: 'Article moved to trash in database', id });
     }
   } catch (error: any) {

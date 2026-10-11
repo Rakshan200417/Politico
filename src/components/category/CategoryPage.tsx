@@ -10,7 +10,6 @@ function StoryMeta({
   image,
   deck,
   category,
-  date,
 }: {
   byline: string;
   title?: string;
@@ -18,22 +17,21 @@ function StoryMeta({
   image?: string;
   deck?: string;
   category?: string;
-  date?: string;
 }) {
   return (
-    <div className="mt-2 flex items-center justify-between">
-      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#666]">
-        BY {byline} {date && <span className="mx-1">|</span>} {date}
-      </p>
-      <SaveShareButtons
-        title={title}
-        slug={slug}
-        image={image}
-        deck={deck}
-        category={category}
-        byline={byline}
-        size="sm"
-      />
+    <div className="mt-2 flex items-center justify-between gap-2">
+      <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-[#666] truncate">{byline}</p>
+      <div className="shrink-0">
+        <SaveShareButtons
+          title={title}
+          slug={slug}
+          image={image}
+          deck={deck}
+          category={category}
+          byline={byline}
+          size="sm"
+        />
+      </div>
     </div>
   );
 }
@@ -41,17 +39,21 @@ function StoryMeta({
 function StoryRow({ story }: { story: CategoryStory }) {
   const storySlug = story.slug || slugify(story.title);
   return (
-    <article className="border-t border-[#e1e1e1] py-6 first:border-t-0 first:pt-0">
-      <div className="grid grid-cols-[180px_minmax(0,1fr)] gap-6 sm:grid-cols-[240px_minmax(0,1fr)]">
-        <a href={`/news/${storySlug}`} className="aspect-[4/3] overflow-hidden bg-[#f2f2f2] block">
+    <article className="border-t border-[#e1e1e1] py-4 first:border-t-0 first:pt-0 overflow-hidden">
+      <div className="grid grid-cols-[150px_minmax(0,1fr)] gap-5 sm:grid-cols-[208px_minmax(0,1fr)]">
+        <a href={`/news/${storySlug}`} className="aspect-[4/3] w-full overflow-hidden bg-[#f2f2f2] block shrink-0">
           <img src={story.image} alt="" className="h-full w-full object-cover transition-transform duration-300 hover:scale-[1.02]" />
         </a>
-        <div>
+        <div className="min-w-0 overflow-hidden">
           <a href={`/news/${storySlug}`} className="block">
-            <h3 className="text-[18px] font-serif font-bold leading-[1.1] text-[#111] hover:text-[#d71920] sm:text-[22px]">
+            <h3 className="text-[18px] font-bold leading-[1.15] tracking-[-0.02em] text-[#111] hover:text-[#d71920] sm:text-[21px] break-words [overflow-wrap:anywhere]">
               {story.title}
             </h3>
-            <p className="mt-2 font-sans text-[15px] leading-[1.3] text-[#555] sm:text-[16px]">{story.deck}</p>
+            {story.deck && (
+              <p className="mt-2 font-sans text-[15px] leading-[1.3] text-[#666] sm:text-[17px] break-words [overflow-wrap:anywhere]">
+                {story.deck}
+              </p>
+            )}
           </a>
           <StoryMeta
             byline={story.byline}
@@ -59,7 +61,6 @@ function StoryRow({ story }: { story: CategoryStory }) {
             slug={storySlug}
             image={story.image}
             deck={story.deck}
-            date={story.date}
           />
         </div>
       </div>
@@ -68,135 +69,117 @@ function StoryRow({ story }: { story: CategoryStory }) {
 }
 
 export default function CategoryPage({ category }: { category: CategoryPageData }) {
-  const allMoreStories = category.moreStories;
+  const leadSlug = category.lead?.slug || slugify(category.lead?.title || "");
 
   return (
-    <main className="mx-auto w-full max-w-[1080px] px-4 pb-16 font-sans sm:px-6">
-      
-      {/* Top Banner Advertisement */}
-      <div className="pt-6 pb-6 border-b border-[#ededed] mb-8">
-        <div className="flex justify-center items-center h-[90px] lg:h-[120px]">
-          <AdvertisementSlot variant="banner" />
+    <main className="mx-auto w-full max-w-[1080px] px-4 pb-16 font-sans sm:px-6 overflow-x-hidden">
+      {/* Top Banner Box */}
+      <div className="flex h-[150px] items-center justify-center border-b border-[#ededed] sm:h-[180px]">
+        <div className="w-full max-w-[650px] bg-[#f2f2f2] px-5 py-4 text-center">
+          <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#d71920]">POLITICO</span>
+          <p className="mt-1 text-[15px] font-bold text-[#222] sm:text-[18px]">Your first read on {category.name} politics and policy</p>
+          <button className="mt-2 rounded-full bg-[#d71920] px-5 py-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-white">Subscribe now</button>
         </div>
       </div>
 
-      {/* Category Header */}
-      <div className="text-center mb-10 pb-8 border-b border-[#ededed]">
-        <h1 className="text-[32px] font-sans text-[#111] sm:text-[44px] mb-3 font-medium">
-          {category.name}
-        </h1>
+      {/* Header */}
+      <header className="border-b border-[#e3e3e3] py-7 text-center sm:py-8">
+        <h1 className="text-[42px] font-normal tracking-[-0.04em] text-[#111] sm:text-[52px]">{category.name}</h1>
         {category.description && (
-          <p className="font-sans text-[15px] sm:text-[16px] font-bold text-[#333] max-w-3xl mx-auto">
-            {category.description}
-          </p>
+          <p className="mx-auto mt-3 max-w-[760px] text-[14px] leading-[1.35] text-[#111] sm:text-[16px]">{category.description}</p>
         )}
-      </div>
+      </header>
 
-      {/* Lead Section (Image 1 match) */}
-      <section className="grid gap-8 pt-2 lg:grid-cols-[5fr_4fr] lg:gap-12 mb-10 pb-10 border-b border-[#ededed]">
-        {/* Left: Lead Article */}
-        <article>
-          <a href={`/news/${category.lead.slug || slugify(category.lead.title)}`} className="block group">
-            <h2 className="text-[34px] font-sans font-bold leading-[1.05] tracking-[-0.01em] text-[#111] group-hover:text-[#d71920] sm:text-[42px]">
-              {category.lead.title}
-            </h2>
-            <p className="mt-4 font-serif text-[18px] leading-[1.4] text-[#555] sm:text-[20px]">{category.lead.deck}</p>
-            <div className="mt-3 mb-6">
-              <StoryMeta
-                byline={category.lead.byline}
-                title={category.lead.title}
-                slug={category.lead.slug || slugify(category.lead.title)}
-                image={category.lead.image}
-                deck={category.lead.deck}
-                category={category.name}
-                date={category.lead.date}
-              />
-            </div>
-            <div className="aspect-[4/3] sm:aspect-[16/9] w-full overflow-hidden bg-[#f2f2f2]">
-              <img src={category.lead.image} alt="" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
-            </div>
-          </a>
-        </article>
+      {/* Lead Section: 1 Lead + Side Stories (Max 2 side stories to equal 3 top stories) */}
+      <section className="grid gap-7 pt-8 lg:grid-cols-[minmax(0,2fr)_minmax(260px,1fr)] overflow-hidden">
+        {category.lead && (
+          <article className="min-w-0 overflow-hidden">
+            <a href={`/news/${leadSlug}`} className="block group">
+              <h2 className="max-w-[700px] text-[31px] font-bold leading-[1.08] tracking-[-0.03em] text-[#111] group-hover:text-[#d71920] sm:text-[40px] break-words [overflow-wrap:anywhere]">
+                {category.lead.title}
+              </h2>
+              {category.lead.deck && (
+                <p className="mt-3 max-w-[700px] font-sans text-[17px] leading-[1.3] text-[#666] sm:text-[19px] break-words [overflow-wrap:anywhere]">
+                  {category.lead.deck}
+                </p>
+              )}
+              <div className="mt-2 mb-4">
+                <StoryMeta
+                  byline={category.lead.byline}
+                  title={category.lead.title}
+                  slug={leadSlug}
+                  image={category.lead.image}
+                  deck={category.lead.deck}
+                  category={category.name}
+                />
+              </div>
+              <div className="aspect-[16/9] w-full overflow-hidden bg-[#f2f2f2]">
+                <img
+                  src={category.lead.image}
+                  alt=""
+                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                />
+              </div>
+            </a>
+          </article>
+        )}
 
-        {/* Right: Side Stories */}
-        <aside className="flex flex-col gap-8 lg:pl-2 lg:pt-[130px]">
-          {category.sideStories.slice(0, 2).map((story, i) => (
-            <article key={i} className="border-b border-[#e1e1e1] pb-8 last:border-0 last:pb-0">
-              <a href={`/news/${story.slug || slugify(story.title)}`} className="grid grid-cols-[48%_minmax(0,1fr)] gap-6 group">
-                <div className="aspect-[3/2] overflow-hidden bg-[#f2f2f2]">
-                  <img src={story.image} alt="" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
-                </div>
-                <div>
-                  <h3 className="text-[20px] font-sans font-bold leading-[1.1] text-[#111] group-hover:text-[#d71920] sm:text-[24px]">
-                    {story.title}
-                  </h3>
-                  <div className="mt-3">
+        <aside className="border-t border-[#e1e1e1] pt-6 lg:border-t-0 lg:border-l lg:pl-6 lg:pt-0 min-w-0 overflow-hidden">
+          {category.sideStories && category.sideStories.map((story, i) => {
+            const storySlug = story.slug || slugify(story.title);
+            return (
+              <article key={`${story.title}-${i}`} className="border-b border-[#e1e1e1] pb-5 pt-5 first:pt-0 overflow-hidden">
+                <a href={`/news/${storySlug}`} className="grid grid-cols-[125px_minmax(0,1fr)] gap-4 sm:grid-cols-1 group">
+                  <div className="aspect-[4/3] w-full overflow-hidden bg-[#f2f2f2]">
+                    <img src={story.image} alt="" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
+                  </div>
+                  <div className="min-w-0 overflow-hidden">
+                    <h3 className="mt-0 text-[17px] font-bold leading-[1.15] tracking-[-0.02em] text-[#111] group-hover:text-[#d71920] sm:mt-3 sm:text-[20px] break-words [overflow-wrap:anywhere]">
+                      {story.title}
+                    </h3>
                     <StoryMeta
                       byline={story.byline}
                       title={story.title}
-                      slug={story.slug || slugify(story.title)}
+                      slug={storySlug}
                       image={story.image}
                       category={category.name}
-                      date={story.date}
                     />
                   </div>
-                </div>
-              </a>
-            </article>
-          ))}
+                </a>
+              </article>
+            );
+          })}
+
+          {/* Sidebar Advertisement Space */}
+          <div className="mt-4">
+            <AdvertisementSlot variant="sidebar" />
+          </div>
+
+          <div className="mt-7 border-t border-[#e1e1e1] pt-5">
+            <h3 className="text-[20px] font-normal text-[#111]">Inside {category.name}</h3>
+            <p className="mt-1 text-[14px] text-[#222]">Your first read on the latest news and analysis.</p>
+            <a href="#" className="mt-2 inline-block text-[11px] font-bold text-[#d71920]">Sign Up &nbsp;|&nbsp; Read today's edition</a>
+          </div>
         </aside>
       </section>
 
-      {/* Middle Newsletters & Survey Ad (Image 2 match) */}
-      <section className="mb-12">
-        <div className="grid md:grid-cols-2 gap-8 mb-10">
-          <div className="pr-4 md:border-r border-[#e1e1e1]">
-            <h3 className="text-[20px] font-sans text-[#111] mb-2 font-medium">Global Security</h3>
-            <p className="text-[14px] text-[#444] mb-3 leading-snug">
-              This POLITICO Pro newsletter preview explores the people, policies and power shifts shaping today's international security landscape.
-            </p>
-            <p className="text-[12px] font-bold text-[#d71920]">
-              Sign up for the preview <span className="text-gray-400 font-normal mx-1">|</span> <span className="text-[#111] font-normal hover:underline cursor-pointer">Read the latest edition</span>
-            </p>
-          </div>
-          <div className="pl-0 md:pl-4">
-            <h3 className="text-[20px] font-sans text-[#111] mb-2 font-medium">National Security Daily</h3>
-            <p className="text-[14px] text-[#444] mb-3 leading-snug">
-              From the SitRoom to the E-Ring, the inside scoop on defense, national security and foreign policy.
-            </p>
-            <p className="text-[12px] font-bold text-[#d71920]">
-              Sign up <span className="text-gray-400 font-normal mx-1">|</span> <span className="text-[#111] font-normal hover:underline cursor-pointer">Read today's edition</span>
-            </p>
-          </div>
-        </div>
+      {/* In-page Advertisement Space */}
+      <div className="my-8">
+        <AdvertisementSlot variant="in-article" />
+      </div>
 
-        {/* Survey Ad */}
-        <div className="w-full flex flex-col items-center">
-          <p className="text-[10px] text-gray-500 mb-2">Advertisement</p>
-          <div className="w-full max-w-[800px] bg-[#f5f5f5] p-8 text-center flex flex-col items-center justify-center">
-            <p className="text-[11px] font-bold text-[#457b9d] tracking-wider uppercase mb-6">Sponsored Survey | Question 1/3</p>
-            <p className="text-[16px] font-sans text-[#111] font-medium mb-8 max-w-[500px]">
-              In the past month, have you seen or heard messaging around <span className="font-bold">long-acting injectable treatments (LAIs)</span> for <span className="font-bold">opioid use disorder?</span>
-            </p>
-            <div className="flex gap-4 w-full max-w-[600px]">
-              <button className="flex-1 bg-[#e0e0e0] hover:bg-[#d5d5d5] text-[#111] font-medium py-3 rounded text-[15px] transition">Yes</button>
-              <button className="flex-1 bg-[#e0e0e0] hover:bg-[#d5d5d5] text-[#111] font-medium py-3 rounded text-[15px] transition">No</button>
-              <button className="flex-1 bg-[#e0e0e0] hover:bg-[#d5d5d5] text-[#111] font-medium py-3 rounded text-[15px] transition">Not sure</button>
-            </div>
-          </div>
+      {/* More News Section */}
+      <section className="mt-8 border-t border-[#e1e1e1] pt-8">
+        <div className="mb-4 flex items-center gap-2 border-b border-[#d9d9d9] pb-2">
+          <span className="h-2 w-2 rounded-full border border-[#d71920]" />
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#222]">More {category.name} news</h2>
         </div>
-      </section>
-
-      {/* More Coverage Section (Image 3 match) */}
-      <section className="mt-16">
-        <div className="mb-6 pb-2 border-b-2 border-[#111]">
-          <h2 className="text-[12px] font-bold uppercase tracking-[0.1em] text-[#111]">More of Politico's Coverage of {category.name}</h2>
-        </div>
-        
-        <div className="flex flex-col">
-          {allMoreStories.slice(0, 15).map((story, idx) => (
-            <StoryRow key={`${story.title}-${idx}`} story={story} />
-          ))}
+        <div className="max-w-[760px]">
+          {category.moreStories && category.moreStories.length > 0 ? (
+            category.moreStories.map((story, i) => <StoryRow key={`${story.title}-${i}`} story={story} />)
+          ) : (
+            <p className="text-sm text-gray-500 py-4">No additional articles in this category.</p>
+          )}
 
           {category.totalPages && category.totalPages > 1 && (
             <div className="mt-12 pt-8 flex items-center justify-center gap-1.5 sm:gap-2">

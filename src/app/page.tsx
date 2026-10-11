@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { slugify } from "@/data/newsArticles";
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";

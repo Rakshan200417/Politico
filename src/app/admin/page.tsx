@@ -65,6 +65,9 @@ export default function AdminDashboard() {
 
   const [publishedPosts, setPublishedPosts] = useState<AdminArticleData[]>([]);
   const [isPublishedLoading, setIsPublishedLoading] = useState(false);
+  const [publishedCategoryFilter, setPublishedCategoryFilter] = useState("All Categories");
+  const [publishedPlacementFilter, setPublishedPlacementFilter] = useState("All Placements");
+  const [publishedSearchQuery, setPublishedSearchQuery] = useState("");
 
   const [systemUsers, setSystemUsers] = useState<any[]>([]);
   const [isUsersLoading, setIsUsersLoading] = useState(false);
@@ -103,6 +106,17 @@ export default function AdminDashboard() {
     loadNewsletters();
     loadPublishedPosts();
     loadSystemUsers();
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "article_updated") {
+        loadPendingArticles();
+        loadPublishedPosts();
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
   }, []);
 
   const loadNewsletters = async () => {
@@ -154,6 +168,15 @@ export default function AdminDashboard() {
     } finally {
       setIsUsersLoading(false);
     }
+  };
+
+  const formatLinkedInUrl = (url?: string) => {
+    if (!url || !url.trim()) return "";
+    let clean = url.trim();
+    if (!clean.startsWith("http://") && !clean.startsWith("https://")) {
+      clean = "https://" + clean;
+    }
+    return clean;
   };
 
   const handleDeleteUser = async (id: number, email: string) => {
@@ -330,6 +353,35 @@ export default function AdminDashboard() {
     );
   });
 
+  const displayedPublishedPosts = publishedPosts.filter((article) => {
+    if (publishedCategoryFilter !== "All Categories") {
+      const selected = publishedCategoryFilter.toLowerCase().trim();
+      const mainCat = (article.category || "").toLowerCase().trim();
+      const subCatsStr = Array.isArray(article.subcategories) 
+        ? article.subcategories.join(" ").toLowerCase()
+        : String(article.subcategories || "").toLowerCase();
+      const isMainMatch = mainCat === selected;
+      const isSubMatch = subCatsStr.includes(`"${selected}"`) || subCatsStr.includes(selected);
+      if (!isMainMatch && !isSubMatch) {
+        return false;
+      }
+    }
+    if (publishedPlacementFilter !== "All Placements") {
+      const placement = article.homepage_placement || "None";
+      if (placement !== publishedPlacementFilter) {
+        return false;
+      }
+    }
+    if (publishedSearchQuery.trim()) {
+      const q = publishedSearchQuery.toLowerCase();
+      const titleMatch = article.title?.toLowerCase().includes(q);
+      const authorMatch = (article.writer_name || article.writer_email || "").toLowerCase().includes(q);
+      const deckMatch = (article.deck || article.card_summary || "").toLowerCase().includes(q);
+      if (!titleMatch && !authorMatch && !deckMatch) return false;
+    }
+    return true;
+  });
+
   if (isEditing && editingArticle) {
     return (
       <WriterEditor
@@ -445,23 +497,23 @@ export default function AdminDashboard() {
             </div>
           ) : (
             <div className="overflow-x-auto pb-4">
-              <table className="w-full text-left border-collapse min-w-[900px]">
+              <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-gray-100">
-                    <th className="py-4 px-4 text-[10px] font-bold uppercase tracking-wider text-gray-400 w-[45%]">Article Details</th>
-                    <th className="py-4 px-4 text-[10px] font-bold uppercase tracking-wider text-gray-400">Category</th>
-                    <th className="py-4 px-4 text-[10px] font-bold uppercase tracking-wider text-gray-400">Author</th>
-                    <th className="py-4 px-4 text-[10px] font-bold uppercase tracking-wider text-gray-400">Submitted Date</th>
-                    <th className="py-4 px-4 text-[10px] font-bold uppercase tracking-wider text-gray-400">Status</th>
-                    <th className="py-4 px-4 text-[10px] font-bold uppercase tracking-wider text-gray-400 text-right">Actions</th>
+                    <th className="py-4 px-4 text-[10px] font-bold uppercase tracking-wider text-gray-400 w-[38%]">Article Details</th>
+                    <th className="py-4 px-4 text-[10px] font-bold uppercase tracking-wider text-gray-400 w-[12%]">Category</th>
+                    <th className="py-4 px-4 text-[10px] font-bold uppercase tracking-wider text-gray-400 w-[14%]">Author</th>
+                    <th className="py-4 px-4 text-[10px] font-bold uppercase tracking-wider text-gray-400 w-[18%]">Submitted Date</th>
+                    <th className="py-4 px-4 text-[10px] font-bold uppercase tracking-wider text-gray-400 w-[10%]">Status</th>
+                    <th className="py-4 px-4 text-[10px] font-bold uppercase tracking-wider text-gray-400 text-right w-[8%]">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {displayedReviews.map((review) => (
                     <tr key={review.id} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="py-5 px-4">
-                        <div className="flex gap-4 items-start">
-                          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-gray-200 flex-shrink-0 overflow-hidden relative">
+                      <td className="py-5 px-4 max-w-[320px]">
+                        <div className="flex gap-4 items-start min-w-0">
+                          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg bg-gray-200 flex-shrink-0 overflow-hidden relative">
                             {review.image ? (
                               <img src={review.image} alt={review.title} className="w-full h-full object-cover" />
                             ) : (
@@ -470,9 +522,9 @@ export default function AdminDashboard() {
                               </div>
                             )}
                           </div>
-                          <div className="flex flex-col flex-1 min-w-0">
-                            <h3 className="text-[13px] sm:text-sm font-bold text-[#111] leading-snug mb-1 line-clamp-2 pr-2">{review.title}</h3>
-                            <p className="text-[11px] text-gray-500 line-clamp-2 mb-2 leading-relaxed pr-2">{review.deck}</p>
+                          <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
+                            <h3 className="text-[13px] sm:text-sm font-bold text-[#111] leading-snug mb-1 line-clamp-2 pr-2 break-all">{review.title}</h3>
+                            <p className="text-[11px] text-gray-500 line-clamp-2 mb-2 leading-relaxed pr-2 break-all">{review.deck}</p>
                             <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{review.read_time}</span>
                           </div>
                         </div>
@@ -651,7 +703,7 @@ export default function AdminDashboard() {
                 <Database size={14} /> BACKUP ARTICLES (ZIP)
               </button>
               <div className="text-[10px] font-bold text-gray-500 bg-gray-50 px-3 py-2 rounded-full border border-gray-100 whitespace-nowrap">
-                Live items: {publishedPosts.length} / {publishedPosts.length}
+                Live items: {displayedPublishedPosts.length} / {publishedPosts.length}
               </div>
             </div>
           </div>
@@ -659,31 +711,131 @@ export default function AdminDashboard() {
           <div className="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-100 flex flex-wrap items-center gap-4">
             <div className="flex flex-col gap-1.5 flex-1 min-w-[150px]">
               <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Filter by Category</label>
-              <select className="w-full bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 py-2 px-3 focus:outline-none">
-                <option>All Categories</option>
-                <option>World</option>
-                <option>Companies</option>
-                <option>Startups</option>
-                <option>Markets</option>
-                <option>Economy</option>
-                <option>Finance</option>
-                <option>Technology</option>
-                <option>Industries</option>
-                <option>Leaders</option>
+              <select 
+                value={publishedCategoryFilter}
+                onChange={(e) => setPublishedCategoryFilter(e.target.value)}
+                className="w-full bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 py-2 px-3 focus:outline-none"
+              >
+                <option value="All Categories">All Categories</option>
+                
+                <optgroup label="Regions & Countries">
+                  <option value="Middle East">Middle East</option>
+                  <option value="China">China</option>
+                  <option value="United States">United States</option>
+                  <option value="Europe">Europe</option>
+                  <option value="Britain">Britain</option>
+                  <option value="Africa">Africa</option>
+                  <option value="Asia">Asia</option>
+                </optgroup>
+
+                <optgroup label="Main Categories">
+                  <option value="Companies">Companies</option>
+                  <option value="Startups">Startups</option>
+                  <option value="Markets">Markets</option>
+                  <option value="Economy">Economy</option>
+                  <option value="Finance">Finance</option>
+                  <option value="Technology">Technology</option>
+                  <option value="Industries">Industries</option>
+                  <option value="Leaders">Leaders</option>
+                  <option value="Business">Business</option>
+                  <option value="Interview">Interview</option>
+                </optgroup>
+
+                <optgroup label="Companies Subcategories">
+                  <option value="Corporate Announcements">Corporate Announcements</option>
+                  <option value="Mergers & Acquisitions">Mergers & Acquisitions</option>
+                  <option value="Leadership Changes">Leadership Changes</option>
+                </optgroup>
+
+                <optgroup label="Startups Subcategories">
+                  <option value="Funding & Investment">Funding & Investment</option>
+                  <option value="Founder Stories">Founder Stories</option>
+                  <option value="Venture Capital">Venture Capital</option>
+                  <option value="Startup Failures">Startup Failures</option>
+                </optgroup>
+
+                <optgroup label="Markets Subcategories">
+                  <option value="Stock Market">Stock Market</option>
+                  <option value="Bonds">Bonds</option>
+                  <option value="Mutual Funds">Mutual Funds</option>
+                </optgroup>
+
+                <optgroup label="Economy Subcategories">
+                  <option value="GDP & Economic Growth">GDP & Economic Growth</option>
+                  <option value="Employment">Employment</option>
+                  <option value="Government Economic Policies">Government Economic Policies</option>
+                </optgroup>
+
+                <optgroup label="Finance Subcategories">
+                  <option value="Digital Banking">Digital Banking</option>
+                  <option value="FinTech">FinTech</option>
+                  <option value="Banking Industry">Banking Industry</option>
+                  <option value="Loans & Lending">Loans & Lending</option>
+                </optgroup>
+
+                <optgroup label="Technology Subcategories">
+                  <option value="Artificial Intelligence">Artificial Intelligence</option>
+                  <option value="Cybersecurity">Cybersecurity</option>
+                  <option value="Gadgets & Devices">Gadgets & Devices</option>
+                  <option value="Software">Software</option>
+                </optgroup>
+
+                <optgroup label="Industries Subcategories">
+                  <option value="Manufacturing">Manufacturing</option>
+                  <option value="Energy">Energy</option>
+                  <option value="Pharmaceuticals">Pharmaceuticals</option>
+                  <option value="Automobile">Automobile</option>
+                  <option value="Agriculture Business">Agriculture Business</option>
+                  <option value="Construction">Construction</option>
+                  <option value="Design">Design</option>
+                  <option value="Textiles">Textiles</option>
+                  <option value="Entertainment">Entertainment</option>
+                </optgroup>
+
+                <optgroup label="Leaders Subcategories">
+                  <option value="Business Leaders">Business Leaders</option>
+                  <option value="CEO Interviews">CEO Interviews</option>
+                  <option value="Executive Appointments">Executive Appointments</option>
+                  <option value="Leadership Strategies">Leadership Strategies</option>
+                </optgroup>
               </select>
             </div>
             <div className="flex flex-col gap-1.5 flex-1 min-w-[150px]">
               <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Filter by Placement</label>
-              <select className="w-full bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 py-2 px-3 focus:outline-none">
-                <option>All Placements</option>
+              <select 
+                value={publishedPlacementFilter}
+                onChange={(e) => setPublishedPlacementFilter(e.target.value)}
+                className="w-full bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 py-2 px-3 focus:outline-none"
+              >
+                <option value="All Placements">All Placements</option>
+                <option value="None">None</option>
+                <option value="Home - Latest News">Home - Latest News</option>
+                <option value="Home - A+ Section">Home - A+ Section</option>
+                <option value="Home - Right Panel">Home - Right Panel</option>
+                <option value="Home - Bottom Panel">Home - Bottom Panel</option>
+                <option value="Home - More Top Headlines">Home - More Top Headlines</option>
+                <option value="Home - Spotlight">Home - Spotlight</option>
               </select>
             </div>
             <div className="flex flex-col gap-1.5 flex-[2] min-w-[200px]">
               <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Search Articles</label>
-              <input type="text" placeholder="Search title, author..." className="w-full bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 py-2 px-3 focus:outline-none placeholder-gray-400" />
+              <input 
+                type="text" 
+                value={publishedSearchQuery}
+                onChange={(e) => setPublishedSearchQuery(e.target.value)}
+                placeholder="Search title, author..." 
+                className="w-full bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 py-2 px-3 focus:outline-none placeholder-gray-400" 
+              />
             </div>
             <div className="flex items-end pb-0.5">
-              <button className="text-xs font-bold text-[#2563eb] hover:bg-blue-50 px-4 py-2 rounded-lg transition-colors bg-white border border-gray-200">
+              <button 
+                onClick={() => {
+                  setPublishedCategoryFilter("All Categories");
+                  setPublishedPlacementFilter("All Placements");
+                  setPublishedSearchQuery("");
+                }}
+                className="text-xs font-bold text-[#2563eb] hover:bg-blue-50 px-4 py-2 rounded-lg transition-colors bg-white border border-gray-200"
+              >
                 Clear Filters
               </button>
             </div>
@@ -697,69 +849,68 @@ export default function AdminDashboard() {
               </span>
             </div>
           ) : (
-            <div className="overflow-x-auto pb-4">
-              <table className="w-full text-left border-collapse min-w-[800px]">
+            <div className="w-full overflow-x-auto pb-4">
+              <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b-2 border-gray-100">
-                    <th className="py-3 px-4 text-[9px] font-bold uppercase tracking-widest text-gray-400">Article Details</th>
-                    <th className="py-3 px-4 text-[9px] font-bold uppercase tracking-widest text-gray-400">Category</th>
-                    <th className="py-3 px-4 text-[9px] font-bold uppercase tracking-widest text-gray-400">Author</th>
-                    <th className="py-3 px-4 text-[9px] font-bold uppercase tracking-widest text-gray-400">Metrics Desk</th>
-                    <th className="py-3 px-4 text-[9px] font-bold uppercase tracking-widest text-gray-400 text-right">Delete Gate</th>
+                    <th className="py-3 px-3 text-[9px] font-bold uppercase tracking-widest text-gray-400">Article Details</th>
+                    <th className="py-3 px-3 text-[9px] font-bold uppercase tracking-widest text-gray-400 w-32">Category</th>
+                    <th className="py-3 px-3 text-[9px] font-bold uppercase tracking-widest text-gray-400 w-32">Author</th>
+                    <th className="py-3 px-3 text-[9px] font-bold uppercase tracking-widest text-gray-400 w-36">Metrics</th>
+                    <th className="py-3 px-3 text-[9px] font-bold uppercase tracking-widest text-gray-400 text-right w-24">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {publishedPosts.map((article, idx) => (
+                  {displayedPublishedPosts.map((article, idx) => (
                     <tr key={article.id || idx} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="py-4 px-4 w-1/3 min-w-[250px]">
+                      <td className="py-4 px-3 max-w-[340px]">
                         <div className="flex items-start gap-3">
                           {article.image ? (
-                            <img src={article.image} alt="" className="w-16 h-16 rounded object-cover flex-shrink-0 border border-gray-200" />
+                            <img src={article.image} alt="" className="w-14 h-14 rounded object-cover flex-shrink-0 border border-gray-200" />
                           ) : (
-                            <div className="w-16 h-16 rounded bg-gray-100 border border-gray-200 flex-shrink-0 flex items-center justify-center">
-                              <FileText size={20} className="text-gray-300" />
+                            <div className="w-14 h-14 rounded bg-gray-100 border border-gray-200 flex-shrink-0 flex items-center justify-center">
+                              <FileText size={18} className="text-gray-300" />
                             </div>
                           )}
-                          <div>
-                            <h4 className="text-xs font-bold text-gray-900 leading-tight mb-1">{article.title}</h4>
-                            <p className="text-[10px] text-gray-500 font-medium mb-1 line-clamp-1">{article.deck || article.card_summary}</p>
+                          <div className="min-w-0 flex-1">
+                            <h4 className="text-xs font-bold text-gray-900 leading-tight mb-1 line-clamp-2 break-words [overflow-wrap:anywhere]">{article.title}</h4>
+                            <p className="text-[10px] text-gray-500 font-medium mb-1 line-clamp-1 break-words [overflow-wrap:anywhere]">{article.deck || article.card_summary}</p>
                             <p className="text-[9px] text-gray-400 font-mono">{article.read_time || '5 min read'}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="py-4 px-4">
-                        <span className="text-[9px] font-bold text-blue-700 bg-blue-50 border border-blue-100 px-2.5 py-0.5 rounded-sm uppercase tracking-widest">
-                          {(() => {
-                            try {
-                              let subs = article.subcategories;
-                              if (typeof subs === 'string') {
-                                subs = JSON.parse(subs || '[]');
-                              }
-                              if (Array.isArray(subs) && subs.length > 0) return subs[0];
-                            } catch(e) {}
-                            return article.category || 'World';
-                          })()}
-                        </span>
+                      <td className="py-4 px-3 w-32">
+                        <div className="flex flex-col items-start gap-1">
+                          <span className="text-[9px] font-bold text-blue-700 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-sm uppercase tracking-widest truncate max-w-full">
+                            {article.category || 'World'}
+                          </span>
+                          {article.homepage_placement && article.homepage_placement !== "None" && (
+                            <span className="text-[8px] font-bold text-purple-700 bg-purple-50 border border-purple-100 px-2 py-0.5 rounded-sm uppercase tracking-widest truncate max-w-full">
+                              {article.homepage_placement}
+                            </span>
+                          )}
+                        </div>
                       </td>
-                      <td className="py-4 px-4">
-                        <span className="text-xs font-bold text-gray-800">{article.writer_name || article.writer_email?.split('@')[0] || "Unknown"}</span>
+                      <td className="py-4 px-3 w-32">
+                        <span className="text-xs font-bold text-gray-800 truncate block">{article.writer_name || article.writer_email?.split('@')[0] || "Unknown"}</span>
                       </td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-3 w-36 whitespace-nowrap">
                         <span className="text-[10px] font-bold text-[#2563eb]">{article.views || 0} Views</span>
                         <span className="text-[10px] text-gray-400 mx-1">•</span>
                         <span className="text-[10px] font-bold text-gray-500">{article.comments_count || 0} Comments</span>
                       </td>
-                      <td className="py-4 px-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-
+                      <td className="py-4 px-3 text-right w-24">
+                        <div className="flex items-center justify-end gap-1.5">
                           <button 
                             onClick={() => handleOpenArticle(article)}
+                            title="Edit Article"
                             className="w-7 h-7 rounded bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center hover:bg-blue-100 transition-colors"
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
                           </button>
                           <button 
                             onClick={() => article.id && handleDeletePublishedPost(article.id)}
+                            title="Delete Article"
                             className="w-7 h-7 rounded bg-red-50 text-red-600 border border-red-100 flex items-center justify-center hover:bg-red-100 transition-colors"
                           >
                             <Trash2 size={12} />
@@ -768,10 +919,10 @@ export default function AdminDashboard() {
                       </td>
                     </tr>
                   ))}
-                  {publishedPosts.length === 0 && (
+                  {displayedPublishedPosts.length === 0 && (
                     <tr>
                       <td colSpan={5} className="py-12 text-center text-gray-400 text-sm">
-                        No published posts found.
+                        No published posts found matching your filters.
                       </td>
                     </tr>
                   )}
@@ -879,9 +1030,25 @@ export default function AdminDashboard() {
                           <td className="py-4 px-4 text-right">
                             <div className="flex items-center justify-end gap-3">
                               <button 
-                                onClick={() => {
+                                onClick={async () => {
                                   setSelectedSystemUser(sysUser);
                                   setUserModalState("view");
+                                  try {
+                                    const res = await fetch(`/api/profile?email=${encodeURIComponent(sysUser.email)}`);
+                                    if (res.ok) {
+                                      const data = await res.json();
+                                      if (data.profile) {
+                                        setSelectedSystemUser((prev: any) => ({
+                                          ...prev,
+                                          avatar_url: data.profile.avatar_url || prev?.avatar_url,
+                                          bio: data.profile.bio || prev?.bio,
+                                          linkedin_profile: data.profile.linkedin_profile || prev?.linkedin_profile,
+                                        }));
+                                      }
+                                    }
+                                  } catch (e) {
+                                    console.warn("Could not fetch extra profile details", e);
+                                  }
                                 }}
                                 className="text-blue-600 hover:text-blue-800 transition-colors" title="View Profile"
                               >
@@ -1036,15 +1203,41 @@ export default function AdminDashboard() {
               </div>
               
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 rounded-lg bg-black text-white text-3xl font-black italic flex items-center justify-center overflow-hidden flex-shrink-0 bg-gradient-to-br from-indigo-900 to-purple-900">
-                  {selectedSystemUser.name ? selectedSystemUser.name.substring(0,2).toUpperCase() : 'US'}
+                <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border border-gray-100 shadow-sm bg-gradient-to-br from-indigo-900 to-purple-900 flex items-center justify-center relative">
+                  {selectedSystemUser.avatar_url ? (
+                    <img 
+                      src={selectedSystemUser.avatar_url} 
+                      alt={selectedSystemUser.name} 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = 'none';
+                        const fallback = (e.target as HTMLElement).nextElementSibling;
+                        if (fallback) (fallback as HTMLElement).classList.remove('hidden');
+                      }}
+                    />
+                  ) : null}
+                  <span className={`text-white text-2xl font-black italic ${selectedSystemUser.avatar_url ? 'hidden' : 'block'}`}>
+                    {selectedSystemUser.name ? selectedSystemUser.name.substring(0,2).toUpperCase() : 'US'}
+                  </span>
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                     {selectedSystemUser.name}
-                    <div className="w-5 h-5 rounded bg-blue-600 text-white flex items-center justify-center text-[10px]">
-                      in
-                    </div>
+                    {selectedSystemUser.linkedin_profile ? (
+                      <a 
+                        href={formatLinkedInUrl(selectedSystemUser.linkedin_profile)} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="w-5 h-5 rounded bg-[#0077b5] hover:bg-[#005582] text-white flex items-center justify-center text-[10px] font-bold transition-all hover:scale-105 shadow-sm cursor-pointer"
+                        title="Open LinkedIn Profile"
+                      >
+                        in
+                      </a>
+                    ) : (
+                      <div className="w-5 h-5 rounded bg-blue-600/50 text-white flex items-center justify-center text-[10px] font-bold" title="No LinkedIn profile linked">
+                        in
+                      </div>
+                    )}
                   </h2>
                   <span className="inline-block mt-1 text-[9px] font-bold text-blue-600 border border-blue-200 px-2.5 py-0.5 rounded-full uppercase tracking-widest">
                     {selectedSystemUser.role}
@@ -1063,19 +1256,28 @@ export default function AdminDashboard() {
                 
                 <div>
                   <label className="block text-[9px] font-bold uppercase tracking-widest text-gray-500 mb-1">Bio</label>
-                  <div className="bg-gray-50 p-4 rounded-lg text-xs text-gray-600 leading-relaxed font-mono">
-                    {selectedSystemUser.role.charAt(0).toUpperCase() + selectedSystemUser.role.slice(1)} User {selectedSystemUser.role.charAt(0).toUpperCase() + selectedSystemUser.role.slice(1)} User{selectedSystemUser.role.charAt(0).toUpperCase() + selectedSystemUser.role.slice(1)} User{selectedSystemUser.role.charAt(0).toUpperCase() + selectedSystemUser.role.slice(1)}
-                    <br />
-                    User{selectedSystemUser.role.charAt(0).toUpperCase() + selectedSystemUser.role.slice(1)} User{selectedSystemUser.role.charAt(0).toUpperCase() + selectedSystemUser.role.slice(1)} User{selectedSystemUser.role.charAt(0).toUpperCase() + selectedSystemUser.role.slice(1)} User{selectedSystemUser.role.charAt(0).toUpperCase() + selectedSystemUser.role.slice(1)} User{selectedSystemUser.role.charAt(0).toUpperCase() + selectedSystemUser.role.slice(1)} User
+                  <div className="bg-gray-50 p-4 rounded-lg text-xs text-gray-700 leading-relaxed font-sans border border-gray-100 whitespace-pre-wrap">
+                    {selectedSystemUser.bio && selectedSystemUser.bio.trim() 
+                      ? selectedSystemUser.bio 
+                      : `${selectedSystemUser.role.charAt(0).toUpperCase() + selectedSystemUser.role.slice(1)} account on POLITICO.`}
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-[9px] font-bold uppercase tracking-widest text-gray-500 mb-1">LinkedIn</label>
-                  <a href="#" className="flex items-start gap-2 text-xs text-blue-600 hover:underline">
-                    <div className="mt-0.5"><div className="w-3.5 h-3.5 rounded-sm bg-blue-600 text-white flex items-center justify-center text-[8px] font-bold">in</div></div>
-                    <span className="break-all">https://linkedin.com/in/{selectedSystemUser.name?.toLowerCase().replace(/\s+/g, '_')}_profile</span>
-                  </a>
+                  {selectedSystemUser.linkedin_profile ? (
+                    <a 
+                      href={formatLinkedInUrl(selectedSystemUser.linkedin_profile)} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="flex items-start gap-2 text-xs text-[#0077b5] hover:text-[#005582] hover:underline font-medium transition-colors"
+                    >
+                      <div className="mt-0.5"><div className="w-3.5 h-3.5 rounded-sm bg-[#0077b5] text-white flex items-center justify-center text-[8px] font-bold">in</div></div>
+                      <span className="break-all">{formatLinkedInUrl(selectedSystemUser.linkedin_profile)}</span>
+                    </a>
+                  ) : (
+                    <span className="text-xs text-gray-400 italic">No LinkedIn profile provided.</span>
+                  )}
                 </div>
               </div>
 

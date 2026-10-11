@@ -11,7 +11,7 @@ export default async function RightListCategorySection({ category, isMostRead = 
       articles = await getLatestPublishedArticles(4, true);
     }
   } else {
-    const result = await getPublishedArticlesByCategory(category, 4, true);
+    const result = await getPublishedArticlesByCategory(category, 4, true, 1, true);
     articles = result.articles;
   }
 

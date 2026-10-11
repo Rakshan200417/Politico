@@ -25,7 +25,7 @@ export interface Article {
   is_sponsored?: boolean | number;
 }
 
-export async function getPublishedArticlesByCategory(category: string, limit: number = 5, excludePlaced: boolean = false, page: number = 1): Promise<{articles: Article[], totalPages: number, currentPage: number}> {
+export async function getPublishedArticlesByCategory(category: string, limit: number = 5, excludePlaced: boolean = false, page: number = 1, mainCategoryOnly: boolean = false): Promise<{articles: Article[], totalPages: number, currentPage: number}> {
   try {
     const offset = (page - 1) * limit;
     let placementFilter = "";
@@ -33,7 +33,12 @@ export async function getPublishedArticlesByCategory(category: string, limit: nu
       placementFilter = " AND (homepage_placement IS NULL OR homepage_placement = 'None' OR homepage_placement = '')";
     }
     if (category.toLowerCase() === "world") {
-      const condition = `status = 'published' AND (category IN ('World', 'Middle East', 'Asia', 'Europe', 'Africa', 'Americas', 'Oceania', 'Russia', 'China', 'United Kingdom', 'Global') OR subcategories LIKE '%"World"%' OR subcategories LIKE '%"Middle East"%' OR subcategories LIKE '%"Asia"%' OR subcategories LIKE '%"Europe"%' OR subcategories LIKE '%"Africa"%' OR subcategories LIKE '%"Americas"%' OR subcategories LIKE '%"Oceania"%' OR subcategories LIKE '%"Russia"%' OR subcategories LIKE '%"China"%' OR subcategories LIKE '%"United Kingdom"%' OR subcategories LIKE '%"Global"%')${placementFilter}`;
+      let condition = "";
+      if (mainCategoryOnly) {
+        condition = `status = 'published' AND category IN ('World', 'Middle East', 'Asia', 'Europe', 'Africa', 'Americas', 'Oceania', 'Russia', 'China', 'United Kingdom', 'Global')${placementFilter}`;
+      } else {
+        condition = `status = 'published' AND (category IN ('World', 'Middle East', 'Asia', 'Europe', 'Africa', 'Americas', 'Oceania', 'Russia', 'China', 'United Kingdom', 'Global') OR subcategories LIKE '%"World"%' OR subcategories LIKE '%"Middle East"%' OR subcategories LIKE '%"Asia"%' OR subcategories LIKE '%"Europe"%' OR subcategories LIKE '%"Africa"%' OR subcategories LIKE '%"Americas"%' OR subcategories LIKE '%"Oceania"%' OR subcategories LIKE '%"Russia"%' OR subcategories LIKE '%"China"%' OR subcategories LIKE '%"United Kingdom"%' OR subcategories LIKE '%"Global"%')${placementFilter}`;
+      }
       
       const [countRows] = await pool.query(`SELECT COUNT(*) as total FROM articles WHERE ${condition}`);
       const totalArticles = (countRows as any)[0].total;
@@ -45,15 +50,23 @@ export async function getPublishedArticlesByCategory(category: string, limit: nu
       );
       return { articles: rows as Article[], totalPages, currentPage: page };
     } else {
-      const condition = `status = 'published' AND (category = ? OR subcategories LIKE ?)${placementFilter}`;
+      let condition = "";
+      let params: any[] = [];
+      if (mainCategoryOnly) {
+        condition = `status = 'published' AND category = ?${placementFilter}`;
+        params = [category];
+      } else {
+        condition = `status = 'published' AND (category = ? OR subcategories LIKE ?)${placementFilter}`;
+        params = [category, `%"${category}"%`];
+      }
       
-      const [countRows] = await pool.query(`SELECT COUNT(*) as total FROM articles WHERE ${condition}`, [category, `%"${category}"%`]);
+      const [countRows] = await pool.query(`SELECT COUNT(*) as total FROM articles WHERE ${condition}`, params);
       const totalArticles = (countRows as any)[0].total;
       const totalPages = Math.ceil(totalArticles / limit);
 
       const [rows] = await pool.query(
         `SELECT * FROM articles WHERE ${condition} ORDER BY updated_at DESC LIMIT ? OFFSET ?`,
-        [category, `%"${category}"%`, limit, offset]
+        [...params, limit, offset]
       );
       return { articles: rows as Article[], totalPages, currentPage: page };
     }
@@ -150,7 +163,23 @@ export async function getAuthorProfile(email: string): Promise<{ avatar_url?: st
       [email]
     );
     const profiles = rows as any[];
-    return profiles.length > 0 ? profiles[0] : null;
+    let profile = profiles.length > 0 ? { ...profiles[0] } : null;
+
+    // Check users table for avatar_url fallback if missing
+    const [userRows] = await pool.query(
+      "SELECT avatar_url FROM users WHERE email = ? LIMIT 1",
+      [email]
+    );
+    const uRows = userRows as any[];
+    if (uRows.length > 0 && uRows[0].avatar_url) {
+      if (!profile) {
+        profile = { avatar_url: uRows[0].avatar_url, linkedin_profile: '', bio: '' };
+      } else if (!profile.avatar_url) {
+        profile.avatar_url = uRows[0].avatar_url;
+      }
+    }
+
+    return profile;
   } catch (error) {
     console.error(`Error fetching profile for ${email}:`, error);
     return null;
@@ -162,12 +191,25 @@ export async function getAuthorProfileByName(name: string): Promise<{ avatar_url
     const [rows] = await pool.query(
       `SELECT pd.avatar_url, pd.linkedin_profile, pd.bio 
        FROM profile_details pd 
-       JOIN users u ON pd.email = u.email 
-       WHERE LOWER(u.name) = ? LIMIT 1`,
-      [name.toLowerCase()]
+       LEFT JOIN users u ON pd.email = u.email 
+       WHERE LOWER(u.name) = ? OR LOWER(pd.full_name) = ? LIMIT 1`,
+      [name.toLowerCase(), name.toLowerCase()]
     );
     const profiles = rows as any[];
-    return profiles.length > 0 ? profiles[0] : null;
+    if (profiles.length > 0 && (profiles[0].avatar_url || profiles[0].linkedin_profile || profiles[0].bio)) {
+      return profiles[0];
+    }
+
+    const [userRows] = await pool.query(
+      "SELECT avatar_url FROM users WHERE LOWER(name) = ? LIMIT 1",
+      [name.toLowerCase()]
+    );
+    const uRows = userRows as any[];
+    if (uRows.length > 0 && uRows[0].avatar_url) {
+      return { avatar_url: uRows[0].avatar_url, linkedin_profile: '', bio: '' };
+    }
+
+    return null;
   } catch (error) {
     console.error(`Error fetching profile by name ${name}:`, error);
     return null;

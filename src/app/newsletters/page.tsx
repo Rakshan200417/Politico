@@ -84,32 +84,17 @@ export default function NewslettersPage() {
   const [selected, setSelected] = useState<Record<string, boolean>>({});
 
   const handleToggleCategory = (catId: string) => {
-    setSelected((prev) => {
-      const isNowSelected = !prev[catId];
-      const newState = { ...prev, [catId]: isNowSelected };
-      
-      const subCats = megaMenuData[catId];
-      if (subCats) {
-        subCats.forEach(sub => {
-          newState[sub.id] = isNowSelected;
-        });
-      }
-      return newState;
-    });
+    setSelected((prev) => ({
+      ...prev,
+      [catId]: !prev[catId]
+    }));
   };
 
-  const handleToggleSub = (subId: string, parentId: string) => {
-    setSelected((prev) => {
-      const isNowSelected = !prev[subId];
-      const newState = { ...prev, [subId]: isNowSelected };
-      
-      const subCats = megaMenuData[parentId];
-      if (subCats) {
-        const allSubSelected = subCats.every(sub => newState[sub.id]);
-        newState[parentId] = allSubSelected;
-      }
-      return newState;
-    });
+  const handleToggleSub = (subId: string) => {
+    setSelected((prev) => ({
+      ...prev,
+      [subId]: !prev[subId]
+    }));
   };
 
   const getAllSelectableIds = () => {
@@ -228,7 +213,7 @@ export default function NewslettersPage() {
                       <div 
                         key={sub.id} 
                         className="flex items-center gap-3 cursor-pointer group"
-                        onClick={() => handleToggleSub(sub.id, cat.id)}
+                        onClick={() => handleToggleSub(sub.id)}
                       >
                         <div className={`w-4 h-4 border ${selected[sub.id] ? 'bg-[#ce1126] border-[#ce1126]' : 'border-gray-300'} flex items-center justify-center rounded-sm transition-colors group-hover:border-[#ce1126]`}>
                           {selected[sub.id] && (

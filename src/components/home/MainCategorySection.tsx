@@ -2,7 +2,7 @@ import { getPublishedArticlesByCategory } from "@/lib/articleService";
 import { formatPublishDate } from "@/utils/dateFormatter";
 
 export default async function MainCategorySection({ category, count = 4 }: { category: string, count?: number }) {
-  let { articles } = await getPublishedArticlesByCategory(category, count, true);
+  let { articles } = await getPublishedArticlesByCategory(category, count, true, 1, true);
 
   if (!articles || articles.length === 0) {
     articles = [];

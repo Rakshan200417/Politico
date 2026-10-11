@@ -99,6 +99,19 @@ export default function WriterDashboard() {
       console.warn("Could not fetch articles from DB:", err);
     }
 
+    // Fallback: check localStorage for saved articles
+    try {
+      const cached = localStorage.getItem("writer_articles");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setArticles(parsed);
+          setIsLoading(false);
+          return;
+        }
+      }
+    } catch (e) {}
+
     // Default mock seed article
     const initialSeed: ArticleData[] = [
       {
@@ -133,6 +146,14 @@ export default function WriterDashboard() {
     if (user) {
       loadArticles();
     }
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "article_updated") {
+        loadArticles();
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, [user?.email]);
 
   // Tab counts
@@ -234,80 +255,105 @@ export default function WriterDashboard() {
 
   // Handler: Delete article -> Move to Trash
   const handleDeleteArticle = async (article: ArticleData) => {
-    if (!article.id) return;
+    const matchesArticle = (a: ArticleData) =>
+      (article.id && a.id === article.id) ||
+      (!article.id && a.title === article.title);
 
-    // 1. Optimistic UI update
+    // 1. Optimistic UI update: move to trash
     const updated = articles.map((a) =>
-      a.id === article.id ? { ...a, status: "trash" as const } : a,
+      matchesArticle(a) ? { ...a, status: "trash" as const } : a,
     );
     setArticles(updated);
-    localStorage.setItem("writer_articles", JSON.stringify(updated));
-
-    // 2. Persist to DB
     try {
-      await fetch(
-        `/api/articles?id=${article.id}&email=${encodeURIComponent(user?.email || "")}&action=trash`,
-        {
-          method: "DELETE",
-        },
-      );
-    } catch (err) {
-      console.error("Failed to move article to trash in DB:", err);
+      localStorage.setItem("writer_articles", JSON.stringify(updated));
+      localStorage.setItem("article_updated", Date.now().toString());
+    } catch (e) {}
+
+    // 2. Persist to DB if persisted
+    if (article.id) {
+      try {
+        await fetch(
+          `/api/articles?id=${article.id}&action=trash`,
+          {
+            method: "DELETE",
+          },
+        );
+      } catch (err) {
+        console.error("Failed to move article to trash in DB:", err);
+      }
     }
   };
 
   // Handler: Restore article from Trash back to Draft
   const handleRestoreArticle = async (article: ArticleData) => {
-    if (!article.id) return;
+    const matchesArticle = (a: ArticleData) =>
+      (article.id && a.id === article.id) ||
+      (!article.id && a.title === article.title);
 
-    // 1. Optimistic UI update
+    // 1. Optimistic UI update: restore to draft
     const updated = articles.map((a) =>
-      a.id === article.id ? { ...a, status: "draft" as const } : a,
+      matchesArticle(a) ? { ...a, status: "draft" as const } : a,
     );
     setArticles(updated);
-    localStorage.setItem("writer_articles", JSON.stringify(updated));
+    try {
+      localStorage.setItem("writer_articles", JSON.stringify(updated));
+      localStorage.setItem("article_updated", Date.now().toString());
+    } catch (e) {}
 
     // 2. Persist to DB
-    try {
-      await fetch("/api/articles", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: article.id,
-          status: "draft",
-          writer_email: user?.email,
-        }),
-      });
-    } catch (err) {
-      console.error("Failed to restore article in DB:", err);
+    if (article.id) {
+      try {
+        await fetch("/api/articles", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: article.id,
+            status: "draft",
+          }),
+        });
+      } catch (err) {
+        console.error("Failed to restore article in DB:", err);
+      }
     }
+
+    // 3. Navigate directly to Saved Drafts tab so the writer sees it immediately
+    setActiveTab("drafts");
   };
 
   // Handler: Delete permanently from Trash
   const handlePermanentDelete = async (article: ArticleData) => {
-    if (!article.id) return;
     if (
       !window.confirm(
-        "Are you sure you want to permanently delete this article? This cannot be undone.",
+        "Are you sure you want to permanently delete this article? This action cannot be undone.",
       )
     ) {
       return;
     }
 
-    // 1. Optimistic UI update
-    const updated = articles.filter((a) => a.id !== article.id);
+    const matchesArticle = (a: ArticleData) =>
+      (article.id && a.id === article.id) ||
+      (!article.id && a.title === article.title);
+
+    // 1. Optimistic UI update: remove from list
+    const updated = articles.filter((a) => !matchesArticle(a));
     setArticles(updated);
+    try {
+      localStorage.setItem("writer_articles", JSON.stringify(updated));
+      localStorage.setItem("article_updated", Date.now().toString());
+    } catch (e) {}
 
     // 2. Persist to DB
-    try {
-      await fetch(
-        `/api/articles?id=${article.id}&email=${encodeURIComponent(user?.email || "")}&action=permanent`,
-        {
-          method: "DELETE",
-        },
-      );
-    } catch (err) {
-      console.error("Failed to permanent delete from DB:", err);
+    if (article.id) {
+      try {
+        await fetch(
+          `/api/articles?id=${article.id}&action=permanent`,
+          {
+            method: "DELETE",
+          },
+        );
+      } catch (err) {
+        console.error("Failed to permanent delete from DB:", err);
+      }
     }
   };
 
@@ -517,13 +563,13 @@ export default function WriterDashboard() {
         <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
           {/* Table Header */}
           <div className="grid grid-cols-12 gap-4 px-6 py-3 border-b border-gray-100 bg-gray-50 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-            <div className="col-span-12 md:col-span-6 lg:col-span-5">
+            <div className="col-span-12 md:col-span-5 lg:col-span-4">
               POST TITLE & SUMMARY
             </div>
             <div className="hidden lg:block col-span-2">CATEGORY</div>
-            <div className="hidden md:block col-span-3 lg:col-span-2">DATE</div>
+            <div className="hidden md:block col-span-2">DATE</div>
             <div className="hidden md:block col-span-2">STATUS</div>
-            <div className="hidden md:block col-span-1 text-right">ACTIONS</div>
+            <div className="col-span-12 md:col-span-3 lg:col-span-2 text-right">ACTIONS</div>
           </div>
           {/* Table Body */}
           <div className="divide-y divide-gray-100">

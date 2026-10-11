@@ -114,6 +114,7 @@ export const navbarCategories = [
   "Energy",
   "Pharmaceuticals",
   "Automobile",
+  "Leadership Strategies",
 ];
 
 export const worldRegions = [
@@ -175,6 +176,33 @@ export default function WriterEditor({
   const [metaDescription, setMetaDescription] = useState(
     initialArticle?.meta_description || "",
   );
+  const [isFocusKeywordAuto, setIsFocusKeywordAuto] = useState(
+    !initialArticle?.focus_keyword,
+  );
+  const [isCardSummaryAuto, setIsCardSummaryAuto] = useState(
+    !initialArticle?.card_summary,
+  );
+  const [isMetaDescriptionAuto, setIsMetaDescriptionAuto] = useState(
+    !initialArticle?.meta_description,
+  );
+
+  // Auto-generate SEO in real-time as writer types
+  useEffect(() => {
+    if (isFocusKeywordAuto) {
+      setFocusKeyword(title);
+    }
+  }, [title, isFocusKeywordAuto]);
+
+  useEffect(() => {
+    const rawContent = editorRef.current?.innerText || content || "";
+    const cleanText = (deck.trim() || rawContent.replace(/\s+/g, " ").trim()).slice(0, 160);
+    if (isCardSummaryAuto) {
+      setCardSummary(cleanText);
+    }
+    if (isMetaDescriptionAuto) {
+      setMetaDescription(cleanText);
+    }
+  }, [deck, content, isCardSummaryAuto, isMetaDescriptionAuto]);
 
   // UI States
   const [sidebarTab, setSidebarTab] = useState<"details" | "seo">("details");
@@ -187,6 +215,7 @@ export default function WriterEditor({
 
   // Image Modal States (Screenshots 1 & 2)
   const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [isEditingImage, setIsEditingImage] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
   const [imageCaption, setImageCaption] = useState("");
   const [imageCredit, setImageCredit] = useState("");
@@ -328,10 +357,19 @@ export default function WriterEditor({
   };
 
   const handleInsertImage = () => {
+    setIsEditingImage(false);
+    setSelectedImageNode(null);
+    setImageUrl("");
+    setImageCaption("");
+    setImageCredit("");
+    setImageKeywords([]);
+    setImageKeywordInput("");
+    setUploadedFileName("");
+    setUploadSuccessMessage(null);
     setImageModalOpen(true);
   };
 
-  // Handle computer file upload (Screenshots 1 & 2)
+  // Handle computer file upload (Upload to server disk via /api/upload)
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -341,26 +379,62 @@ export default function WriterEditor({
     setUploadSuccessMessage(null);
 
     try {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64 = reader.result as string;
-        setImageUrl(base64);
-        setPendingImages([
-          ...pendingImages,
-          {
-            url: base64,
-            filename: file.name,
-            caption: imageCaption,
-            credit: imageCredit,
-            seo_keywords: imageKeywords.join(", "),
-          },
-        ]);
-        setUploadSuccessMessage(`FILE "${file.name.toUpperCase()}" LOADED TEMPORARILY!`);
-        showToast("✔ IMAGE PREPARED (WILL SAVE ON DRAFT/SUBMIT)");
-      };
-      reader.readAsDataURL(file);
-    } catch (err) {
-      console.warn("Upload error, using local base64 fallback:", err);
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("uploader_email", userEmail);
+      formData.append("caption", imageCaption);
+      formData.append("credit", imageCredit);
+      formData.append("seo_keywords", imageKeywords.join(", "));
+
+      const res = await fetch("/api/upload?type=articles", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        throw new Error(`Upload failed with status: ${res.status}`);
+      }
+
+      const data = await res.json();
+      const serverUrl = data.url;
+
+      setImageUrl(serverUrl);
+      setPendingImages((prev) => [
+        ...prev,
+        {
+          url: serverUrl,
+          filename: file.name,
+          caption: imageCaption,
+          credit: imageCredit,
+          seo_keywords: imageKeywords.join(", "),
+        },
+      ]);
+      setUploadSuccessMessage(`FILE "${file.name.toUpperCase()}" UPLOADED SUCCESSFULLY!`);
+      showToast("✔ IMAGE UPLOADED (READY TO INSERT/REPLACE)");
+    } catch (err: any) {
+      console.warn("Server upload error, falling back to FileReader:", err);
+      try {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64 = reader.result as string;
+          setImageUrl(base64);
+          setPendingImages((prev) => [
+            ...prev,
+            {
+              url: base64,
+              filename: file.name,
+              caption: imageCaption,
+              credit: imageCredit,
+              seo_keywords: imageKeywords.join(", "),
+            },
+          ]);
+          setUploadSuccessMessage(`FILE "${file.name.toUpperCase()}" LOADED!`);
+          showToast("✔ IMAGE PREPARED");
+        };
+        reader.readAsDataURL(file);
+      } catch (readErr) {
+        alert("Failed to process image file.");
+      }
     } finally {
       setIsUploadingImage(false);
     }
@@ -384,7 +458,7 @@ export default function WriterEditor({
     setImageKeywords(imageKeywords.filter((k) => k !== kwToRemove));
   };
 
-  // Confirm insert image into editor canvas (Screenshot 3)
+  // Confirm insert or edit/replace image into editor canvas (Screenshot 3)
   const handleConfirmInsertImage = () => {
     if (!imageUrl.trim()) {
       alert("Please paste an image URL or select a file to upload.");
@@ -393,7 +467,8 @@ export default function WriterEditor({
 
     const altText = imageKeywords.join(", ") || imageCaption || "Article image";
 
-    if (selectedImageNode) {
+    if (isEditingImage && selectedImageNode) {
+      // REPLACE ONLY THE SELECTED IMAGE
       const oldSrc = selectedImageNode.src;
       selectedImageNode.src = imageUrl;
       selectedImageNode.alt = altText;
@@ -404,76 +479,86 @@ export default function WriterEditor({
         if (imageCaption || imageCredit) {
           const figcaption = document.createElement("figcaption");
           figcaption.className =
-            "text-base flex justify-between items-center text-gray-500 mt-2.5 font-medium italic";
+            "text-base flex justify-between items-center text-gray-500 mt-2.5 font-medium italic px-1";
           figcaption.innerHTML = `<span class="text-left">${imageCaption}</span> ${imageCredit ? `<span class="text-right not-italic text-gray-400 text-[0.8em]">(${imageCredit})</span>` : ""}`;
           figure.appendChild(figcaption);
         }
       }
       
-      if (leadImage === oldSrc) {
+      const firstImg = editorRef.current?.querySelector("img");
+      if (firstImg === selectedImageNode || !leadImage || leadImage === oldSrc || oldSrc.includes(leadImage) || leadImage.includes(oldSrc)) {
         setLeadImage(imageUrl);
       }
       
       setSelectedImageNode(null);
+      showToast("✔ IMAGE REPLACED SUCCESSFULLY!");
     } else {
-      const firstImg = editorRef.current?.querySelector("img");
-      if (firstImg) {
-        const oldSrc = firstImg.src;
-        firstImg.src = imageUrl;
-        firstImg.alt = altText;
-        const figure = firstImg.closest("figure");
-        if (figure) {
-          const existingFigCaption = figure.querySelector("figcaption");
-          if (existingFigCaption) existingFigCaption.remove();
-          if (imageCaption || imageCredit) {
-            const figcaption = document.createElement("figcaption");
-            figcaption.className =
-              "text-base flex justify-between items-center text-gray-500 mt-2.5 font-medium italic px-1";
-            figcaption.innerHTML = `<span class="text-left">${imageCaption}</span> ${imageCredit ? `<span class="text-right not-italic text-gray-400 text-[0.8em]">(${imageCredit})</span>` : ""}`;
-            figure.appendChild(figcaption);
-          }
-        }
-        
-        if (leadImage === oldSrc) {
-          setLeadImage(imageUrl);
-        }
-      } else {
-        const figureHtml = `
-          <figure class="my-6 mx-auto w-full clear-both">
-            <img src="${imageUrl}" alt="${altText}" class="w-full rounded-2xl shadow-sm object-cover mx-auto cursor-pointer" />
-            ${(imageCaption || imageCredit) ? `<figcaption class="text-base flex justify-between items-center text-gray-500 mt-2.5 font-medium italic px-1"><span class="text-left">${imageCaption}</span> ${imageCredit ? `<span class="text-right not-italic text-gray-400 text-[0.8em]">(${imageCredit})</span>` : ""}</figcaption>` : ""}
-          </figure>
-          <p><br></p>
-        `;
-        if (editorRef.current) {
-          editorRef.current.focus();
+      // INSERT A NEW IMAGE (e.g. 2nd image) INTO THE CANVAS
+      const figureHtml = `
+        <figure class="my-6 mx-auto w-full clear-both">
+          <img src="${imageUrl}" alt="${altText}" class="w-full rounded-2xl shadow-sm object-cover mx-auto cursor-pointer" />
+          ${(imageCaption || imageCredit) ? `<figcaption class="text-base flex justify-between items-center text-gray-500 mt-2.5 font-medium italic px-1"><span class="text-left">${imageCaption}</span> ${imageCredit ? `<span class="text-right not-italic text-gray-400 text-[0.8em]">(${imageCredit})</span>` : ""}</figcaption>` : ""}
+        </figure>
+        <p><br></p>
+      `;
+
+      if (editorRef.current) {
+        editorRef.current.focus();
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0 && editorRef.current.contains(sel.anchorNode)) {
           document.execCommand("insertHTML", false, figureHtml);
+        } else {
+          editorRef.current.insertAdjacentHTML("beforeend", figureHtml);
         }
       }
+
+      if (!leadImage) {
+        setLeadImage(imageUrl);
+      }
+      showToast("✔ NEW IMAGE INSERTED INTO ARTICLE!");
     }
 
     if (editorRef.current) setContent(editorRef.current.innerHTML);
 
-    // If there was no lead image, OR we just inserted the very first image into the canvas, update leadImage
-    // (We know we inserted the first image if firstImg was null in the else block above)
-    if (!leadImage || (!selectedImageNode && !editorRef.current?.querySelectorAll("img")[1])) {
-      setLeadImage(imageUrl);
-    }
-
     // Reset and close modal
     setImageModalOpen(false);
+    setIsEditingImage(false);
     setImageUrl("");
     setImageCaption("");
     setImageCredit("");
     setImageKeywords([]);
-    showToast("✔ IMAGE UPDATED/INSERTED INTO ARTICLE!");
+    setImageKeywordInput("");
+    setUploadedFileName("");
+    setUploadSuccessMessage(null);
   };
 
   const handleEditSelectedImage = () => {
     if (!selectedImageNode) return;
+    setIsEditingImage(true);
     setImageUrl(selectedImageNode.src);
-    const altParts = selectedImageNode.alt.split(", ");
+    const altParts = selectedImageNode.alt ? selectedImageNode.alt.split(", ").filter(Boolean) : [];
     setImageKeywords(altParts);
+
+    const figure = selectedImageNode.closest("figure");
+    if (figure) {
+      const figcaption = figure.querySelector("figcaption");
+      if (figcaption) {
+        const leftSpan = figcaption.querySelector(".text-left");
+        const rightSpan = figcaption.querySelector(".text-right");
+        setImageCaption(leftSpan ? leftSpan.textContent || "" : figcaption.childNodes[0]?.textContent || "");
+        if (rightSpan) {
+          setImageCredit(rightSpan.textContent?.replace(/[()]/g, "").trim() || "");
+        }
+      } else {
+        setImageCaption("");
+        setImageCredit("");
+      }
+    } else {
+      setImageCaption("");
+      setImageCredit("");
+    }
+    setUploadedFileName("");
+    setUploadSuccessMessage(null);
     setImageModalOpen(true);
   };
 
@@ -565,11 +650,17 @@ export default function WriterEditor({
 
   const handleDeleteSelectedImage = () => {
     if (!selectedImageNode) return;
+    const oldSrc = selectedImageNode.src;
     const figure = selectedImageNode.closest("figure");
     if (figure) figure.remove();
     else selectedImageNode.remove();
     setSelectedImageNode(null);
+    if (leadImage === oldSrc) {
+      const nextImg = editorRef.current?.querySelector("img");
+      setLeadImage(nextImg ? nextImg.src : "");
+    }
     if (editorRef.current) setContent(editorRef.current.innerHTML);
+    showToast("✔ Image removed from article.");
   };
 
   // Subcategory toggle
@@ -601,16 +692,13 @@ export default function WriterEditor({
   // Auto-generate SEO
   const handleAutoGenerateSEO = () => {
     const rawContent = editorRef.current?.innerText || content || "";
-    // Generate card summary: content
-    const summary = rawContent.trim();
-    setCardSummary(summary.slice(0, 160));
-
-    // Extract focus keyword: title
+    const cleanText = (deck.trim() || rawContent.replace(/\s+/g, " ").trim()).slice(0, 160);
+    setCardSummary(cleanText);
     setFocusKeyword(title);
-
-    // Generate Meta description:
-    setMetaDescription(summary.slice(0, 160));
-
+    setMetaDescription(cleanText);
+    setIsFocusKeywordAuto(true);
+    setIsCardSummaryAuto(true);
+    setIsMetaDescriptionAuto(true);
     showToast("✨ SEO fields auto-generated successfully!");
   };
 
@@ -1010,7 +1098,6 @@ export default function WriterEditor({
                   <option value="Home - Bottom Panel">Home - Bottom Panel</option>
                   <option value="Home - More Top Headlines">Home - More Top Headlines</option>
                   <option value="Home - Spotlight">Home - Spotlight</option>
-                  <option value="Home - Most Read">Home - Most Read</option>
                 </select>
                 <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none" />
               </div>
@@ -1086,7 +1173,10 @@ export default function WriterEditor({
             <textarea
               rows={3}
               value={cardSummary}
-              onChange={(e) => setCardSummary(e.target.value)}
+              onChange={(e) => {
+                setCardSummary(e.target.value);
+                setIsCardSummaryAuto(false);
+              }}
               placeholder="Concise 1-2 sentence preview details."
               className="w-full bg-white border border-gray-300 rounded-xl p-3 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-black transition resize-y"
             />
@@ -1100,7 +1190,10 @@ export default function WriterEditor({
             <input
               type="text"
               value={focusKeyword}
-              onChange={(e) => setFocusKeyword(e.target.value)}
+              onChange={(e) => {
+                setFocusKeyword(e.target.value);
+                setIsFocusKeywordAuto(false);
+              }}
               placeholder="e.g. Vexillum Minerals"
               className="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-black transition"
             />
@@ -1165,7 +1258,10 @@ export default function WriterEditor({
             <textarea
               rows={3}
               value={metaDescription}
-              onChange={(e) => setMetaDescription(e.target.value)}
+              onChange={(e) => {
+                setMetaDescription(e.target.value);
+                setIsMetaDescriptionAuto(false);
+              }}
               placeholder="Discover why... — the sentence shown under the title in Google."
               className="w-full bg-white border border-gray-300 rounded-xl p-3 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-black transition resize-y"
             />
@@ -1425,37 +1521,36 @@ export default function WriterEditor({
             </button>
           </div>
 
-          {/* Cover Image Preview (if uploaded but not in canvas) */}
-          {leadImage && !content.includes(leadImage) && (
-            <div className="mb-6 relative group border border-gray-200 rounded-2xl overflow-hidden">
-              <span className="absolute top-3 left-3 bg-black/70 backdrop-blur text-white text-[10px] font-black px-2.5 py-1 rounded-md uppercase tracking-wider z-10 shadow-sm">
-                Cover Image
-              </span>
-              <img src={leadImage} alt="Cover" className="w-full h-64 sm:h-80 object-cover" />
-            </div>
-          )}
-
-          {/* Title Input Field */}
+          {/* Title Input Field (Head) */}
           <div className="mb-3 sm:mb-4">
-            <input
-              type="text"
+            <textarea
+              rows={1}
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                e.target.style.height = "auto";
+                e.target.style.height = `${e.target.scrollHeight}px`;
+              }}
               placeholder="Add Title..."
-              className="w-full text-2xl sm:text-4xl lg:text-5xl font-black text-gray-950 placeholder-gray-300 border-none outline-none tracking-tight leading-tight bg-transparent"
+              className="w-full text-2xl sm:text-4xl lg:text-5xl font-black text-gray-950 placeholder-gray-300 border-none outline-none tracking-tight leading-tight bg-transparent resize-none overflow-hidden break-words whitespace-pre-wrap [word-break:break-word]"
             />
           </div>
 
-          {/* Subheading / Deck Input Field */}
+          {/* Subheading / Deck Input Field (Sub head) */}
           <div className="mb-6 sm:mb-8">
-            <input
-              type="text"
+            <textarea
+              rows={1}
               value={deck}
-              onChange={(e) => setDeck(e.target.value)}
+              onChange={(e) => {
+                setDeck(e.target.value);
+                e.target.style.height = "auto";
+                e.target.style.height = `${e.target.scrollHeight}px`;
+              }}
               placeholder="Add Subheading / Deck..."
-              className="w-full text-sm sm:text-lg lg:text-xl font-medium text-gray-500 placeholder-gray-300 border-none outline-none leading-relaxed bg-transparent"
+              className="w-full text-sm sm:text-lg lg:text-xl font-medium text-gray-500 placeholder-gray-300 border-none outline-none leading-relaxed bg-transparent resize-none overflow-hidden break-words whitespace-pre-wrap [word-break:break-word]"
             />
           </div>
+
 
 
           <div className="relative">
@@ -1575,7 +1670,7 @@ export default function WriterEditor({
                 }
               }}
               data-placeholder="Start writing or type / for plugins"
-              className="w-full min-h-[400px] sm:min-h-[550px] outline-none text-base sm:text-lg leading-relaxed text-gray-800 prose max-w-none focus:ring-0 empty:before:content-[attr(data-placeholder)] empty:before:text-gray-300 empty:before:pointer-events-none"
+              className="w-full min-h-[400px] sm:min-h-[550px] outline-none text-base sm:text-lg leading-relaxed text-gray-800 prose max-w-none focus:ring-0 break-words [word-break:break-word] overflow-wrap-anywhere empty:before:content-[attr(data-placeholder)] empty:before:text-gray-300 empty:before:pointer-events-none"
             />
           </div>
 
@@ -1634,7 +1729,7 @@ export default function WriterEditor({
                   <ImageIcon size={16} />
                 </div>
                 <h3 className="text-sm font-black text-gray-900 tracking-tight">
-                  Insert Article Image
+                  {isEditingImage ? "Edit / Replace Image" : "Insert Article Image"}
                 </h3>
               </div>
               <button
@@ -1799,8 +1894,17 @@ export default function WriterEditor({
                 disabled={!imageUrl.trim() || isUploadingImage}
                 className="px-5 py-2.5 rounded-xl bg-[#ce1126] hover:bg-[#a00c1c] active:scale-[0.98] disabled:opacity-50 text-white text-xs font-black uppercase tracking-wider shadow-sm transition flex items-center gap-1.5 cursor-pointer"
               >
-                <Plus size={15} strokeWidth={3} />
-                <span>+ INSERT IMAGE</span>
+                {isEditingImage ? (
+                  <>
+                    <Edit size={14} />
+                    <span>REPLACE IMAGE</span>
+                  </>
+                ) : (
+                  <>
+                    <Plus size={15} strokeWidth={3} />
+                    <span>+ INSERT IMAGE</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
