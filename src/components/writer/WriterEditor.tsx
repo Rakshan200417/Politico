@@ -20,6 +20,7 @@ import {
   Sparkles,
   ChevronLeft,
   ChevronDown,
+  ChevronUp,
   ChevronRight,
   X,
   CheckCircle,
@@ -72,7 +73,7 @@ interface WriterEditorProps {
 }
 
 export const navbarCategories = [
-  "Business",
+  "World",
   "Companies",
   "Startups",
   "Markets",
@@ -144,7 +145,7 @@ export default function WriterEditor({
   const [deck, setDeck] = useState(initialArticle?.deck || "");
   const [content, setContent] = useState(initialArticle?.content || "");
   const [category, setCategory] = useState(
-    initialArticle?.category || "Business",
+    initialArticle?.category || "World",
   );
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
   const [activeHoverCategory, setActiveHoverCategory] = useState<string | null>(null);
@@ -186,21 +187,60 @@ export default function WriterEditor({
     !initialArticle?.meta_description,
   );
 
+  // Helper to extract main focus keywords from head (excluding common stop words)
+  const extractFocusKeywords = (head: string): string => {
+    if (!head || !head.trim()) return "";
+    const stopWords = new Set([
+      "a", "an", "the", "and", "or", "but", "in", "on", "at", "to", "for",
+      "of", "with", "by", "from", "up", "about", "into", "over", "after",
+      "is", "are", "was", "were", "be", "been", "being", "have", "has", "had",
+      "do", "does", "did", "this", "that", "these", "those", "it", "its", "as"
+    ]);
+    const words = head
+      .replace(/[^\w\s-]/g, "")
+      .split(/\s+/)
+      .filter((w) => w.length > 2 && !stopWords.has(w.toLowerCase()));
+
+    if (words.length === 0) {
+      return head.split(/\s+/).slice(0, 3).join(" ");
+    }
+    // Return the top 3-4 key topical words
+    return words.slice(0, 4).join(" ");
+  };
+
   // Auto-generate SEO in real-time as writer types
   useEffect(() => {
     if (isFocusKeywordAuto) {
-      setFocusKeyword(title);
+      setFocusKeyword(extractFocusKeywords(title));
     }
   }, [title, isFocusKeywordAuto]);
 
   useEffect(() => {
-    const rawContent = editorRef.current?.innerText || content || "";
-    const cleanText = (deck.trim() || rawContent.replace(/\s+/g, " ").trim()).slice(0, 160);
+    const rawContent = editorRef.current?.innerText || content.replace(/<[^>]+>/g, " ") || "";
+    
+    // First line summary for card summary
     if (isCardSummaryAuto) {
-      setCardSummary(cleanText);
+      const source = deck.trim() || rawContent.replace(/\s+/g, " ").trim();
+      if (source) {
+        // Take first sentence or first line
+        const firstLine = source.split(/\r?\n|\.(?:\s|$)/)[0]?.trim();
+        setCardSummary(firstLine ? `${firstLine}.` : source.slice(0, 100));
+      } else {
+        setCardSummary("");
+      }
     }
+
+    // First 160 words of description for meta description
     if (isMetaDescriptionAuto) {
-      setMetaDescription(cleanText);
+      const combined = [deck.trim(), rawContent.replace(/\s+/g, " ").trim()]
+        .filter(Boolean)
+        .join(" ");
+      const words = combined.split(/\s+/).filter(Boolean);
+      if (words.length > 0) {
+        setMetaDescription(words.slice(0, 160).join(" "));
+      } else {
+        setMetaDescription("");
+      }
     }
   }, [deck, content, isCardSummaryAuto, isMetaDescriptionAuto]);
 
@@ -259,9 +299,11 @@ export default function WriterEditor({
       const wrapperRect = wrapper.getBoundingClientRect();
       const imgRect = selectedImageNode.getBoundingClientRect();
       if (wrapperRect) {
+        const targetEl = selectedImageNode.closest("figure") || selectedImageNode;
+        const targetRect = targetEl.getBoundingClientRect();
         setToolbarPosition({
-          top: Math.max(10, imgRect.top - wrapperRect.top - 55),
-          left: Math.max(10, imgRect.left - wrapperRect.left + (imgRect.width / 2) - 150),
+          top: Math.max(0, targetRect.top - wrapperRect.top - 50),
+          left: Math.max(0, Math.min(wrapperRect.width - 320, targetRect.left - wrapperRect.left + (targetRect.width / 2) - 170)),
         });
         setImageRect({
           top: imgRect.top - wrapperRect.top,
@@ -296,8 +338,8 @@ export default function WriterEditor({
       if (initialImg && !initialHtml.includes("<img")) {
         const figureHtml = `
           <figure class="my-6 mx-auto w-full clear-both">
-            <img src="${initialImg}" alt="${initialArticle?.title || 'Article image'}" class="w-full rounded-2xl shadow-sm object-cover mx-auto cursor-pointer" />
-            ${(initialArticle?.image_caption || initialArticle?.image_credit) ? `<figcaption class="text-base flex justify-between items-center text-gray-500 mt-2.5 font-medium italic px-1"><span class="text-left">${initialArticle.image_caption || ''}</span> ${initialArticle.image_credit ? `<span class="text-right not-italic text-gray-400 text-[0.8em]">(${initialArticle.image_credit})</span>` : ''}</figcaption>` : ''}
+            <img src="${initialImg}" alt="${initialArticle?.title || 'Article image'}" class="w-full rounded-none shadow-sm object-cover mx-auto cursor-pointer" />
+            ${(initialArticle?.image_caption || initialArticle?.image_credit) ? `<figcaption class="text-base flex justify-between items-center text-gray-500 mt-2.5 font-normal not-italic px-1"><span class="text-left font-normal not-italic">${initialArticle.image_caption || ''}</span> ${initialArticle.image_credit ? `<span class="text-right not-italic text-gray-400 text-[0.8em]">(${initialArticle.image_credit})</span>` : ''}</figcaption>` : ''}
           </figure>
           <p><br></p>
         `;
@@ -308,10 +350,42 @@ export default function WriterEditor({
       setContent(initialHtml);
     }
 
-    if (initialArticle?.image) setLeadImage(initialArticle.image);
-    if (initialArticle?.image_caption) setImageCaption(initialArticle.image_caption);
-    if (initialArticle?.image_credit) setImageCredit(initialArticle.image_credit);
+    if (initialArticle) {
+      setTitle(initialArticle.title || "");
+      setDeck(initialArticle.deck || "");
+      setCategory(initialArticle.category || "World");
+      setSelectedSubcategories(initialArticle.subcategories || []);
+      setTags(initialArticle.tags || []);
+      setReadDuration(initialArticle.read_time || "5 min read");
+      setHomepagePlacement(initialArticle.homepage_placement || "None");
+      setTargetedEmails(initialArticle.targeted_emails || "");
+      setIsSponsored(!!initialArticle.is_sponsored);
+      if (initialArticle.card_summary) {
+        setCardSummary(initialArticle.card_summary);
+        setIsCardSummaryAuto(false);
+      }
+      if (initialArticle.focus_keyword) {
+        setFocusKeyword(initialArticle.focus_keyword);
+        setIsFocusKeywordAuto(false);
+      }
+      if (initialArticle.meta_description) {
+        setMetaDescription(initialArticle.meta_description);
+        setIsMetaDescriptionAuto(false);
+      }
+      if (initialArticle.image) setLeadImage(initialArticle.image);
+      if (initialArticle.image_caption) setImageCaption(initialArticle.image_caption);
+      if (initialArticle.image_credit) setImageCredit(initialArticle.image_credit);
+    }
   }, [initialArticle]);
+
+  // Ensure title textarea auto-expands to show the entire heading without cutting off
+  const titleTextareaRef = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    if (titleTextareaRef.current) {
+      titleTextareaRef.current.style.height = "auto";
+      titleTextareaRef.current.style.height = `${titleTextareaRef.current.scrollHeight}px`;
+    }
+  }, [title]);
 
   // Auto-calculate read time based on word count
   useEffect(() => {
@@ -338,6 +412,199 @@ export default function WriterEditor({
     document.execCommand(command, false, value);
     if (editorRef.current) {
       setContent(editorRef.current.innerHTML);
+    }
+  };
+
+  // Toggle Blockquote (Quote / Mention button): if already in blockquote, revert to normal paragraph; otherwise format as blockquote
+  const handleToggleBlockquote = () => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) {
+      if (editorRef.current) {
+        editorRef.current.focus();
+        document.execCommand("formatBlock", false, "<blockquote>");
+        setContent(editorRef.current.innerHTML);
+      }
+      return;
+    }
+
+    const anchor = selection.anchorNode;
+    const anchorElem = anchor instanceof HTMLElement ? anchor : anchor?.parentElement;
+    const existingBlockquote = anchorElem?.closest("blockquote");
+
+    if (existingBlockquote && editorRef.current?.contains(existingBlockquote)) {
+      // Revert to normal paragraph
+      let unwrapped = false;
+      try {
+        unwrapped = document.execCommand("formatBlock", false, "<p>");
+      } catch {}
+
+      // Robust DOM fallback: if execCommand didn't replace the blockquote, replace it directly
+      if (existingBlockquote.parentElement && editorRef.current?.contains(existingBlockquote)) {
+        const p = document.createElement("p");
+        p.innerHTML = existingBlockquote.innerHTML;
+        existingBlockquote.parentElement.replaceChild(p, existingBlockquote);
+        // Place cursor back inside p
+        const range = document.createRange();
+        range.selectNodeContents(p);
+        range.collapse(false);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+    } else {
+      // Format as blockquote
+      try {
+        document.execCommand("formatBlock", false, "<blockquote>");
+      } catch {
+        try {
+          document.execCommand("formatBlock", false, "blockquote");
+        } catch {}
+      }
+
+      // Check if it successfully became a blockquote
+      const newAnchor = window.getSelection()?.anchorNode;
+      const newElem = newAnchor instanceof HTMLElement ? newAnchor : newAnchor?.parentElement;
+      if (!newElem?.closest("blockquote")) {
+        // Fallback: find the immediate child of editorRef or current block element and turn into blockquote
+        let targetBlock: HTMLElement | null = anchorElem || null;
+        while (targetBlock && targetBlock.parentElement !== editorRef.current && targetBlock !== editorRef.current) {
+          targetBlock = targetBlock.parentElement;
+        }
+
+        if (targetBlock && editorRef.current?.contains(targetBlock) && targetBlock !== editorRef.current) {
+          const bq = document.createElement("blockquote");
+          bq.innerHTML = targetBlock.innerHTML;
+          targetBlock.parentElement?.replaceChild(bq, targetBlock);
+          // Restore cursor inside bq
+          const range = document.createRange();
+          range.selectNodeContents(bq);
+          range.collapse(false);
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
+      }
+    }
+
+    if (editorRef.current) {
+      setContent(editorRef.current.innerHTML);
+    }
+  };
+
+  // Toggle Code Block (Image 2 code button): if already in pre/code, revert to normal paragraph; otherwise format as pre
+  const handleToggleCodeBlock = () => {
+    if (editorRef.current) {
+      editorRef.current.focus();
+    }
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) {
+      handleFormat("formatBlock", "pre");
+      return;
+    }
+    const anchor = selection.anchorNode;
+    const anchorElem = anchor instanceof HTMLElement ? anchor : anchor?.parentElement;
+    const existingPre = anchorElem?.closest("pre");
+
+    if (existingPre && editorRef.current?.contains(existingPre)) {
+      // Revert to normal paragraph
+      document.execCommand("formatBlock", false, "p");
+    } else {
+      document.execCommand("formatBlock", false, "pre");
+    }
+    if (editorRef.current) {
+      setContent(editorRef.current.innerHTML);
+    }
+  };
+
+  // Move image Up by one paragraph/block
+  const handleMoveImageUp = () => {
+    if (!selectedImageNode || !editorRef.current) return;
+    const target = (selectedImageNode.closest("figure") || selectedImageNode) as HTMLElement;
+    const editor = editorRef.current;
+
+    // Helper to find preceding paragraph/block
+    let current: Node | null = target.previousSibling;
+    let foundPrevBlock: HTMLElement | null = null;
+
+    while (current) {
+      if (current instanceof HTMLElement) {
+        // If it's a block with text or an image, or non-empty paragraph
+        const text = current.textContent?.trim() || "";
+        if (current.tagName === "P" || current.tagName === "DIV" || current.tagName === "BLOCKQUOTE" || current.tagName === "H1" || current.tagName === "H2" || current.tagName === "H3") {
+          if (text.length > 0 || current.querySelector("img")) {
+            foundPrevBlock = current;
+            break;
+          }
+        }
+      }
+      current = current.previousSibling;
+    }
+
+    if (foundPrevBlock && foundPrevBlock.parentNode) {
+      foundPrevBlock.parentNode.insertBefore(target, foundPrevBlock);
+      setContent(editor.innerHTML);
+      setImageRenderTick((t) => t + 1);
+      showToast("✔ Image moved up 1 paragraph!");
+    } else {
+      // Check if target is inside a container or paragraph itself
+      if (target.parentElement && target.parentElement !== editor) {
+        const blockParent = target.closest("p, div, blockquote, section") as HTMLElement | null;
+        if (blockParent && blockParent !== editor && blockParent.parentElement) {
+          blockParent.parentElement.insertBefore(target, blockParent);
+          setContent(editor.innerHTML);
+          setImageRenderTick((t) => t + 1);
+          showToast("✔ Image moved up 1 paragraph!");
+          return;
+        }
+      }
+      showToast("Already at the top of content.");
+    }
+  };
+
+  // Move image Down by one paragraph/block
+  const handleMoveImageDown = () => {
+    if (!selectedImageNode || !editorRef.current) return;
+    const target = (selectedImageNode.closest("figure") || selectedImageNode) as HTMLElement;
+    const editor = editorRef.current;
+
+    // Helper to find succeeding paragraph/block
+    let current: Node | null = target.nextSibling;
+    let foundNextBlock: HTMLElement | null = null;
+
+    while (current) {
+      if (current instanceof HTMLElement) {
+        const text = current.textContent?.trim() || "";
+        if (current.tagName === "P" || current.tagName === "DIV" || current.tagName === "BLOCKQUOTE" || current.tagName === "H1" || current.tagName === "H2" || current.tagName === "H3") {
+          if (text.length > 0 || current.querySelector("img")) {
+            foundNextBlock = current;
+            break;
+          }
+        }
+      }
+      current = current.nextSibling;
+    }
+
+    if (foundNextBlock && foundNextBlock.parentNode) {
+      // Place target directly AFTER foundNextBlock
+      if (foundNextBlock.nextSibling) {
+        foundNextBlock.parentNode.insertBefore(target, foundNextBlock.nextSibling);
+      } else {
+        foundNextBlock.parentNode.appendChild(target);
+      }
+      setContent(editor.innerHTML);
+      setImageRenderTick((t) => t + 1);
+      showToast("✔ Image moved down 1 paragraph!");
+    } else {
+      // Check if target was nested inside an element that had a next sibling
+      if (target.parentElement && target.parentElement !== editor) {
+        const blockParent = target.closest("p, div, blockquote, section") as HTMLElement | null;
+        if (blockParent && blockParent !== editor && blockParent.nextSibling && blockParent.parentElement) {
+          blockParent.parentElement.insertBefore(target, blockParent.nextSibling);
+          setContent(editor.innerHTML);
+          setImageRenderTick((t) => t + 1);
+          showToast("✔ Image moved down 1 paragraph!");
+          return;
+        }
+      }
+      showToast("Already at the bottom of content.");
     }
   };
 
@@ -479,8 +746,8 @@ export default function WriterEditor({
         if (imageCaption || imageCredit) {
           const figcaption = document.createElement("figcaption");
           figcaption.className =
-            "text-base flex justify-between items-center text-gray-500 mt-2.5 font-medium italic px-1";
-          figcaption.innerHTML = `<span class="text-left">${imageCaption}</span> ${imageCredit ? `<span class="text-right not-italic text-gray-400 text-[0.8em]">(${imageCredit})</span>` : ""}`;
+            "text-base flex justify-between items-center text-gray-500 mt-2.5 font-normal not-italic px-1";
+          figcaption.innerHTML = `<span class="text-left font-normal not-italic">${imageCaption}</span> ${imageCredit ? `<span class="text-right not-italic text-gray-400 text-[0.8em]">(${imageCredit})</span>` : ""}`;
           figure.appendChild(figcaption);
         }
       }
@@ -496,8 +763,8 @@ export default function WriterEditor({
       // INSERT A NEW IMAGE (e.g. 2nd image) INTO THE CANVAS
       const figureHtml = `
         <figure class="my-6 mx-auto w-full clear-both">
-          <img src="${imageUrl}" alt="${altText}" class="w-full rounded-2xl shadow-sm object-cover mx-auto cursor-pointer" />
-          ${(imageCaption || imageCredit) ? `<figcaption class="text-base flex justify-between items-center text-gray-500 mt-2.5 font-medium italic px-1"><span class="text-left">${imageCaption}</span> ${imageCredit ? `<span class="text-right not-italic text-gray-400 text-[0.8em]">(${imageCredit})</span>` : ""}</figcaption>` : ""}
+          <img src="${imageUrl}" alt="${altText}" class="w-full rounded-none shadow-sm object-cover mx-auto cursor-pointer" />
+          ${(imageCaption || imageCredit) ? `<figcaption class="text-base flex justify-between items-center text-gray-500 mt-2.5 font-normal not-italic px-1"><span class="text-left font-normal not-italic">${imageCaption}</span> ${imageCredit ? `<span class="text-right not-italic text-gray-400 text-[0.8em]">(${imageCredit})</span>` : ""}</figcaption>` : ""}
         </figure>
         <p><br></p>
       `;
@@ -631,21 +898,20 @@ export default function WriterEditor({
   ) => {
     if (!selectedImageNode) return;
     const figure = selectedImageNode.closest("figure");
-    if (figure) {
-      figure.classList.remove(
-        "float-left",
-        "mx-auto",
-        "float-right",
-        "clear-both",
-        "mr-6",
-        "ml-6",
-      );
-      figure.classList.add(align);
-      if (align === "float-left") figure.classList.add("mr-6");
-      if (align === "float-right") figure.classList.add("ml-6");
-      if (editorRef.current) setContent(editorRef.current.innerHTML);
-      setImageRenderTick(t => t + 1);
-    }
+    const target = figure || selectedImageNode;
+    target.classList.remove(
+      "float-left",
+      "mx-auto",
+      "float-right",
+      "clear-both",
+      "mr-6",
+      "ml-6",
+    );
+    target.classList.add(align);
+    if (align === "float-left") target.classList.add("mr-6");
+    if (align === "float-right") target.classList.add("ml-6");
+    if (editorRef.current) setContent(editorRef.current.innerHTML);
+    setImageRenderTick(t => t + 1);
   };
 
   const handleDeleteSelectedImage = () => {
@@ -788,6 +1054,16 @@ export default function WriterEditor({
         if (data.id) {
           savedArticle.id = data.id;
         }
+        const returnedImage = data.image || data.article?.image;
+        if (returnedImage) {
+          savedArticle.image = returnedImage;
+          setImageUrl(returnedImage);
+        }
+        const returnedContent = data.content || data.article?.content;
+        if (returnedContent) {
+          savedArticle.content = returnedContent;
+          setContent(returnedContent);
+        }
       } else {
         console.warn(
           "DB save response not OK, relying on client sync:",
@@ -828,7 +1104,7 @@ export default function WriterEditor({
   };
 
   const headerTrackerTitle = title.trim()
-    ? title.toUpperCase().slice(0, 40) + (title.length > 40 ? "..." : "")
+    ? title.toUpperCase()
     : "NEW BUSINESS HEADLINE";
 
   // Render Settings Panel (shared by desktop card and mobile drawer)
@@ -901,7 +1177,7 @@ export default function WriterEditor({
                     {/* 2. World (Click to expand accordion) */}
                     <div>
                       <div 
-                        className={`w-full text-left px-4 py-2 text-xs flex items-center justify-between cursor-pointer transition-colors ${worldRegions.includes(category) ? "bg-red-50 text-[#ce1126] font-bold" : "text-gray-700 hover:bg-gray-50 font-medium"}`}
+                        className={`w-full text-left px-4 py-2 text-xs flex items-center justify-between cursor-pointer transition-colors ${category === "World" || worldRegions.includes(category) ? "bg-red-50 text-[#ce1126] font-bold" : "text-gray-700 hover:bg-gray-50 font-medium"}`}
                         onClick={(e) => {
                           e.stopPropagation();
                           setActiveHoverCategory(activeHoverCategory === "World" ? null : "World");
@@ -913,6 +1189,18 @@ export default function WriterEditor({
 
                       {activeHoverCategory === "World" && (
                         <div className="bg-gray-50 py-1 border-y border-gray-100">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCategory("World");
+                              setIsCategoryDropdownOpen(false);
+                              setSelectedSubcategories([]);
+                              setActiveHoverCategory(null);
+                            }}
+                            className={`w-full text-left px-6 py-2 text-xs transition-colors ${category === "World" ? "bg-red-100 text-[#ce1126] font-bold" : "text-gray-600 hover:bg-gray-200 font-medium"}`}
+                          >
+                            World (General)
+                          </button>
                           {worldRegions.map((region) => (
                             <button
                               key={region}
@@ -1098,6 +1386,7 @@ export default function WriterEditor({
                   <option value="Home - Bottom Panel">Home - Bottom Panel</option>
                   <option value="Home - More Top Headlines">Home - More Top Headlines</option>
                   <option value="Home - Spotlight">Home - Spotlight</option>
+                  <option value="Home - More Read">Home - More Read</option>
                 </select>
                 <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none" />
               </div>
@@ -1325,7 +1614,10 @@ export default function WriterEditor({
 
           <div className="h-3.5 w-px bg-gray-700 flex-shrink-0" />
 
-          <span className="text-[11px] sm:text-xs font-mono font-bold tracking-wider text-gray-200 uppercase truncate max-w-[130px] sm:max-w-[220px] md:max-w-md">
+          <span 
+            className="text-[11px] sm:text-xs font-mono font-bold tracking-wider text-gray-200 uppercase whitespace-normal break-words flex-1 min-w-0"
+            title={headerTrackerTitle}
+          >
             {headerTrackerTitle}
           </span>
         </div>
@@ -1422,10 +1714,10 @@ export default function WriterEditor({
       {/* Main Content Layout: Centered Card Grid for Desktop (Image 1) & Mobile (Image 4) */}
       <div className="flex-1 w-full max-w-[1560px] mx-auto p-3 sm:p-6 lg:p-8 flex flex-col lg:flex-row items-start gap-6 lg:gap-8">
         {/* Left Side: Writing Canvas Card */}
-        <main className="flex-1 w-full min-w-0 bg-white border border-gray-200/90 rounded-2xl p-4 sm:p-8 lg:p-10 shadow-xs">
-          {/* Editor Action Toolbar */}
+        <main className="flex-1 w-full min-w-0 bg-white border border-gray-200/90 rounded-none p-4 sm:p-8 lg:p-10 shadow-xs relative">
+          {/* Editor Action Toolbar (Sticky at top of canvas beneath navbar) */}
           <div
-            className="bg-[#f8fafc] border border-slate-200/90 rounded-2xl p-2 sm:p-2.5 mb-6 sm:mb-8 flex items-center gap-1 sm:gap-2 flex-wrap shadow-xs"
+            className="sticky top-14 sm:top-16 z-30 bg-[#f8fafc] border border-slate-200 rounded-none p-2 sm:p-2.5 mb-6 sm:mb-8 flex items-center gap-1 sm:gap-2 flex-wrap shadow-md"
             onMouseDown={(e) => e.preventDefault()}
           >
             <button
@@ -1494,16 +1786,16 @@ export default function WriterEditor({
             <div className="h-4 w-px bg-slate-300 mx-1" />
 
             <button
-              onClick={() => handleFormat("formatBlock", "blockquote")}
-              title="Quote"
-              className="p-1.5 rounded-lg hover:bg-white text-slate-700 hover:text-black transition"
+              onClick={handleToggleBlockquote}
+              title="Quote (Toggle)"
+              className="p-1.5 rounded-none hover:bg-white text-slate-700 hover:text-black transition"
             >
               <Quote size={16} />
             </button>
             <button
-              onClick={() => handleFormat("formatBlock", "pre")}
-              title="Code Block"
-              className="p-1.5 rounded-lg hover:bg-white text-slate-700 hover:text-black transition"
+              onClick={handleToggleCodeBlock}
+              title="Code Block (Toggle)"
+              className="p-1.5 rounded-none hover:bg-white text-slate-700 hover:text-black transition"
             >
               <Code size={16} />
             </button>
@@ -1512,7 +1804,7 @@ export default function WriterEditor({
 
             <button
               onClick={handleInsertImage}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-50 text-[#ce1126] hover:bg-red-100 text-xs font-bold transition border border-red-200/80 shadow-xs ml-auto"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-red-50 text-[#ce1126] hover:bg-red-100 text-xs font-bold transition border border-red-200/80 shadow-xs ml-auto"
             >
               <ImageIcon size={14} className="text-[#ce1126]" />
               <span className="text-[11px] sm:text-xs tracking-wider">
@@ -1524,6 +1816,7 @@ export default function WriterEditor({
           {/* Title Input Field (Head) */}
           <div className="mb-3 sm:mb-4">
             <textarea
+              ref={titleTextareaRef}
               rows={1}
               value={title}
               onChange={(e) => {
@@ -1557,12 +1850,12 @@ export default function WriterEditor({
             {/* Floating Image Toolbar */}
             {selectedImageNode && (
               <div
-                className="image-toolbar absolute z-50 bg-[#1e293b] text-white rounded-lg shadow-xl flex items-center p-1.5 gap-2 border border-slate-700"
+                className="image-toolbar absolute z-50 bg-[#1e293b] text-white rounded-none shadow-2xl flex items-center p-1.5 gap-2 border border-slate-700"
                 style={{ top: toolbarPosition.top, left: toolbarPosition.left }}
               >
                 <button
                   onClick={handleEditSelectedImage}
-                  className="flex items-center gap-1.5 bg-[#ea580c] hover:bg-[#c2410c] text-white px-3 py-1.5 rounded text-xs font-bold transition-colors"
+                  className="flex items-center gap-1.5 bg-[#ea580c] hover:bg-[#c2410c] text-white px-3 py-1.5 rounded-none text-xs font-bold transition-colors shadow-xs"
                 >
                   <Edit size={14} /> Edit Image
                 </button>
@@ -1570,53 +1863,75 @@ export default function WriterEditor({
                 <div className="w-px h-5 bg-slate-600 mx-1"></div>
 
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">
-                  Size
+                  SIZE
                 </span>
                 <button
-                  onClick={() => handleSetImageSize("w-full")}
-                  className={`text-xs font-bold px-2 py-1 rounded hover:bg-slate-700 ${(selectedImageNode.closest("figure") ? selectedImageNode.closest("figure")!.classList.contains("w-full") : selectedImageNode.classList.contains("w-full")) ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
+                  onClick={() => handleSetImageSize("w-1/3")}
+                  className={`text-xs font-bold px-2 py-1 rounded-none hover:bg-slate-700 transition ${(selectedImageNode.closest("figure") ? selectedImageNode.closest("figure")!.classList.contains("w-1/3") : selectedImageNode.classList.contains("w-1/3")) ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
                 >
-                  FULL
+                  S
                 </button>
                 <button
                   onClick={() => handleSetImageSize("w-1/2")}
-                  className={`text-xs font-bold px-2 py-1 rounded hover:bg-slate-700 ${(selectedImageNode.closest("figure") ? selectedImageNode.closest("figure")!.classList.contains("w-1/2") : selectedImageNode.classList.contains("w-1/2")) ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
+                  className={`text-xs font-bold px-2 py-1 rounded-none hover:bg-slate-700 transition ${(selectedImageNode.closest("figure") ? selectedImageNode.closest("figure")!.classList.contains("w-1/2") : selectedImageNode.classList.contains("w-1/2")) ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
                 >
                   M
                 </button>
                 <button
-                  onClick={() => handleSetImageSize("w-1/3")}
-                  className={`text-xs font-bold px-2 py-1 rounded hover:bg-slate-700 ${(selectedImageNode.closest("figure") ? selectedImageNode.closest("figure")!.classList.contains("w-1/3") : selectedImageNode.classList.contains("w-1/3")) ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
+                  onClick={() => handleSetImageSize("w-full")}
+                  className={`text-xs font-bold px-2 py-1 rounded-none hover:bg-slate-700 transition ${(selectedImageNode.closest("figure") ? selectedImageNode.closest("figure")!.classList.contains("w-full") : selectedImageNode.classList.contains("w-full")) ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
                 >
-                  S
+                  FULL
                 </button>
 
                 <div className="w-px h-5 bg-slate-600 mx-1"></div>
 
                 <button
                   onClick={() => handleSetImageAlign("float-left")}
-                  className={`p-1.5 rounded hover:bg-slate-700 ${(selectedImageNode.closest("figure") ? selectedImageNode.closest("figure")!.classList.contains("float-left") : selectedImageNode.classList.contains("float-left")) ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
+                  title="Align Left"
+                  className={`p-1.5 rounded-none hover:bg-slate-700 transition ${(selectedImageNode.closest("figure") ? selectedImageNode.closest("figure")!.classList.contains("float-left") : selectedImageNode.classList.contains("float-left")) ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
                 >
                   <AlignLeft size={16} />
                 </button>
                 <button
                   onClick={() => handleSetImageAlign("mx-auto")}
-                  className={`p-1.5 rounded hover:bg-slate-700 ${(selectedImageNode.closest("figure") ? selectedImageNode.closest("figure")!.classList.contains("mx-auto") : selectedImageNode.classList.contains("mx-auto")) ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
+                  title="Align Center"
+                  className={`p-1.5 rounded-none hover:bg-slate-700 transition ${(selectedImageNode.closest("figure") ? selectedImageNode.closest("figure")!.classList.contains("mx-auto") : selectedImageNode.classList.contains("mx-auto")) ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
                 >
                   <AlignCenter size={16} />
                 </button>
                 <button
                   onClick={() => handleSetImageAlign("float-right")}
-                  className={`p-1.5 rounded hover:bg-slate-700 ${(selectedImageNode.closest("figure") ? selectedImageNode.closest("figure")!.classList.contains("float-right") : selectedImageNode.classList.contains("float-right")) ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
+                  title="Align Right"
+                  className={`p-1.5 rounded-none hover:bg-slate-700 transition ${(selectedImageNode.closest("figure") ? selectedImageNode.closest("figure")!.classList.contains("float-right") : selectedImageNode.classList.contains("float-right")) ? "bg-slate-700 text-[#ea580c]" : "text-slate-300"}`}
                 >
                   <AlignRight size={16} />
                 </button>
 
                 <div className="w-px h-5 bg-slate-600 mx-1"></div>
 
+                {/* Move Image Up / Down in Paragraphs */}
+                <button
+                  onClick={handleMoveImageUp}
+                  title="Move Image Up 1 Paragraph"
+                  className="p-1.5 rounded-none hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
+                >
+                  <ChevronUp size={16} strokeWidth={2.5} />
+                </button>
+                <button
+                  onClick={handleMoveImageDown}
+                  title="Move Image Down 1 Paragraph"
+                  className="p-1.5 rounded-none hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
+                >
+                  <ChevronDown size={16} strokeWidth={2.5} />
+                </button>
+
+                <div className="w-px h-5 bg-slate-600 mx-1"></div>
+
                 <button
                   onClick={handleDeleteSelectedImage}
-                  className="p-1.5 rounded hover:bg-red-500/20 text-slate-300 hover:text-red-400 transition-colors"
+                  title="Delete Image"
+                  className="p-1.5 rounded-none hover:bg-red-500/20 text-slate-300 hover:text-red-400 transition-colors"
                 >
                   <Trash2 size={16} />
                 </button>
@@ -1638,7 +1953,7 @@ export default function WriterEditor({
                 {['nw', 'ne', 'sw', 'se'].map((corner) => (
                    <div 
                      key={corner}
-                     className={`absolute w-3 h-3 bg-white border-2 border-blue-500 rounded-full pointer-events-auto`}
+                     className={`absolute w-3 h-3 bg-white border-2 border-blue-500 rounded-none pointer-events-auto`}
                      style={{
                        top: corner.includes('n') ? -6 : 'auto',
                        bottom: corner.includes('s') ? -6 : 'auto',
@@ -1692,7 +2007,7 @@ export default function WriterEditor({
         </main>
 
         {/* Article Settings Card (Side-by-side on desktop, stacked underneath on mobile) */}
-        <aside className="w-full lg:w-[380px] xl:w-[410px] flex-shrink-0 bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col text-gray-900">
+        <aside className="w-full lg:w-[380px] xl:w-[410px] flex-shrink-0 bg-white border border-gray-200 rounded-none p-5 sm:p-6 shadow-xs flex flex-col text-gray-900">
           <div className="flex items-center justify-between pb-3 border-b border-gray-200 mb-4">
             <span className="text-xs font-black uppercase tracking-wider text-gray-900">
               ⚙️ ARTICLE SETTINGS
@@ -1933,8 +2248,8 @@ export default function WriterEditor({
           </div>
 
           {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto w-full">
-            <div className="max-w-[1200px] mx-auto w-full p-6 sm:p-10">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden w-full max-w-full">
+            <div className="max-w-[1200px] mx-auto w-full p-6 sm:p-10 min-w-0">
               
 
 
@@ -1945,12 +2260,12 @@ export default function WriterEditor({
                     {category}
                   </div>
 
-                  <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold text-gray-950 tracking-tight leading-tight mb-4">
+                  <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold text-gray-950 tracking-tight leading-tight mb-4 break-words [overflow-wrap:anywhere] [word-break:break-word]">
                     {title || "Untitled Article"}
                   </h1>
                   
                   {deck && (
-                    <p className="text-lg text-gray-600 font-medium mb-6 leading-relaxed">
+                    <p className="text-lg text-gray-600 font-medium mb-6 leading-relaxed break-words [overflow-wrap:anywhere] [word-break:break-word]">
                       {deck}
                     </p>
                   )}

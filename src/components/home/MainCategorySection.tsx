@@ -39,7 +39,7 @@ export default async function MainCategorySection({ category, count = 4 }: { cat
         <div className="w-full aspect-[16/9] bg-gray-200 mb-4 overflow-hidden">
           <img src={mainArticle.image || `https://picsum.photos/seed/${mainArticle.id}/800/600`} alt={category} className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
         </div>
-        <h3 className="text-[26px] font-bold leading-[1.1] tracking-[-0.02em] text-[#111111] group-hover:text-[#d32f2f] transition-colors mb-2 font-sans">
+        <h3 className="text-[26px] font-bold leading-[1.1] tracking-[-0.02em] text-[#111111] group-hover:text-[#d32f2f] transition-colors mb-2 font-sans line-clamp-2 overflow-hidden text-ellipsis break-words [word-break:break-word]">
           {mainArticle.title}
         </h3>
         <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mt-2 font-sans">
@@ -55,7 +55,7 @@ export default async function MainCategorySection({ category, count = 4 }: { cat
                 <img src={article.image || `https://picsum.photos/seed/${article.id}/800/600`} alt="News" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
               </div>
               <div>
-                <h3 className="text-[17px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mb-1">
+                <h3 className="text-[17px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mb-1 line-clamp-2 overflow-hidden text-ellipsis break-words [word-break:break-word]">
                   {article.title}
                 </h3>
                 <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mt-2 font-sans">

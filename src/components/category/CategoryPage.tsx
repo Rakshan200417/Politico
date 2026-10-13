@@ -10,6 +10,7 @@ function StoryMeta({
   image,
   deck,
   category,
+  categoryTag,
 }: {
   byline: string;
   title?: string;
@@ -17,10 +18,18 @@ function StoryMeta({
   image?: string;
   deck?: string;
   category?: string;
+  categoryTag?: string;
 }) {
   return (
     <div className="mt-2 flex items-center justify-between gap-2">
-      <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-[#666] truncate">{byline}</p>
+      <div className="flex items-center gap-2 truncate">
+        {categoryTag && (
+          <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#d71920] shrink-0">
+            # {categoryTag}
+          </span>
+        )}
+        <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-[#666] truncate">{byline}</p>
+      </div>
       <div className="shrink-0">
         <SaveShareButtons
           title={title}
@@ -46,7 +55,7 @@ function StoryRow({ story }: { story: CategoryStory }) {
         </a>
         <div className="min-w-0 overflow-hidden">
           <a href={`/news/${storySlug}`} className="block">
-            <h3 className="text-[18px] font-bold leading-[1.15] tracking-[-0.02em] text-[#111] hover:text-[#d71920] sm:text-[21px] break-words [overflow-wrap:anywhere]">
+            <h3 className="text-[18px] font-bold leading-[1.15] tracking-[-0.02em] text-[#111] hover:text-[#d71920] sm:text-[21px] line-clamp-2 overflow-hidden text-ellipsis break-words [overflow-wrap:anywhere] [word-break:break-word]">
               {story.title}
             </h3>
             {story.deck && (
@@ -61,6 +70,8 @@ function StoryRow({ story }: { story: CategoryStory }) {
             slug={storySlug}
             image={story.image}
             deck={story.deck}
+            category={story.category}
+            categoryTag={story.categoryTag}
           />
         </div>
       </div>
@@ -95,7 +106,7 @@ export default function CategoryPage({ category }: { category: CategoryPageData 
         {category.lead && (
           <article className="min-w-0 overflow-hidden">
             <a href={`/news/${leadSlug}`} className="block group">
-              <h2 className="max-w-[700px] text-[31px] font-bold leading-[1.08] tracking-[-0.03em] text-[#111] group-hover:text-[#d71920] sm:text-[40px] break-words [overflow-wrap:anywhere]">
+              <h2 className="max-w-[700px] text-[31px] font-bold leading-[1.08] tracking-[-0.03em] text-[#111] group-hover:text-[#d71920] sm:text-[40px] line-clamp-2 overflow-hidden text-ellipsis break-words [overflow-wrap:anywhere] [word-break:break-word]">
                 {category.lead.title}
               </h2>
               {category.lead.deck && (
@@ -111,6 +122,7 @@ export default function CategoryPage({ category }: { category: CategoryPageData 
                   image={category.lead.image}
                   deck={category.lead.deck}
                   category={category.name}
+                  categoryTag={category.lead.categoryTag}
                 />
               </div>
               <div className="aspect-[16/9] w-full overflow-hidden bg-[#f2f2f2]">
@@ -134,7 +146,7 @@ export default function CategoryPage({ category }: { category: CategoryPageData 
                     <img src={story.image} alt="" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
                   </div>
                   <div className="min-w-0 overflow-hidden">
-                    <h3 className="mt-0 text-[17px] font-bold leading-[1.15] tracking-[-0.02em] text-[#111] group-hover:text-[#d71920] sm:mt-3 sm:text-[20px] break-words [overflow-wrap:anywhere]">
+                    <h3 className="mt-0 text-[17px] font-bold leading-[1.15] tracking-[-0.02em] text-[#111] group-hover:text-[#d71920] sm:mt-2 sm:text-[20px] line-clamp-2 overflow-hidden text-ellipsis break-words [overflow-wrap:anywhere] [word-break:break-word]">
                       {story.title}
                     </h3>
                     <StoryMeta
@@ -143,29 +155,19 @@ export default function CategoryPage({ category }: { category: CategoryPageData 
                       slug={storySlug}
                       image={story.image}
                       category={category.name}
+                      categoryTag={story.categoryTag}
                     />
                   </div>
                 </a>
               </article>
             );
           })}
-
-          {/* Sidebar Advertisement Space */}
-          <div className="mt-4">
-            <AdvertisementSlot variant="sidebar" />
-          </div>
-
-          <div className="mt-7 border-t border-[#e1e1e1] pt-5">
-            <h3 className="text-[20px] font-normal text-[#111]">Inside {category.name}</h3>
-            <p className="mt-1 text-[14px] text-[#222]">Your first read on the latest news and analysis.</p>
-            <a href="#" className="mt-2 inline-block text-[11px] font-bold text-[#d71920]">Sign Up &nbsp;|&nbsp; Read today's edition</a>
-          </div>
         </aside>
       </section>
 
-      {/* In-page Advertisement Space */}
-      <div className="my-8">
-        <AdvertisementSlot variant="in-article" />
+      {/* Ad Banner directly under the top 3 news stories (no gaps) matching user requirement */}
+      <div className="mt-2 mb-6">
+        <AdvertisementSlot variant="in-article" className="my-2" />
       </div>
 
       {/* More News Section */}

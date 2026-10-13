@@ -33,11 +33,29 @@ export async function getPublishedArticlesByCategory(category: string, limit: nu
       placementFilter = " AND (homepage_placement IS NULL OR homepage_placement = 'None' OR homepage_placement = '')";
     }
     if (category.toLowerCase() === "world") {
+      const worldCategories = [
+        'World',
+        'Asia',
+        'Middle East',
+        'Europe',
+        'Britain',
+        'Africa',
+        'China',
+        'United States',
+        'Americas',
+        'Oceania',
+        'Russia',
+        'United Kingdom',
+        'Global'
+      ];
+      const quotedCats = worldCategories.map(c => `'${c}'`).join(', ');
+
       let condition = "";
       if (mainCategoryOnly) {
-        condition = `status = 'published' AND category IN ('World', 'Middle East', 'Asia', 'Europe', 'Africa', 'Americas', 'Oceania', 'Russia', 'China', 'United Kingdom', 'Global')${placementFilter}`;
+        condition = `status = 'published' AND category IN (${quotedCats})${placementFilter}`;
       } else {
-        condition = `status = 'published' AND (category IN ('World', 'Middle East', 'Asia', 'Europe', 'Africa', 'Americas', 'Oceania', 'Russia', 'China', 'United Kingdom', 'Global') OR subcategories LIKE '%"World"%' OR subcategories LIKE '%"Middle East"%' OR subcategories LIKE '%"Asia"%' OR subcategories LIKE '%"Europe"%' OR subcategories LIKE '%"Africa"%' OR subcategories LIKE '%"Americas"%' OR subcategories LIKE '%"Oceania"%' OR subcategories LIKE '%"Russia"%' OR subcategories LIKE '%"China"%' OR subcategories LIKE '%"United Kingdom"%' OR subcategories LIKE '%"Global"%')${placementFilter}`;
+        const subcatLikes = worldCategories.map(c => `subcategories LIKE '%"${c}"%' OR subcategories LIKE '%${c}%'`).join(' OR ');
+        condition = `status = 'published' AND (category IN (${quotedCats}) OR ${subcatLikes})${placementFilter}`;
       }
       
       const [countRows] = await pool.query(`SELECT COUNT(*) as total FROM articles WHERE ${condition}`);
@@ -45,7 +63,7 @@ export async function getPublishedArticlesByCategory(category: string, limit: nu
       const totalPages = Math.ceil(totalArticles / limit);
 
       const [rows] = await pool.query(
-        `SELECT * FROM articles WHERE ${condition} ORDER BY updated_at DESC LIMIT ? OFFSET ?`,
+        `SELECT * FROM articles WHERE ${condition} ORDER BY COALESCE(updated_at, created_at) DESC LIMIT ? OFFSET ?`,
         [limit, offset]
       );
       return { articles: rows as Article[], totalPages, currentPage: page };

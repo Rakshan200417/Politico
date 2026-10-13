@@ -1,9 +1,31 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 
+const DEFAULT_ADMIN_EMAIL = 'akramyoonos006@gmail.com';
+const DEFAULT_ADMIN_PASS = 'pass123#';
+
+async function ensureDefaultAdmin() {
+  try {
+    const [rows]: any = await pool.execute(
+      'SELECT id FROM users WHERE email = ?',
+      [DEFAULT_ADMIN_EMAIL]
+    );
+    if (rows.length === 0) {
+      await pool.execute(
+        'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
+        ['Default Admin', DEFAULT_ADMIN_EMAIL, DEFAULT_ADMIN_PASS, 'admin']
+      );
+    }
+  } catch (err) {
+    console.warn('Could not auto-ensure default admin in users table:', err);
+  }
+}
+
 // GET /api/users
 export async function GET() {
   try {
+    await ensureDefaultAdmin();
+
     const [rows] = await pool.query(`
       SELECT 
         u.id, 
@@ -27,10 +49,18 @@ export async function GET() {
 // POST /api/users
 export async function POST(request: Request) {
   try {
-    const { name, email, password, role } = await request.json();
+    await ensureDefaultAdmin();
+
+    const { name, email, password, role, loggedInEmail } = await request.json();
     if (!email || !password || !role) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
+
+    // Only default admin can create another admin
+    if (role === 'admin' && loggedInEmail !== DEFAULT_ADMIN_EMAIL) {
+      return NextResponse.json({ error: 'Only default admin can create admin users' }, { status: 403 });
+    }
+
     await pool.execute(
       'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
       [name || '', email, password, role]
@@ -45,7 +75,7 @@ export async function POST(request: Request) {
   }
 }
 
-// DELETE /api/users?id=X
+// DELETE /api/users?id=X&loggedInEmail=...
 export async function DELETE(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -57,20 +87,22 @@ export async function DELETE(request: Request) {
     }
 
     // Check who we are deleting
-    const [userRows]: any = await pool.execute('SELECT email FROM users WHERE id = ?', [id]);
+    const [userRows]: any = await pool.execute('SELECT email, role FROM users WHERE id = ?', [id]);
     if (userRows.length === 0) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
     const userToDelete = userRows[0];
 
-    // Cannot delete default admin
-    if (userToDelete.email === 'admin@example.com') {
+    // No one can delete default admin
+    if (userToDelete.email === DEFAULT_ADMIN_EMAIL || userToDelete.email === 'admin@example.com') {
       return NextResponse.json({ error: 'Cannot delete the default admin' }, { status: 403 });
     }
 
-    // Only default admin can delete other admins
-    if (loggedInUserEmail !== 'admin@example.com' && userToDelete.role === 'admin') {
-      return NextResponse.json({ error: 'Only default admin can delete other admins' }, { status: 403 });
+    // Normal admin can ONLY delete reader and writer
+    if (loggedInUserEmail !== DEFAULT_ADMIN_EMAIL) {
+      if (userToDelete.role === 'admin') {
+        return NextResponse.json({ error: 'Normal admin can only delete reader and writer accounts' }, { status: 403 });
+      }
     }
 
     await pool.execute('DELETE FROM users WHERE id = ?', [id]);
@@ -97,15 +129,26 @@ export async function PUT(request: Request) {
     }
     const userToUpdate = userRows[0];
 
-    // Cannot demote/change role of default admin
+    // No one can edit default admin data except default admin themselves
+    const isTargetDefaultAdmin = userToUpdate.email === DEFAULT_ADMIN_EMAIL || userToUpdate.email === 'admin@example.com';
+    if (isTargetDefaultAdmin && loggedInEmail !== DEFAULT_ADMIN_EMAIL) {
+      return NextResponse.json({ error: 'Cannot edit default admin account' }, { status: 403 });
+    }
+
+    // Cannot demote default admin role
     const newRole = role || userToUpdate.role;
-    if (userToUpdate.email === 'admin@example.com' && newRole !== 'admin') {
+    if (isTargetDefaultAdmin && newRole !== 'admin') {
       return NextResponse.json({ error: 'Cannot change default admin role' }, { status: 403 });
     }
 
-    // Only default admin can edit other admins
-    if (loggedInEmail !== 'admin@example.com' && userToUpdate.role === 'admin' && loggedInEmail !== userToUpdate.email) {
-      return NextResponse.json({ error: 'Only default admin can edit other admins' }, { status: 403 });
+    // Normal admin can ONLY edit reader and writer data (or their own name/password)
+    if (loggedInEmail !== DEFAULT_ADMIN_EMAIL) {
+      if (userToUpdate.role === 'admin' && userToUpdate.email !== loggedInEmail) {
+        return NextResponse.json({ error: 'Normal admin can only edit reader and writer accounts' }, { status: 403 });
+      }
+      if (newRole === 'admin' && userToUpdate.role !== 'admin') {
+        return NextResponse.json({ error: 'Normal admin cannot promote users to admin' }, { status: 403 });
+      }
     }
 
     // Check email uniqueness if email changed
@@ -132,6 +175,16 @@ export async function PUT(request: Request) {
       );
     }
 
+    // Keep articles synced with updated user name and email
+    try {
+      await pool.execute(
+        'UPDATE articles SET writer_name = ?, writer_email = ? WHERE writer_email = ? OR writer_name = ?',
+        [newName, targetEmail, userToUpdate.email, userToUpdate.name]
+      );
+    } catch (e) {
+      console.warn('Could not sync articles author info:', e);
+    }
+
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('Error updating user:', error);
@@ -141,4 +194,3 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: 'Failed to update user' }, { status: 500 });
   }
 }
-

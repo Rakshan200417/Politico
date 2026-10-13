@@ -39,7 +39,7 @@ export default async function TopNewsGrid() {
         {mainStory && (
           <article className="group cursor-pointer">
             <a href={`/news/${mainStory.slug || slugify(mainStory.title)}`} className="block">
-              <h1 className="text-[44px] sm:text-[52px] lg:text-[60px] font-bold leading-[0.95] tracking-[-0.03em] text-[#111111] group-hover:text-[#333333] transition-colors duration-150 mb-3 font-sans">
+              <h1 className="text-[44px] sm:text-[52px] lg:text-[60px] font-bold leading-[0.95] tracking-[-0.03em] text-[#111111] group-hover:text-[#333333] transition-colors duration-150 mb-3 font-sans line-clamp-2 overflow-hidden text-ellipsis break-words [word-break:break-word]">
                 {mainStory.title}
               </h1>
 
@@ -81,7 +81,7 @@ export default async function TopNewsGrid() {
                       className="h-full w-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
                     />
                   </div>
-                  <h3 className="text-[14px] lg:text-[15px] font-bold leading-[1.1] tracking-[-0.01em] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans">
+                  <h3 className="text-[14px] lg:text-[15px] font-bold leading-[1.1] tracking-[-0.01em] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans line-clamp-2 overflow-hidden text-ellipsis break-words [word-break:break-word]">
                     {story.title}
                   </h3>
                 </a>

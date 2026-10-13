@@ -33,7 +33,7 @@ export default async function HomeRightPanel() {
           <div className="w-full aspect-video bg-gray-200 mb-3 overflow-hidden">
             <img src={mainStory.image || `https://picsum.photos/seed/${mainStory.id}/800/600`} alt={mainStory.title} className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
           </div>
-          <h3 className="text-[17px] font-bold leading-[1.1] tracking-[-0.02em] text-[#111111] group-hover:text-[#d32f2f] transition-colors mb-2 font-sans">
+          <h3 className="text-[17px] font-bold leading-[1.1] tracking-[-0.02em] text-[#111111] group-hover:text-[#d32f2f] transition-colors mb-2 font-sans line-clamp-2 overflow-hidden text-ellipsis break-words [word-break:break-word]">
             {mainStory.title}
           </h3>
           <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest font-sans">
@@ -44,7 +44,7 @@ export default async function HomeRightPanel() {
       
       {story2 && (
         <a href={`/news/${story2.slug || slugify(story2.title)}`} className="group cursor-pointer border-b border-gray-100 pb-4 block">
-          <h3 className="text-[17px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans">
+          <h3 className="text-[17px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans line-clamp-2 overflow-hidden text-ellipsis break-words [word-break:break-word]">
             {story2.title}
           </h3>
         </a>
@@ -52,11 +52,11 @@ export default async function HomeRightPanel() {
 
       {story3 && (
         <a href={`/news/${story3.slug || slugify(story3.title)}`} className="group cursor-pointer border-b border-gray-100 pb-4 block">
-          <h3 className="text-[17px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors mb-2 font-sans">
+          <h3 className="text-[17px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors mb-2 font-sans line-clamp-2 overflow-hidden text-ellipsis break-words [word-break:break-word]">
             {story3.title}
           </h3>
           {story3.deck && (
-            <p className="text-[13px] leading-[1.3] text-[#333333] font-sans mb-2">
+            <p className="text-[13px] leading-[1.3] text-[#333333] font-sans mb-2 line-clamp-2 overflow-hidden text-ellipsis break-words">
               {story3.deck}
             </p>
           )}
@@ -68,7 +68,7 @@ export default async function HomeRightPanel() {
 
       {story4 && (
         <a href={`/news/${story4.slug || slugify(story4.title)}`} className="group cursor-pointer border-b border-gray-100 pb-4 block last:border-0">
-          <h3 className="text-[17px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors mb-2 font-sans">
+          <h3 className="text-[17px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors mb-2 font-sans line-clamp-2 overflow-hidden text-ellipsis break-words [word-break:break-word]">
             {story4.title}
           </h3>
           <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest font-sans">

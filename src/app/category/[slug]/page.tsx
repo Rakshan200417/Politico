@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
 export default async function CategoryRoute({ params, searchParams }: { params: { slug: string }, searchParams: { page?: string } }) {
   if (params.slug.toLowerCase() === "world") {
-    return <WorldCategoryPage />;
+    return <WorldCategoryPage searchParams={searchParams} />;
   }
 
   // Convert slug back to proper category string (e.g. 'technology' -> 'Technology')
@@ -49,14 +49,28 @@ export default async function CategoryRoute({ params, searchParams }: { params: 
     articles = [...articles, ...mockArticles];
   }
 
-  const mapToStory = (article: any): CategoryStory => ({
-    title: article.title,
-    deck: article.deck,
-    byline: article.writer_name,
-    image: article.image || `https://picsum.photos/seed/${article.id}/800/600`,
-    slug: article.slug,
-    date: formatPublishDate(article.updated_at || article.created_at),
-  });
+  const mapToStory = (article: any): CategoryStory => {
+    let subTag = undefined;
+    try {
+      if (Array.isArray(article.subcategories) && article.subcategories.length > 0) {
+        subTag = article.subcategories[0];
+      } else if (typeof article.subcategories === 'string' && article.subcategories.trim()) {
+        const parsed = article.subcategories.startsWith('[') ? JSON.parse(article.subcategories) : article.subcategories.split(',');
+        if (parsed.length > 0 && parsed[0]) subTag = parsed[0].trim();
+      }
+    } catch {}
+
+    return {
+      title: article.title,
+      deck: article.deck,
+      byline: article.writer_name || 'POLITICO STAFF',
+      image: article.image || `https://picsum.photos/seed/${article.id}/800/600`,
+      slug: article.slug,
+      date: formatPublishDate(article.updated_at || article.created_at),
+      categoryTag: subTag,
+      category: categoryName,
+    };
+  };
 
   const leadArticle = mapToStory(articles[0]);
   const sideStories = articles.slice(1, 3).map(mapToStory);

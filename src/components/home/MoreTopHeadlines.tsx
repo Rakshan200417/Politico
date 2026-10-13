@@ -76,7 +76,7 @@ export default async function MoreTopHeadlines() {
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              <h3 className="text-[16px] lg:text-[18px] font-bold leading-[1.05] text-[#222222] group-hover:text-[#d32f2f] transition-colors tracking-tight font-sans">
+              <h3 className="text-[16px] lg:text-[18px] font-bold leading-[1.05] text-[#222222] group-hover:text-[#d32f2f] transition-colors tracking-tight font-sans line-clamp-2 overflow-hidden text-ellipsis break-words [word-break:break-word]">
                 {top1.title}
               </h3>
               <div className="flex items-center justify-between">
@@ -106,7 +106,7 @@ export default async function MoreTopHeadlines() {
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              <h3 className="text-[16px] lg:text-[18px] font-bold leading-[1.05] text-[#222222] group-hover:text-[#333333] transition-colors tracking-tight font-sans">
+              <h3 className="text-[16px] lg:text-[18px] font-bold leading-[1.05] text-[#222222] group-hover:text-[#333333] transition-colors tracking-tight font-sans line-clamp-2 overflow-hidden text-ellipsis break-words [word-break:break-word]">
                 {top2.title}
               </h3>
               <div className="flex items-center justify-between">
@@ -138,7 +138,7 @@ export default async function MoreTopHeadlines() {
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              <h3 className="text-[18px] lg:text-[20px] font-extrabold leading-snug text-gray-900 group-hover:text-[#d32f2f] transition-colors tracking-tight font-sans">
+              <h3 className="text-[18px] lg:text-[20px] font-extrabold leading-snug text-gray-900 group-hover:text-[#d32f2f] transition-colors tracking-tight font-sans line-clamp-2 overflow-hidden text-ellipsis break-words [word-break:break-word]">
                 {story.title}
               </h3>
               <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider font-sans">

@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import pool from '@/lib/db';
+import { processArticleImagesForPublish, convertToWebP } from '@/lib/imageConverter';
 
 let isArticlesTableEnsured = false;
 
@@ -33,6 +34,11 @@ async function ensureArticlesTable() {
         INDEX idx_writer_status (writer_email, status)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
+
+    // Ensure title can hold full length headlines without truncation
+    try {
+      await pool.query(`ALTER TABLE articles MODIFY COLUMN title TEXT NOT NULL`);
+    } catch (e) {}
 
     // Safely verify columns in case table was created with an older schema
     const optionalColumns = [
@@ -84,8 +90,14 @@ export async function GET(request: Request) {
     const params: any[] = [];
 
     if (email) {
-      query += ' AND writer_email = ?';
-      params.push(email);
+      const nameParam = searchParams.get('name') || '';
+      if (nameParam) {
+        query += ' AND (writer_email = ? OR writer_name = ?)';
+        params.push(email, nameParam);
+      } else {
+        query += ' AND (writer_email = ? OR writer_name = ?)';
+        params.push(email, email.split('@')[0]);
+      }
     }
     if (status) {
       query += ' AND status = ?';
@@ -145,7 +157,7 @@ export async function POST(request: Request) {
       slug = '',
       deck = '',
       content = '',
-      category = 'Business',
+      category = 'World',
       subcategories = [],
       tags = [],
       read_time = '5 min read',
@@ -169,6 +181,23 @@ export async function POST(request: Request) {
       );
     }
 
+    let finalImage = image;
+    let finalContent = content;
+
+    // Convert article image and content images to WebP when approved/published
+    if (status === 'published') {
+      try {
+        const processed = await processArticleImagesForPublish({
+          image: finalImage,
+          content: finalContent,
+        });
+        if (processed.image !== undefined) finalImage = processed.image;
+        if (processed.content !== undefined) finalContent = processed.content;
+      } catch (convErr) {
+        console.warn('[imageConverter] Post publish WebP conversion error:', convErr);
+      }
+    }
+
     const generatedSlug = slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     const subcategoriesJson = JSON.stringify(subcategories || []);
     const tagsJson = JSON.stringify(tags || []);
@@ -186,7 +215,7 @@ export async function POST(request: Request) {
         title,
         generatedSlug,
         deck,
-        content,
+        finalContent,
         category,
         subcategoriesJson,
         tagsJson,
@@ -195,7 +224,7 @@ export async function POST(request: Request) {
         card_summary,
         focus_keyword,
         meta_description,
-        image,
+        finalImage,
         image_caption,
         image_credit,
         homepage_placement,
@@ -209,10 +238,11 @@ export async function POST(request: Request) {
     if (pending_images && pending_images.length > 0) {
       for (const img of pending_images) {
         try {
+          const imgUrl = status === 'published' ? await convertToWebP(img.url) : img.url;
           await pool.execute(
             `INSERT INTO article_images (url, filename, uploader_email, caption, credit, seo_keywords)
              VALUES (?, ?, ?, ?, ?, ?)`,
-            [img.url, img.filename, writer_email, img.caption, img.credit, img.seo_keywords]
+            [imgUrl, img.filename, writer_email, img.caption, img.credit, img.seo_keywords]
           );
         } catch (dbErr) {
           console.warn('[DB] Failed to record pending image:', dbErr);
@@ -231,7 +261,7 @@ export async function POST(request: Request) {
           title,
           slug: generatedSlug,
           deck,
-          content,
+          content: finalContent,
           category,
           subcategories,
           tags,
@@ -240,6 +270,7 @@ export async function POST(request: Request) {
           card_summary,
           focus_keyword,
           meta_description,
+          image: finalImage,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         },
@@ -294,6 +325,35 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Article ID is required for update' }, { status: 400 });
     }
 
+    let finalImage = image;
+    let finalContent = content;
+
+    // When status is 'published' (admin approves), convert image(s) to WebP format
+    if (status === 'published') {
+      try {
+        // If image or content weren't passed in this PUT request, fetch existing values from DB
+        if (finalImage === undefined || finalContent === undefined) {
+          const [existingRows]: any = await pool.execute(
+            'SELECT image, content FROM articles WHERE id = ?',
+            [id]
+          );
+          if (existingRows && existingRows.length > 0) {
+            if (finalImage === undefined) finalImage = existingRows[0].image || '';
+            if (finalContent === undefined) finalContent = existingRows[0].content || '';
+          }
+        }
+
+        const processed = await processArticleImagesForPublish({
+          image: finalImage,
+          content: finalContent,
+        });
+        if (processed.image !== undefined) finalImage = processed.image;
+        if (processed.content !== undefined) finalContent = processed.content;
+      } catch (convErr) {
+        console.warn('[imageConverter] PUT publish WebP conversion error:', convErr);
+      }
+    }
+
     // Dynamic field update builder
     const updates: string[] = [];
     const values: any[] = [];
@@ -301,7 +361,13 @@ export async function PUT(request: Request) {
     if (title !== undefined) { updates.push('title = ?'); values.push(title); }
     if (slug !== undefined) { updates.push('slug = ?'); values.push(slug); }
     if (deck !== undefined) { updates.push('deck = ?'); values.push(deck); }
-    if (content !== undefined) { updates.push('content = ?'); values.push(content); }
+    if (finalContent !== undefined && (content !== undefined || status === 'published')) {
+      updates.push('content = ?');
+      values.push(finalContent);
+    } else if (content !== undefined) {
+      updates.push('content = ?');
+      values.push(content);
+    }
     if (category !== undefined) { updates.push('category = ?'); values.push(category); }
     if (subcategories !== undefined) {
       updates.push('subcategories = ?');
@@ -318,12 +384,19 @@ export async function PUT(request: Request) {
     if (focus_keyword !== undefined) { updates.push('focus_keyword = ?'); values.push(focus_keyword); }
     if (meta_description !== undefined) { updates.push('meta_description = ?'); values.push(meta_description); }
     if (writer_name !== undefined) { updates.push('writer_name = ?'); values.push(writer_name); }
-    if (image !== undefined) { updates.push('image = ?'); values.push(image); }
+    if (finalImage !== undefined && (image !== undefined || status === 'published')) {
+      updates.push('image = ?');
+      values.push(finalImage);
+    } else if (image !== undefined) {
+      updates.push('image = ?');
+      values.push(image);
+    }
     if (image_caption !== undefined) { updates.push('image_caption = ?'); values.push(image_caption); }
     if (image_credit !== undefined) { updates.push('image_credit = ?'); values.push(image_credit); }
     if (homepage_placement !== undefined) { updates.push('homepage_placement = ?'); values.push(homepage_placement); }
     if (targeted_email_distribution !== undefined) { updates.push('targeted_email_distribution = ?'); values.push(targeted_email_distribution); }
     if (is_sponsored !== undefined) { updates.push('is_sponsored = ?'); values.push(is_sponsored); }
+    updates.push('updated_at = NOW()');
 
     if (updates.length === 0) {
       return NextResponse.json({ error: 'No fields provided for update' }, { status: 400 });
@@ -331,12 +404,6 @@ export async function PUT(request: Request) {
 
     values.push(id);
     let whereClause = 'WHERE id = ?';
-
-    // Remove writer_email restriction so admins can edit it without needing the exact original email
-    // if (writer_email) {
-    //   whereClause += ' AND writer_email = ?';
-    //   values.push(writer_email);
-    // }
 
     const sql = `UPDATE articles SET ${updates.join(', ')} ${whereClause}`;
     const [result]: any = await pool.execute(sql, values);
@@ -351,10 +418,11 @@ export async function PUT(request: Request) {
     if (pending_images && pending_images.length > 0) {
       for (const img of pending_images) {
         try {
+          const imgUrl = status === 'published' ? await convertToWebP(img.url) : img.url;
           await pool.execute(
             `INSERT INTO article_images (url, filename, uploader_email, caption, credit, seo_keywords)
              VALUES (?, ?, ?, ?, ?, ?)`,
-            [img.url, img.filename, writer_email, img.caption, img.credit, img.seo_keywords]
+            [imgUrl, img.filename, writer_email, img.caption, img.credit, img.seo_keywords]
           );
         } catch (dbErr) {
           console.warn('[DB] Failed to record pending image:', dbErr);
@@ -368,6 +436,8 @@ export async function PUT(request: Request) {
     return NextResponse.json({
       message: 'Article updated successfully in database',
       id,
+      image: finalImage,
+      content: finalContent,
     });
   } catch (error: any) {
     console.error('[PUT /api/articles Error]:', error);

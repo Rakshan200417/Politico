@@ -78,18 +78,24 @@ export default function WriterDashboard() {
     }
   }, []);
 
-  // Fetch articles from DB (with fallback to localStorage)
+  // Fetch articles from DB (strictly for current writer)
   const loadArticles = async () => {
     setIsLoading(true);
-    const email = user?.email || "writer@politico.com";
+    const email = user?.email;
+    if (!email) {
+      setArticles([]);
+      setIsLoading(false);
+      return;
+    }
 
     try {
+      const nameQuery = user?.name ? `&name=${encodeURIComponent(user.name)}` : "";
       const res = await fetch(
-        `/api/articles?email=${encodeURIComponent(email)}&_t=${Date.now()}`,
+        `/api/articles?email=${encodeURIComponent(email)}${nameQuery}&_t=${Date.now()}`,
       );
       if (res.ok) {
         const data = await res.json();
-        if (data.articles && data.articles.length > 0) {
+        if (Array.isArray(data.articles)) {
           setArticles(data.articles);
           setIsLoading(false);
           return;
@@ -99,12 +105,12 @@ export default function WriterDashboard() {
       console.warn("Could not fetch articles from DB:", err);
     }
 
-    // Fallback: check localStorage for saved articles
+    // Fallback: check email-specific localStorage only if offline
     try {
-      const cached = localStorage.getItem("writer_articles");
+      const cached = localStorage.getItem(`writer_articles_${email}`);
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed)) {
           setArticles(parsed);
           setIsLoading(false);
           return;
@@ -112,33 +118,8 @@ export default function WriterDashboard() {
       }
     } catch (e) {}
 
-    // Default mock seed article
-    const initialSeed: ArticleData[] = [
-      {
-        id: 1,
-        title:
-          "Federal Reserve Signals Shift in Upcoming Interest Rate Meeting",
-        deck: "Policymakers weigh new labor market indicators before committing to quantitative adjustments in Washington.",
-        content:
-          "<p>Federal Reserve officials are preparing for what could be their most critical policy meeting of the fiscal year...</p>",
-        category: "Economy",
-        subcategories: [
-          "Government Economic Policies",
-          "GDP & Economic Growth",
-        ],
-        tags: ["Fed", "InterestRates", "Economy"],
-        read_time: "4 min read",
-        status: "draft",
-        card_summary:
-          "Federal Reserve officials analyze labor market data before their policy meeting.",
-        focus_keyword: "Federal Reserve Interest Rates",
-        meta_description:
-          "Discover how the latest Federal Reserve meeting is set to shape policy and interest rate trends across national markets.",
-        slug: "federal-reserve-signals-shift-in-interest-rate-meeting",
-      },
-    ];
-
-    setArticles(initialSeed);
+    // A writer who has not written articles should see 0 articles, not other writers' data
+    setArticles([]);
     setIsLoading(false);
   };
 
@@ -264,8 +245,9 @@ export default function WriterDashboard() {
       matchesArticle(a) ? { ...a, status: "trash" as const } : a,
     );
     setArticles(updated);
+    const emailKey = user?.email ? `writer_articles_${user.email}` : "writer_articles";
     try {
-      localStorage.setItem("writer_articles", JSON.stringify(updated));
+      localStorage.setItem(emailKey, JSON.stringify(updated));
       localStorage.setItem("article_updated", Date.now().toString());
     } catch (e) {}
 
@@ -295,8 +277,9 @@ export default function WriterDashboard() {
       matchesArticle(a) ? { ...a, status: "draft" as const } : a,
     );
     setArticles(updated);
+    const emailKey = user?.email ? `writer_articles_${user.email}` : "writer_articles";
     try {
-      localStorage.setItem("writer_articles", JSON.stringify(updated));
+      localStorage.setItem(emailKey, JSON.stringify(updated));
       localStorage.setItem("article_updated", Date.now().toString());
     } catch (e) {}
 
@@ -337,8 +320,9 @@ export default function WriterDashboard() {
     // 1. Optimistic UI update: remove from list
     const updated = articles.filter((a) => !matchesArticle(a));
     setArticles(updated);
+    const emailKey = user?.email ? `writer_articles_${user.email}` : "writer_articles";
     try {
-      localStorage.setItem("writer_articles", JSON.stringify(updated));
+      localStorage.setItem(emailKey, JSON.stringify(updated));
       localStorage.setItem("article_updated", Date.now().toString());
     } catch (e) {}
 

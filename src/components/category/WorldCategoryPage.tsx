@@ -1,169 +1,160 @@
 import React from "react";
-import { getPublishedArticlesByCategory } from "@/lib/articleService";
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
-import AdvertisementSlot from "@/components/common/AdvertisementSlot";
+import CategoryPage from "@/components/category/CategoryPage";
+import { getPublishedArticlesByCategory } from "@/lib/articleService";
+import type { CategoryPageData, CategoryStory } from "@/components/category/categoryData";
+import { formatPublishDate } from "@/utils/dateFormatter";
+import { slugify } from "@/data/newsArticles";
 
 const WORLD_REGIONS = [
-  "World",
+  "Asia",
   "China",
   "United States",
   "Europe",
   "Britain",
   "Middle East",
   "Africa",
-  "Asia"
+  "Americas",
+  "Oceania",
+  "Russia",
+  "United Kingdom",
+  "Global",
 ];
 
-async function MoreWorldNews() {
-  let { articles } = await getPublishedArticlesByCategory("World", 12, true, 2);
-
-  if (!articles || articles.length === 0) {
-    const mockArticles = Array.from({ length: 4 }).map((_, i) => ({
-      id: 800 + i,
-      slug: `mock-world-news-${i}`,
-      title: `Global Update: Important International Development Part ${i + 1}`,
-      writer_name: 'POLITICO STAFF',
-      image: `https://picsum.photos/seed/moreworld${i}/800/600`,
-    })) as any;
-    articles = mockArticles;
+export function extractWorldTag(article: any): string {
+  // 1. If article category is a specific region
+  if (
+    article.category &&
+    WORLD_REGIONS.some((r) => r.toLowerCase() === article.category.toLowerCase())
+  ) {
+    const match = WORLD_REGIONS.find(
+      (r) => r.toLowerCase() === article.category.toLowerCase()
+    );
+    return match || article.category;
   }
 
-  return (
-    <>
-      {articles.map((article: any) => (
-        <a key={article.id} href={`/news/${article.slug}`} className="group cursor-pointer block flex flex-col min-w-0 overflow-hidden">
-          <div className="w-full aspect-[4/3] bg-gray-200 mb-3 overflow-hidden">
-            <img 
-              src={article.image || `https://picsum.photos/seed/${article.id}/800/600`} 
-              alt="More World News" 
-              className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" 
-            />
-          </div>
-          <h3 className="text-[16px] font-bold leading-[1.2] tracking-[-0.01em] text-[#111111] group-hover:text-[#d32f2f] transition-colors mb-2 font-sans flex-1 break-words [overflow-wrap:anywhere]">
-            {article.title}
-          </h3>
-          <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 font-sans mt-auto truncate">
-            BY {article.writer_name}
-          </p>
-        </a>
-      ))}
-    </>
-  );
-}
+  // 2. Parse subcategories if available
+  let subs: string[] = [];
+  try {
+    if (Array.isArray(article.subcategories)) {
+      subs = article.subcategories;
+    } else if (typeof article.subcategories === "string") {
+      subs = article.subcategories.startsWith("[")
+        ? JSON.parse(article.subcategories)
+        : article.subcategories.split(",").map((s: string) => s.trim());
+    }
+  } catch {}
 
-async function RegionSection({ region }: { region: string }) {
-  let { articles } = await getPublishedArticlesByCategory(region, 4);
-
-  if (!articles || articles.length === 0) {
-    const mockArticles = Array.from({ length: 4 }).map((_, i) => ({
-      id: 900 + i,
-      slug: `mock-${region.toLowerCase().replace(/\s+/g, '-')}-${i}`,
-      title: `${region} Update: Major Developments By Lucas Thompson Part ${i + 1}`,
-      deck: `This is a simulated deck describing the latest developments in ${region} affecting global markets and policies.`,
-      writer_name: 'LUCAS THOMPSON',
-      image: `https://picsum.photos/seed/${region.replace(/\s+/g, '')}${i}/800/600`,
-      updated_at: new Date().toISOString()
-    })) as any;
-    articles = mockArticles;
+  for (const sub of subs) {
+    const match = WORLD_REGIONS.find(
+      (r) => r.toLowerCase() === sub.toLowerCase()
+    );
+    if (match) return match;
   }
 
-  const leadArticle = articles[0];
-  const sideArticles = articles.slice(1, 4);
+  if (subs.length > 0 && subs[0]) {
+    return subs[0];
+  }
 
-  return (
-    <div className="w-full mb-16 border-t border-gray-200 pt-8 first:border-t-0 first:pt-0 overflow-hidden">
-      <div className="flex items-center gap-2 pb-2 mb-6 border-b border-[#d9d9d9]">
-        <span className="w-2.5 h-2.5 rounded-full border-2 border-[#d32f2f] bg-transparent inline-block"></span>
-        <h2 className="text-[14px] font-extrabold tracking-[0.12em] text-[#222222] uppercase font-sans">
-          {region}
-        </h2>
-      </div>
+  // 3. Check tags
+  let tagList: string[] = [];
+  try {
+    if (Array.isArray(article.tags)) {
+      tagList = article.tags;
+    } else if (typeof article.tags === "string") {
+      tagList = article.tags.startsWith("[")
+        ? JSON.parse(article.tags)
+        : article.tags.split(",").map((s: string) => s.trim());
+    }
+  } catch {}
 
-      <section className="grid gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,4fr)] lg:gap-12 overflow-hidden">
-        {/* Left: Lead Article */}
-        {leadArticle && (
-          <article className="min-w-0 overflow-hidden">
-            <a href={`/news/${leadArticle.slug}`} className="block group">
-              <h2 className="text-[34px] font-sans font-bold leading-[1.08] tracking-[-0.01em] text-[#111] group-hover:text-[#d71920] sm:text-[42px] break-words [overflow-wrap:anywhere]">
-                {leadArticle.title}
-              </h2>
-              {leadArticle.deck && (
-                <p className="mt-4 font-sans text-[18px] leading-[1.4] text-[#555] sm:text-[20px] break-words [overflow-wrap:anywhere]">
-                  {leadArticle.deck}
-                </p>
-              )}
-              <div className="mt-4 mb-6">
-                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#666] truncate">
-                  BY {leadArticle.writer_name}
-                </p>
-              </div>
-              <div className="aspect-[4/3] sm:aspect-[16/9] w-full overflow-hidden bg-[#f2f2f2]">
-                <img src={leadArticle.image || `https://picsum.photos/seed/${leadArticle.id}/800/600`} alt="" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
-              </div>
-            </a>
-          </article>
-        )}
+  for (const tag of tagList) {
+    const match = WORLD_REGIONS.find(
+      (r) => r.toLowerCase() === tag.toLowerCase()
+    );
+    if (match) return match;
+  }
 
-        {/* Right: Side Stories */}
-        <aside className="flex flex-col gap-8 lg:pl-2 lg:pt-[20px] min-w-0 overflow-hidden">
-          {sideArticles.map((story: any) => (
-            <article key={story.id} className="border-b border-[#e1e1e1] pb-8 last:border-0 last:pb-0 overflow-hidden">
-              <a href={`/news/${story.slug}`} className="grid grid-cols-[120px_minmax(0,1fr)] sm:grid-cols-[160px_minmax(0,1fr)] gap-4 sm:gap-6 group">
-                <div className="aspect-[3/2] w-full overflow-hidden bg-[#f2f2f2] shrink-0">
-                  <img src={story.image || `https://picsum.photos/seed/${story.id}/800/600`} alt="" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
-                </div>
-                <div className="min-w-0 overflow-hidden">
-                  <h3 className="text-[18px] font-sans font-bold leading-[1.2] text-[#111] group-hover:text-[#d71920] sm:text-[22px] break-words [overflow-wrap:anywhere]">
-                    {story.title}
-                  </h3>
-                  <div className="mt-3">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#666] truncate">
-                      BY {story.writer_name}
-                    </p>
-                  </div>
-                </div>
-              </a>
-            </article>
-          ))}
-        </aside>
-      </section>
-    </div>
-  );
+  // 4. If category is non-empty and not 'World'
+  if (article.category && article.category.toLowerCase() !== "world") {
+    return article.category;
+  }
+
+  return "Asia";
 }
 
-export default function WorldCategoryPage() {
+export default async function WorldCategoryPage({
+  searchParams,
+}: {
+  searchParams?: { page?: string };
+}) {
+  const currentPageParam = Number(searchParams?.page) || 1;
+  let { articles, totalPages, currentPage } = await getPublishedArticlesByCategory(
+    "World",
+    15,
+    false,
+    currentPageParam
+  );
+
+  if (!articles) {
+    articles = [];
+  }
+
+  // If fewer than 3 articles in DB, supplement with realistic mock stories with world region tags
+  const sampleRegions = ["Asia", "Europe", "United States", "China", "Middle East", "Britain", "Africa"];
+  if (articles.length < 3) {
+    const missingCount = 3 - articles.length;
+    const mockArticles = Array.from({ length: missingCount }).map((_, i) => {
+      const region = sampleRegions[i % sampleRegions.length];
+      return {
+        id: 8800 + articles.length + i,
+        slug: `world-${region.toLowerCase().replace(/\s+/g, "-")}-update-${i + 1}`,
+        title: `${region} Summit: Landmark Diplomatic & Economic Accord Finalized in Major Policy Shift`,
+        deck: `Key leaders and trade officials from ${region} reach consensus on pivotal international trade, security cooperation, and technology standards.`,
+        writer_name: "POLITICO STAFF",
+        category: region,
+        subcategories: [region],
+        image: `https://picsum.photos/seed/world-${region.toLowerCase()}-${i}/800/600`,
+        updated_at: new Date(Date.now() - (i + 1) * 3600000).toISOString(),
+      } as any;
+    });
+    articles = [...articles, ...mockArticles];
+  }
+
+  const mapToStory = (article: any, index: number): CategoryStory => {
+    const storySlug = article.slug || slugify(article.title);
+    return {
+      title: article.title,
+      deck: article.deck,
+      byline: article.writer_name || "POLITICO STAFF",
+      image: article.image || `https://picsum.photos/seed/world-${article.id || index}/800/600`,
+      slug: storySlug,
+      date: formatPublishDate(article.updated_at || article.created_at),
+      categoryTag: extractWorldTag(article),
+      category: "World",
+    };
+  };
+
+  const leadArticle = mapToStory(articles[0], 0);
+  const sideStories = articles.slice(1, 3).map((a, i) => mapToStory(a, i + 1));
+  const moreStories = articles.slice(3).map((a, i) => mapToStory(a, i + 3));
+
+  const categoryData: CategoryPageData = {
+    slug: "world",
+    name: "World",
+    description: "Latest international news, analysis, and geopolitical updates from around the globe.",
+    lead: leadArticle,
+    sideStories: sideStories,
+    moreStories: moreStories,
+    totalPages,
+    currentPage,
+  };
+
   return (
-    <div className="min-h-screen bg-white font-sans overflow-x-hidden">
+    <div className="min-h-screen bg-white">
       <Header />
-      <main className="mx-auto w-full max-w-[1080px] px-4 py-8 sm:px-6 overflow-x-hidden">
-        {/* Top Banner Advertisement */}
-        <div className="pt-6 pb-6 border-b border-[#ededed] mb-8">
-          <AdvertisementSlot />
-        </div>
-        <h1 className="text-[40px] font-sans text-[#111] sm:text-[48px] mb-2 text-center font-bold">
-          World News
-        </h1>
-        <p className="text-center text-gray-500 mb-12 max-w-2xl mx-auto">
-          Latest international news, analysis, and updates from around the globe.
-        </p>
-        
-        {WORLD_REGIONS.map(region => (
-          <RegionSection key={region} region={region} />
-        ))}
-
-        <div className="mt-16 w-full mb-12 border-t border-gray-200 pt-8 overflow-hidden">
-          <div className="flex items-center gap-2 pb-2 mb-6 border-b border-[#d9d9d9]">
-            <span className="w-2.5 h-2.5 rounded-full border-2 border-[#d32f2f] bg-transparent inline-block"></span>
-            <h2 className="text-[14px] font-extrabold tracking-[0.12em] text-[#222222] uppercase font-sans">
-              MORE WORLD NEWS
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-            <MoreWorldNews />
-          </div>
-        </div>
-      </main>
+      <CategoryPage category={categoryData} />
       <Footer />
     </div>
   );

@@ -54,7 +54,7 @@ export default function TopSidebarWidgets() {
                   </div>
                 )}
 
-                <h4 className="text-[14px] font-bold leading-[1.08] tracking-[-0.02em] text-[#111111] group-hover:text-[#d32f2f] transition-colors">
+                <h4 className="text-[14px] font-bold leading-[1.08] tracking-[-0.02em] text-[#111111] group-hover:text-[#d32f2f] transition-colors line-clamp-2 overflow-hidden text-ellipsis break-words [word-break:break-word]">
                   {story.title}
                 </h4>
 

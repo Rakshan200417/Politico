@@ -38,7 +38,7 @@ export default async function WorldHomeSection() {
                 className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" 
               />
             </div>
-            <h3 className="text-[16px] sm:text-[18px] font-bold leading-[1.2] tracking-[-0.01em] text-[#111111] group-hover:text-[#d32f2f] transition-colors mb-2 font-sans">
+            <h3 className="text-[16px] sm:text-[18px] font-bold leading-[1.2] tracking-[-0.01em] text-[#111111] group-hover:text-[#d32f2f] transition-colors mb-2 font-sans line-clamp-2 overflow-hidden text-ellipsis break-words [word-break:break-word]">
               {article.title}
             </h3>
             <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500 font-sans">

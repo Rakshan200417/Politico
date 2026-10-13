@@ -111,7 +111,7 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
   });
 
   return (
-    <div className="min-h-screen bg-white font-sans text-[#111] flex flex-col">
+    <div className="min-h-screen bg-white font-sans text-[#111] flex flex-col overflow-x-hidden w-full max-w-full">
       <Header />
 
       {/* ── Top Banner Advertisement (In the Beige Gap) ── */}
@@ -133,7 +133,7 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
         </div>
       </div>
 
-      <main className="mx-auto w-full max-w-[1080px] px-4 pb-16 font-sans sm:px-6">
+      <main className="mx-auto w-full max-w-[1080px] px-4 pb-16 font-sans sm:px-6 min-w-0 overflow-x-hidden">
 
         {/* Back to Newsfeed */}
         <div className="pt-6 pb-4 border-b border-[#e3e3e3] mb-8">
@@ -141,7 +141,7 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
         </div>
 
         {/* Headline Header */}
-        <header className="pb-8">
+        <header className="pb-8 min-w-0 overflow-hidden">
           {/* Category Tag */}
           <div className="mb-4">
             <a
@@ -152,11 +152,11 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
             </a>
           </div>
 
-          <h1 className="text-[36px] sm:text-[46px] lg:text-[54px] font-bold font-serif leading-[1.1] tracking-[-0.02em] text-[#111]">
+          <h1 className="text-[36px] sm:text-[46px] lg:text-[54px] font-bold font-serif leading-[1.1] tracking-[-0.02em] text-[#111] break-words [overflow-wrap:anywhere] [word-break:break-word]">
             {articleData.title}
           </h1>
 
-          <p className="mt-4 mb-4 max-w-[840px] font-sans text-[18px] sm:text-[20px] leading-[1.5] text-[#4a5568]">
+          <p className="mt-4 mb-4 max-w-[840px] font-sans text-[18px] sm:text-[20px] leading-[1.5] text-[#4a5568] break-words [overflow-wrap:anywhere] [word-break:break-word]">
             {articleData.deck}
           </p>
 

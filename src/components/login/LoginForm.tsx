@@ -1,15 +1,22 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { EyeOff, Eye, ArrowLeft } from "lucide-react";
+import SkeletonLoading from "@/components/common/SkeletonLoading";
 
 export default function LoginForm() {
+  const [pageLoading, setPageLoading] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     rememberMe: true,
   });
+
+  useEffect(() => {
+    const timer = setTimeout(() => setPageLoading(false), 250);
+    return () => clearTimeout(timer);
+  }, []);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -54,6 +61,10 @@ export default function LoginForm() {
       setError("An error occurred. Make sure XAMPP MySQL is running.");
     }
   };
+
+  if (pageLoading) {
+    return <SkeletonLoading />;
+  }
 
   return (
     <div className="min-h-screen w-full bg-[#eef1f5] flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans relative">
@@ -119,14 +130,23 @@ export default function LoginForm() {
               {/* Email / Username Field */}
               <div>
                 <input
-                  type="email"
-                  name="email"
+                  type="text"
+                  name="user_identifier"
+                  id="user_identifier"
                   placeholder="Email or username"
                   value={formData.email}
-                  onChange={handleChange}
+                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   className="w-full border-b border-gray-300 py-2 text-[13px] text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#ce1126] transition-colors bg-transparent selection:bg-gray-200 selection:text-gray-900"
                   required
-                  autoComplete="off"
+                  autoComplete="one-time-code"
+                  autoCorrect="off"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  data-lpignore="true"
+                  data-form-type="other"
+                  data-1p-ignore="true"
+                  data-bwignore="true"
+                  data-private="true"
                 />
               </div>
 

@@ -6,7 +6,10 @@ export default async function RightListCategorySection({ category, isMostRead = 
   let articles: any[] = [];
   
   if (isMostRead) {
-    articles = await getArticlesByPlacement('Home - Most Read', 4);
+    articles = await getArticlesByPlacement('Home - More Read', 4);
+    if (!articles || articles.length === 0) {
+      articles = await getArticlesByPlacement('Home - Most Read', 4);
+    }
     if (!articles || articles.length === 0) {
       articles = await getLatestPublishedArticles(4, true);
     }
@@ -39,7 +42,7 @@ export default async function RightListCategorySection({ category, isMostRead = 
       <div className="flex items-center gap-2 pb-2 mb-3 border-b border-[#d9d9d9]">
         <span className="w-2.5 h-2.5 rounded-full border-2 border-[#d32f2f] bg-transparent inline-block"></span>
         <h2 className="text-[10px] font-extrabold tracking-[0.12em] text-[#222222] uppercase font-sans">
-          {isMostRead ? "MOST READ" : category}
+          {isMostRead ? "MORE READ" : category}
         </h2>
       </div>
       
@@ -65,7 +68,7 @@ export default async function RightListCategorySection({ category, isMostRead = 
                 </div>
               )}
               <div>
-                <h3 className="text-[14px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mt-1">
+                <h3 className="text-[14px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mt-1 line-clamp-2 overflow-hidden text-ellipsis break-words [word-break:break-word]">
                   <a href={`/news/${article.slug || slugify(article.title)}`} className="block">
                     {article.title}
                   </a>

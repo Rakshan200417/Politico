@@ -5,15 +5,18 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const slug = searchParams.get("slug");
 
-  if (!slug) {
-    return NextResponse.json({ error: "Article slug is required" }, { status: 400 });
-  }
-
   try {
-    const [rows] = await pool.query(
-      "SELECT * FROM comments WHERE article_slug = ? ORDER BY created_at DESC",
-      [slug]
-    );
+    let query = "SELECT * FROM comments";
+    const params: any[] = [];
+
+    if (slug) {
+      query += " WHERE article_slug = ?";
+      params.push(slug);
+    }
+
+    query += " ORDER BY created_at DESC LIMIT 100";
+
+    const [rows] = await pool.query(query, params);
     return NextResponse.json({ comments: rows });
   } catch (error) {
     console.error("Error fetching comments:", error);
@@ -50,6 +53,29 @@ export async function POST(request: Request) {
     console.error("Error saving comment:", error);
     return NextResponse.json(
       { error: "Failed to save comment" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "Comment ID is required" },
+        { status: 400 }
+      );
+    }
+
+    await pool.query("DELETE FROM comments WHERE id = ?", [id]);
+    return NextResponse.json({ success: true, message: "Comment deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting comment:", error);
+    return NextResponse.json(
+      { error: "Failed to delete comment" },
       { status: 500 }
     );
   }

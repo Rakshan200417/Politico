@@ -54,7 +54,7 @@ export default function DashboardShell({
       if (parsed.role !== role) {
         // Fallback to exactly match the dashboard owner if roles are crossed
         const fallback = role === "admin" 
-          ? { name: "admin", email: "admin@example.com", role: "admin", avatar_url: "" }
+          ? { name: "admin", email: "akramyoonos006@gmail.com", role: "admin", avatar_url: "" }
           : { name: "writer", email: "writer@example.com", role: "writer", avatar_url: "" };
         setUser(fallback);
         return;
@@ -79,7 +79,7 @@ export default function DashboardShell({
     } else {
       // Fallback if no user is found
       const fallback = role === "admin" 
-        ? { name: "admin", email: "admin@example.com", role: "admin", avatar_url: "" }
+        ? { name: "admin", email: "akramyoonos006@gmail.com", role: "admin", avatar_url: "" }
         : { name: "writer", email: "writer@example.com", role: "writer", avatar_url: "" };
       setUser(fallback);
     }
@@ -112,7 +112,7 @@ export default function DashboardShell({
   const initialLetter = (displayName[0] || user?.email?.[0] || "U").toUpperCase();
 
   return (
-    <div className="min-h-screen flex bg-[#f3f4f6] font-sans antialiased text-gray-900">
+    <div className="min-h-screen flex items-start bg-[#f3f4f6] font-sans antialiased text-gray-900">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div
@@ -123,7 +123,7 @@ export default function DashboardShell({
 
       {/* Sidebar (Slightly increased size for desktop mode) */}
       <aside
-        className={`fixed lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto left-0 w-72 xl:w-80 bg-[#10141e] border-r border-gray-800 z-50 flex flex-col transition-transform duration-300 ease-in-out flex-shrink-0 ${
+        className={`fixed lg:sticky lg:top-0 lg:self-start lg:h-screen lg:overflow-y-auto left-0 w-72 xl:w-80 bg-[#10141e] border-r border-gray-800 z-50 flex flex-col transition-transform duration-300 ease-in-out flex-shrink-0 scrollbar-none ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >

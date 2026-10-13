@@ -32,7 +32,7 @@ export default async function HomeBottomPanel() {
                   className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
                 />
               </div>
-              <h3 className="text-[17px] lg:text-[19px] font-bold leading-[1.1] tracking-[-0.01em] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans">
+              <h3 className="text-[17px] lg:text-[19px] font-bold leading-[1.1] tracking-[-0.01em] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans line-clamp-2 overflow-hidden text-ellipsis break-words [word-break:break-word]">
                 {article.title}
               </h3>
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gray-500 mt-2 font-sans">

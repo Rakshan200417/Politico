@@ -56,14 +56,39 @@
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
 }
-.prose blockquote {
-  border-left: 4px solid #e5e7eb;
-  padding-left: 1rem;
-  font-style: italic;
-  color: #4b5563;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
+.prose blockquote,
+blockquote {
+  border-left: 4px solid #ce1126 !important;
+  padding-left: 1rem !important;
+  color: #1f2937;
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+  display: flow-root !important;
+  position: relative;
 }
+.prose blockquote p,
+blockquote p {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+/* Floated image support so surrounding text and mention lines wrap cleanly */
+.prose figure.float-left,
+figure.float-left,
+img.float-left {
+  float: left !important;
+  margin-right: 1.5rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.prose figure.float-right,
+figure.float-right,
+img.float-right {
+  float: right !important;
+  margin-left: 1.5rem !important;
+  margin-bottom: 1rem !important;
+}
+
 
 @media (min-height: 1020px) {
   .tall-sticky {

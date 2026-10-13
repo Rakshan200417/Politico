@@ -27,7 +27,7 @@ export default async function LeftCategorySection({ category }: { category: stri
               <div className="w-full aspect-[4/3] bg-gray-200 mb-2 overflow-hidden">
                 <img src={article.image || `https://picsum.photos/seed/${article.id}/800/600`} alt="News" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
               </div>
-              <h3 className="text-[16px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mb-1">
+              <h3 className="text-[16px] font-bold leading-[1.2] text-[#111111] group-hover:text-[#d32f2f] transition-colors font-sans mb-1 line-clamp-2 overflow-hidden text-ellipsis break-words [word-break:break-word]">
                 {article.title}
               </h3>
               <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mt-2 font-sans">

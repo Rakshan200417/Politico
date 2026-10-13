@@ -80,7 +80,7 @@ export default async function LatestNewsList() {
                     {getDisplayTime(index)}
                   </span>
                   <div>
-                    <h3 className="text-[15px] font-bold leading-[1.3] text-[#222222] font-sans group-hover:text-[#d32f2f] transition-colors">
+                    <h3 className="text-[15px] font-bold leading-[1.3] text-[#222222] font-sans group-hover:text-[#d32f2f] transition-colors line-clamp-2 overflow-hidden text-ellipsis break-words [word-break:break-word]">
                       {item.title}
                     </h3>
                     

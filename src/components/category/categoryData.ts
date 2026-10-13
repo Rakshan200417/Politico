@@ -5,6 +5,8 @@ export interface CategoryStory {
   image: string;
   slug?: string;
   date?: string;
+  categoryTag?: string;
+  category?: string;
 }
 
 export interface CategoryPageData {

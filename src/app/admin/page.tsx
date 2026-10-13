@@ -27,6 +27,7 @@ import WriterEditor, { ArticleData } from "@/components/writer/WriterEditor";
 import ManageAds from "@/components/admin/ManageAds";
 import ContactUsSubmissions from "@/components/admin/ContactUsSubmissions";
 import AdvertiseLeads from "@/components/admin/AdvertiseLeads";
+import SkeletonLoading from "@/components/common/SkeletonLoading";
 
 interface AdminArticleData extends ArticleData {
   writer_name?: string;
@@ -48,7 +49,81 @@ const adminNavItems: NavItem[] = [
   { id: "shorts", label: "Shorts & Reels", icon: Video },
 ];
 
+const menubarCategoryOptions: string[] = [
+  // World & Countries
+  "World",
+  "China",
+  "United States",
+  "Europe",
+  "Britain",
+  "Middle East",
+  "Africa",
+  "Asia",
+
+  // Companies & Subcategories
+  "Companies",
+  "Corporate Announcements",
+  "Mergers & Acquisitions",
+  "Leadership Changes",
+
+  // Startups & Subcategories
+  "Startups",
+  "Funding & Investment",
+  "Founder Stories",
+  "Venture Capital",
+  "Startup Failures",
+
+  // Markets & Subcategories
+  "Markets",
+  "Stock Market",
+  "Bonds",
+  "Mutual Funds",
+
+  // Economy & Subcategories
+  "Economy",
+  "GDP & Economic Growth",
+  "Employment",
+  "Government Economic Policies",
+
+  // Finance & Subcategories
+  "Finance",
+  "Digital Banking",
+  "FinTech",
+  "Banking Industry",
+  "Loans & Lending",
+
+  // Technology & Subcategories
+  "Technology",
+  "Artificial Intelligence",
+  "Cybersecurity",
+  "Gadgets & Devices",
+  "Software",
+
+  // Industries & Subcategories
+  "Industries",
+  "Manufacturing",
+  "Energy",
+  "Pharmaceuticals",
+  "Automobile",
+  "Agriculture Business",
+  "Construction",
+  "Design",
+  "Textiles",
+  "Entertainment",
+
+  // Leaders & Subcategories
+  "Leaders",
+  "Business Leaders",
+  "CEO Interviews",
+  "Executive Appointments",
+  "Leadership Strategies",
+
+  // Interview
+  "Interview",
+];
+
 export default function AdminDashboard() {
+  const [pageLoading, setPageLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
   const [user, setUser] = useState<{ id?: number | string; name?: string; email?: string; role?: string } | null>(null);
   
@@ -343,6 +418,13 @@ export default function AdminDashboard() {
     loadPublishedPosts();
   };
 
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setPageLoading(false);
+    }, 400);
+    return () => clearTimeout(t);
+  }, []);
+
   const displayedReviews = pendingReviews.filter((r) => {
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
@@ -360,9 +442,45 @@ export default function AdminDashboard() {
       const subCatsStr = Array.isArray(article.subcategories) 
         ? article.subcategories.join(" ").toLowerCase()
         : String(article.subcategories || "").toLowerCase();
-      const isMainMatch = mainCat === selected;
-      const isSubMatch = subCatsStr.includes(`"${selected}"`) || subCatsStr.includes(selected);
-      if (!isMainMatch && !isSubMatch) {
+
+      let isMatch = false;
+      const categoryHierarchy: Record<string, string[]> = {
+        world: [
+          "world", "china", "united states", "europe", "britain", "middle east", "africa", "asia", "global", "americas"
+        ],
+        companies: [
+          "companies", "corporate announcements", "mergers & acquisitions", "leadership changes"
+        ],
+        startups: [
+          "startups", "funding & investment", "founder stories", "venture capital", "startup failures"
+        ],
+        markets: [
+          "markets", "stock market", "bonds", "mutual funds"
+        ],
+        economy: [
+          "economy", "gdp & economic growth", "employment", "government economic policies"
+        ],
+        finance: [
+          "finance", "digital banking", "fintech", "banking industry", "loans & lending"
+        ],
+        technology: [
+          "technology", "artificial intelligence", "cybersecurity", "gadgets & devices", "software"
+        ],
+        industries: [
+          "industries", "manufacturing", "energy", "pharmaceuticals", "automobile", "agriculture business", "construction", "design", "textiles", "entertainment"
+        ],
+        leaders: [
+          "leaders", "business leaders", "ceo interviews", "executive appointments", "leadership strategies"
+        ],
+      };
+
+      if (categoryHierarchy[selected]) {
+        const family = categoryHierarchy[selected];
+        isMatch = family.includes(mainCat) || family.some(c => subCatsStr.includes(c));
+      } else {
+        isMatch = mainCat === selected || subCatsStr.includes(`"${selected}"`) || subCatsStr.includes(selected);
+      }
+      if (!isMatch) {
         return false;
       }
     }
@@ -381,6 +499,10 @@ export default function AdminDashboard() {
     }
     return true;
   });
+
+  if (pageLoading) {
+    return <SkeletonLoading />;
+  }
 
   if (isEditing && editingArticle) {
     return (
@@ -717,87 +839,11 @@ export default function AdminDashboard() {
                 className="w-full bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 py-2 px-3 focus:outline-none"
               >
                 <option value="All Categories">All Categories</option>
-                
-                <optgroup label="Regions & Countries">
-                  <option value="Middle East">Middle East</option>
-                  <option value="China">China</option>
-                  <option value="United States">United States</option>
-                  <option value="Europe">Europe</option>
-                  <option value="Britain">Britain</option>
-                  <option value="Africa">Africa</option>
-                  <option value="Asia">Asia</option>
-                </optgroup>
-
-                <optgroup label="Main Categories">
-                  <option value="Companies">Companies</option>
-                  <option value="Startups">Startups</option>
-                  <option value="Markets">Markets</option>
-                  <option value="Economy">Economy</option>
-                  <option value="Finance">Finance</option>
-                  <option value="Technology">Technology</option>
-                  <option value="Industries">Industries</option>
-                  <option value="Leaders">Leaders</option>
-                  <option value="Business">Business</option>
-                  <option value="Interview">Interview</option>
-                </optgroup>
-
-                <optgroup label="Companies Subcategories">
-                  <option value="Corporate Announcements">Corporate Announcements</option>
-                  <option value="Mergers & Acquisitions">Mergers & Acquisitions</option>
-                  <option value="Leadership Changes">Leadership Changes</option>
-                </optgroup>
-
-                <optgroup label="Startups Subcategories">
-                  <option value="Funding & Investment">Funding & Investment</option>
-                  <option value="Founder Stories">Founder Stories</option>
-                  <option value="Venture Capital">Venture Capital</option>
-                  <option value="Startup Failures">Startup Failures</option>
-                </optgroup>
-
-                <optgroup label="Markets Subcategories">
-                  <option value="Stock Market">Stock Market</option>
-                  <option value="Bonds">Bonds</option>
-                  <option value="Mutual Funds">Mutual Funds</option>
-                </optgroup>
-
-                <optgroup label="Economy Subcategories">
-                  <option value="GDP & Economic Growth">GDP & Economic Growth</option>
-                  <option value="Employment">Employment</option>
-                  <option value="Government Economic Policies">Government Economic Policies</option>
-                </optgroup>
-
-                <optgroup label="Finance Subcategories">
-                  <option value="Digital Banking">Digital Banking</option>
-                  <option value="FinTech">FinTech</option>
-                  <option value="Banking Industry">Banking Industry</option>
-                  <option value="Loans & Lending">Loans & Lending</option>
-                </optgroup>
-
-                <optgroup label="Technology Subcategories">
-                  <option value="Artificial Intelligence">Artificial Intelligence</option>
-                  <option value="Cybersecurity">Cybersecurity</option>
-                  <option value="Gadgets & Devices">Gadgets & Devices</option>
-                  <option value="Software">Software</option>
-                </optgroup>
-
-                <optgroup label="Industries Subcategories">
-                  <option value="Manufacturing">Manufacturing</option>
-                  <option value="Energy">Energy</option>
-                  <option value="Pharmaceuticals">Pharmaceuticals</option>
-                  <option value="Automobile">Automobile</option>
-                  <option value="Agriculture Business">Agriculture Business</option>
-                  <option value="Construction">Construction</option>
-                  <option value="Design">Design</option>
-                  <option value="Textiles">Textiles</option>
-                  <option value="Entertainment">Entertainment</option>
-                </optgroup>
-
-                <optgroup label="Leaders Subcategories">
-                  <option value="Business Leaders">Business Leaders</option>
-                  <option value="CEO Interviews">CEO Interviews</option>
-                  <option value="Executive Appointments">Executive Appointments</option>
-                  <option value="Leadership Strategies">Leadership Strategies</option>
-                </optgroup>
+                {menubarCategoryOptions.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="flex flex-col gap-1.5 flex-1 min-w-[150px]">
@@ -815,6 +861,7 @@ export default function AdminDashboard() {
                 <option value="Home - Bottom Panel">Home - Bottom Panel</option>
                 <option value="Home - More Top Headlines">Home - More Top Headlines</option>
                 <option value="Home - Spotlight">Home - Spotlight</option>
+                <option value="Home - More Read">Home - More Read</option>
               </select>
             </div>
             <div className="flex flex-col gap-1.5 flex-[2] min-w-[200px]">
@@ -1003,28 +1050,42 @@ export default function AdminDashboard() {
                   {systemUsers
                     .filter(u => userActiveTab === 'all' || u.role === userActiveTab.replace('s', ''))
                     .map((sysUser, idx) => {
-                      const isDefaultAdmin = sysUser.email === 'admin@example.com';
+                      const DEFAULT_ADMIN_EMAIL = 'akramyoonos006@gmail.com';
+                      const isDefaultAdmin = sysUser.email === DEFAULT_ADMIN_EMAIL || sysUser.email === 'admin@example.com';
                       const isCurrentUser = sysUser.email === user?.email;
+                      const isDefaultAdminLoggedIn = user?.email === DEFAULT_ADMIN_EMAIL || user?.email === 'admin@example.com';
+
+                      // Permission logic:
+                      // Default admin data cannot be edited by anyone except default admin themselves
+                      const canEdit = isCurrentUser || (!isDefaultAdmin && (isDefaultAdminLoggedIn || sysUser.role !== 'admin'));
+                      // Default admin cannot be deleted by anyone. Normal admin can ONLY delete reader and writer.
+                      const canDelete = !isDefaultAdmin && !isCurrentUser && (isDefaultAdminLoggedIn || sysUser.role !== 'admin');
+
                       return (
                         <tr key={sysUser.id || idx} className="hover:bg-gray-50/50 transition-colors">
                           <td className="py-4 px-4">
                             <div className="flex items-center gap-3">
                               <span className="text-sm font-semibold text-gray-900">{sysUser.name}</span>
-                              {isDefaultAdmin && (
+                              {isCurrentUser ? (
+                                <span className="text-[9px] font-black text-indigo-700 border border-indigo-200 bg-indigo-50 px-2 py-0.5 rounded-sm uppercase tracking-wider whitespace-nowrap">
+                                  You
+                                </span>
+                              ) : isDefaultAdmin ? (
                                 <span className="text-[8px] font-bold text-amber-600 border border-amber-200 bg-amber-50 px-1.5 py-0.5 rounded-sm uppercase tracking-widest whitespace-nowrap">
                                   Default Admin
                                 </span>
-                              )}
+                              ) : null}
                             </div>
                           </td>
                           <td className="py-4 px-4 text-xs font-medium text-gray-600">{sysUser.email}</td>
                           <td className="py-4 px-4">
                             <span className={`text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-wider ${
+                              isDefaultAdmin ? 'text-amber-700 bg-amber-50 border border-amber-200' :
                               sysUser.role === 'admin' ? 'text-[#ce1126] bg-red-50 border border-red-100' :
                               sysUser.role === 'writer' ? 'text-blue-600 bg-blue-50 border border-blue-100' :
                               'text-emerald-600 bg-emerald-50 border border-emerald-100'
                             }`}>
-                              {sysUser.role}
+                              {isDefaultAdmin ? 'Default Admin' : sysUser.role}
                             </span>
                           </td>
                           <td className="py-4 px-4 text-right">
@@ -1055,7 +1116,7 @@ export default function AdminDashboard() {
                                 <Eye size={16} />
                               </button>
                               
-                              {(!isDefaultAdmin || isCurrentUser) && (
+                              {canEdit && (
                                 <button 
                                   onClick={() => {
                                     setSelectedSystemUser(sysUser);
@@ -1068,7 +1129,7 @@ export default function AdminDashboard() {
                                 </button>
                               )}
                               
-                              {(!isDefaultAdmin && (user?.email === 'admin@example.com' || sysUser.role !== 'admin')) && (
+                              {canDelete && (
                                 <button 
                                   onClick={() => handleDeleteUser(sysUser.id, sysUser.email)}
                                   className="text-[10px] font-bold uppercase tracking-wider text-red-600 hover:text-white border border-red-200 hover:bg-red-600 hover:border-red-600 px-3 py-1.5 rounded flex items-center gap-1.5 transition-colors"
@@ -1164,7 +1225,7 @@ export default function AdminDashboard() {
                 >
                   <option value="reader">Reader</option>
                   <option value="writer">Writer</option>
-                  {user?.email === 'admin@example.com' && <option value="admin">Admin</option>}
+                  {(user?.email === 'akramyoonos006@gmail.com' || user?.email === 'admin@example.com') && <option value="admin">Admin</option>}
                 </select>
               </div>
               <div className="flex gap-3 pt-2">

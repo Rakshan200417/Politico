@@ -8,10 +8,11 @@ declare global {
 const pool =
   global._mysqlPool ||
   mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: '', // Default XAMPP password is empty
-    database: 'politico_db', // Ensure this matches what you created in phpMyAdmin
+    host: process.env.DB_HOST || '127.0.0.1',
+    port: Number(process.env.DB_PORT) || 3306,
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '', // Default XAMPP password is empty
+    database: process.env.DB_NAME || 'politico_db', // Ensure this matches what you created in phpMyAdmin
     waitForConnections: true,
     connectionLimit: 10,
     maxIdle: 10,

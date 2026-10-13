@@ -90,46 +90,27 @@ export default function NewslettersPage() {
     }));
   };
 
-  const handleToggleSub = (subId: string) => {
-    setSelected((prev) => ({
-      ...prev,
-      [subId]: !prev[subId]
-    }));
-  };
-
-  const getAllSelectableIds = () => {
-    const ids: string[] = [];
-    mainCategories.forEach(cat => {
-      ids.push(cat.id);
-      if (megaMenuData[cat.id]) {
-        megaMenuData[cat.id].forEach(sub => ids.push(sub.id));
-      }
-    });
-    return ids;
-  };
+  const allSelected = mainCategories.length > 0 && mainCategories.every(cat => selected[cat.id]);
 
   const handleSelectAll = () => {
-    const allIds = getAllSelectableIds();
-    const allSelected = allIds.every(id => selected[id]);
-    
     const newState: Record<string, boolean> = {};
     if (!allSelected) {
-      allIds.forEach(id => {
-        newState[id] = true;
+      mainCategories.forEach(cat => {
+        newState[cat.id] = true;
       });
     }
     setSelected(newState);
   };
 
-  const allSelected = getAllSelectableIds().every(id => selected[id]);
-
   const [email, setEmail] = useState("");
 
   const handleSignUp = async () => {
-    const selectedNewsletters = Object.keys(selected).filter(key => selected[key]);
+    const selectedCategoryNames = mainCategories
+      .filter(cat => selected[cat.id])
+      .map(cat => cat.name);
     
-    if (selectedNewsletters.length === 0) {
-      alert("Please select at least one newsletter to sign up.");
+    if (selectedCategoryNames.length === 0) {
+      alert("Please select at least one main category to sign up.");
       return;
     }
 
@@ -144,7 +125,7 @@ export default function NewslettersPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           email: email.trim(), 
-          newsletters: selectedNewsletters.join(",") 
+          newsletters: selectedCategoryNames.join(", ") 
         })
       });
       
@@ -208,24 +189,17 @@ export default function NewslettersPage() {
                 </div>
 
                 {megaMenuData[cat.id] && (
-                  <div className="ml-9 space-y-3 mt-1">
+                  <ul className="ml-9 space-y-2 mt-2">
                     {megaMenuData[cat.id].map(sub => (
-                      <div 
+                      <li 
                         key={sub.id} 
-                        className="flex items-center gap-3 cursor-pointer group"
-                        onClick={() => handleToggleSub(sub.id)}
+                        className="flex items-center gap-2.5 text-gray-600 select-none py-0.5"
                       >
-                        <div className={`w-4 h-4 border ${selected[sub.id] ? 'bg-[#ce1126] border-[#ce1126]' : 'border-gray-300'} flex items-center justify-center rounded-sm transition-colors group-hover:border-[#ce1126]`}>
-                          {selected[sub.id] && (
-                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                            </svg>
-                          )}
-                        </div>
-                        <span className="text-[15px] text-gray-700">{sub.name}</span>
-                      </div>
+                        <span className="w-1.5 h-1.5 rounded-full bg-gray-400 shrink-0" />
+                        <span className="text-[14px] sm:text-[15px] leading-snug">{sub.name}</span>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 )}
               </div>
             ))}

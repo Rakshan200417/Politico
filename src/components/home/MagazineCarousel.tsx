@@ -293,10 +293,10 @@ export default function MagazineCarousel({ articles }: { articles?: any[] }) {
                 <span className="text-[11px] font-black uppercase text-[#ce1126] tracking-wider block mb-2">
                   {article.category || article.tag || "MAGAZINE"}
                 </span>
-                <h3 className="font-sans text-[23px] font-black leading-[1.05] text-gray-900 group-hover:text-[#ce1126] transition-colors mb-3 tracking-[-0.03em]">
+                <h3 className="font-sans text-[23px] font-black leading-[1.05] text-gray-900 group-hover:text-[#ce1126] transition-colors mb-3 tracking-[-0.03em] line-clamp-2 overflow-hidden text-ellipsis break-words [word-break:break-word]">
                   {article.title}
                 </h3>
-                <p className="text-xs text-gray-600 font-sans leading-relaxed mb-4">
+                <p className="text-xs text-gray-600 font-sans leading-relaxed mb-4 line-clamp-2 overflow-hidden text-ellipsis break-words">
                   {article.deck}
                 </p>
               </div>
