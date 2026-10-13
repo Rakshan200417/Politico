@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Eye, Trash2 } from "lucide-react";
+import { Eye, Trash2, X, Mail, Phone, Building2, Calendar, FileText } from "lucide-react";
 
 interface ContactSubmission {
   id: number;
@@ -19,6 +19,9 @@ interface ContactSubmission {
 export default function ContactUsSubmissions() {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedType, setSelectedType] = useState("All Inquiry Types");
+  const [viewItem, setViewItem] = useState<ContactSubmission | null>(null);
 
   useEffect(() => {
     fetch("/api/contact")
@@ -45,6 +48,9 @@ export default function ContactUsSubmissions() {
       setSubmissions((prev) =>
         prev.map((sub) => (sub.id === id ? { ...sub, status: newStatus } : sub))
       );
+      if (viewItem && viewItem.id === id) {
+        setViewItem((prev) => (prev ? { ...prev, status: newStatus } : null));
+      }
     } catch (err) {
       console.error("Failed to update status", err);
     }
@@ -55,6 +61,9 @@ export default function ContactUsSubmissions() {
     try {
       await fetch(`/api/contact?id=${id}`, { method: "DELETE" });
       setSubmissions((prev) => prev.filter((sub) => sub.id !== id));
+      if (viewItem && viewItem.id === id) {
+        setViewItem(null);
+      }
     } catch (err) {
       console.error("Failed to delete submission", err);
     }
@@ -90,6 +99,22 @@ export default function ContactUsSubmissions() {
     }
   };
 
+  const filteredSubmissions = submissions.filter((sub) => {
+    const q = searchQuery.toLowerCase().trim();
+    const matchesSearch =
+      !q ||
+      sub.name.toLowerCase().includes(q) ||
+      sub.email.toLowerCase().includes(q) ||
+      (sub.company && sub.company.toLowerCase().includes(q)) ||
+      (sub.message && sub.message.toLowerCase().includes(q));
+
+    const matchesType =
+      selectedType === "All Inquiry Types" ||
+      sub.inquiry_type.toLowerCase() === selectedType.toLowerCase();
+
+    return matchesSearch && matchesType;
+  });
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
       <div className="mb-6">
@@ -99,20 +124,27 @@ export default function ContactUsSubmissions() {
         </p>
       </div>
 
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 mb-6">
         <div className="flex-1 max-w-md">
           <input
             type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search name, email, message..."
             className="w-full px-4 py-2 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-gray-400"
           />
         </div>
-        <div className="ml-4">
-          <select className="px-4 py-2 border border-gray-200 rounded-lg text-xs text-gray-600 focus:outline-none focus:border-gray-400">
+        <div>
+          <select
+            value={selectedType}
+            onChange={(e) => setSelectedType(e.target.value)}
+            className="w-full sm:w-auto px-4 py-2 border border-gray-200 rounded-lg text-xs text-gray-600 focus:outline-none focus:border-gray-400"
+          >
             <option>All Inquiry Types</option>
+            <option>Business / Advertising</option>
             <option>Editorial</option>
-            <option>Advertising</option>
-            <option>General</option>
+            <option>Technical glitch</option>
+            <option>General / Others</option>
           </select>
         </div>
       </div>
@@ -138,14 +170,14 @@ export default function ContactUsSubmissions() {
                   Loading...
                 </td>
               </tr>
-            ) : submissions.length === 0 ? (
+            ) : filteredSubmissions.length === 0 ? (
               <tr>
                 <td colSpan={8} className="py-8 text-center text-sm text-gray-500">
-                  No submissions found.
+                  No submissions found matching criteria.
                 </td>
               </tr>
             ) : (
-              submissions.map((sub) => (
+              filteredSubmissions.map((sub) => (
                 <tr key={sub.id} className="hover:bg-gray-50/50 transition-colors group">
                   <td className="py-4 px-4 text-[11px] text-gray-500 whitespace-nowrap">
                     {formatDate(sub.created_at)}
@@ -157,12 +189,12 @@ export default function ContactUsSubmissions() {
                   <td className="py-4 px-4 text-[11px] text-gray-600">
                     {sub.email}
                   </td>
-                  <td className="py-4 px-4">
+                  <td className="py-4 px-4 whitespace-nowrap">
                     <div className="text-[10px] text-gray-500">P: {sub.phone || "-"}</div>
                     <div className="text-[10px] text-gray-500">W: {sub.whatsapp || "-"}</div>
                   </td>
                   <td className="py-4 px-4">
-                    <span className="inline-block px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-gray-600 bg-gray-100 rounded-md">
+                    <span className="inline-block px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-gray-600 bg-gray-100 rounded-md whitespace-nowrap">
                       {sub.inquiry_type}
                     </span>
                   </td>
@@ -184,11 +216,19 @@ export default function ContactUsSubmissions() {
                     </select>
                   </td>
                   <td className="py-4 px-4 text-right">
-                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title="View details">
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => setViewItem(sub)}
+                        className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                        title="View details"
+                      >
                         <Eye size={14} />
                       </button>
-                      <button onClick={() => handleDelete(sub.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors" title="Delete">
+                      <button
+                        onClick={() => handleDelete(sub.id)}
+                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                        title="Delete"
+                      >
                         <Trash2 size={14} />
                       </button>
                     </div>
@@ -199,6 +239,119 @@ export default function ContactUsSubmissions() {
           </tbody>
         </table>
       </div>
+
+      {/* View Details Modal */}
+      {viewItem && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border border-gray-100 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/70">
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-600" />
+                <h3 className="text-base font-bold text-gray-900">Contact Submission Details</h3>
+              </div>
+              <button
+                onClick={() => setViewItem(null)}
+                className="text-gray-400 hover:text-gray-600 p-1 rounded-md hover:bg-gray-200 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4 text-xs sm:text-sm">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
+                    Full Name
+                  </span>
+                  <p className="font-bold text-gray-900">{viewItem.name}</p>
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
+                    Company
+                  </span>
+                  <p className="font-semibold text-gray-800">{viewItem.company || "N/A"}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
+                    Email
+                  </span>
+                  <a href={`mailto:${viewItem.email}`} className="text-blue-600 hover:underline font-medium">
+                    {viewItem.email}
+                  </a>
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
+                    Inquiry Type
+                  </span>
+                  <span className="inline-block px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 border border-blue-200 rounded">
+                    {viewItem.inquiry_type}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
+                    Phone
+                  </span>
+                  <p className="font-mono text-gray-700">{viewItem.phone || "-"}</p>
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
+                    WhatsApp
+                  </span>
+                  <p className="font-mono text-gray-700">{viewItem.whatsapp || "-"}</p>
+                </div>
+              </div>
+
+              <div>
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
+                  Submitted Date
+                </span>
+                <p className="text-gray-600 font-mono text-xs">
+                  {new Date(viewItem.created_at).toLocaleString()}
+                </p>
+              </div>
+
+              <div>
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
+                  Query Message
+                </span>
+                <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-800 whitespace-pre-wrap leading-relaxed text-xs">
+                  {viewItem.message}
+                </div>
+              </div>
+
+              <div className="pt-2 flex items-center justify-between border-t border-gray-100">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-500 font-semibold">Status:</span>
+                  <select
+                    value={viewItem.status}
+                    onChange={(e) => handleStatusChange(viewItem.id, e.target.value)}
+                    className={`text-xs font-bold px-2.5 py-1 rounded border focus:outline-none cursor-pointer ${getStatusColor(viewItem.status)}`}
+                  >
+                    {statusOptions.map((opt) => (
+                      <option key={opt} value={opt} className="text-gray-900 bg-white">
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <button
+                  onClick={() => handleDelete(viewItem.id)}
+                  className="px-3 py-1.5 text-xs font-bold text-red-600 hover:bg-red-50 rounded transition-colors flex items-center gap-1.5"
+                >
+                  <Trash2 size={13} />
+                  <span>Delete</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -26,6 +26,43 @@ async function ensureAdvertiseTable() {
   }
 }
 
+export async function POST(request: Request) {
+  try {
+    await ensureAdvertiseTable();
+    const body = await request.json();
+    const {
+      name = '',
+      company = '',
+      email = '',
+      phone = '',
+      whatsapp = '',
+      service_option = '',
+      requirements = '',
+    } = body;
+
+    if (!name || !email) {
+      return NextResponse.json({ error: 'Name and Email are required' }, { status: 400 });
+    }
+
+    const [result]: any = await pool.execute(
+      `INSERT INTO advertise_leads (name, company, email, phone, whatsapp, service_option, requirements, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'New')`,
+      [name, company, email, phone, whatsapp, service_option, requirements]
+    );
+
+    return NextResponse.json(
+      { message: 'Inquiry submitted successfully', id: result.insertId },
+      { status: 201 }
+    );
+  } catch (error: any) {
+    console.error('Failed to submit advertise lead:', error);
+    return NextResponse.json(
+      { error: 'Failed to submit inquiry', details: error.message },
+      { status: 500 }
+    );
+  }
+}
+
 export async function GET(request: Request) {
   try {
     await ensureAdvertiseTable();

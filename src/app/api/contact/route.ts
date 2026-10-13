@@ -26,6 +26,43 @@ async function ensureContactTable() {
   }
 }
 
+export async function POST(request: Request) {
+  try {
+    await ensureContactTable();
+    const body = await request.json();
+    const {
+      name = '',
+      company = '',
+      email = '',
+      phone = '',
+      whatsapp = '',
+      inquiry_type = '',
+      message = '',
+    } = body;
+
+    if (!name || !email) {
+      return NextResponse.json({ error: 'Name and Email are required' }, { status: 400 });
+    }
+
+    const [result]: any = await pool.execute(
+      `INSERT INTO contact_submissions (name, company, email, phone, whatsapp, inquiry_type, message, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'New')`,
+      [name, company, email, phone, whatsapp, inquiry_type, message]
+    );
+
+    return NextResponse.json(
+      { message: 'Inquiry submitted successfully', id: result.insertId },
+      { status: 201 }
+    );
+  } catch (error: any) {
+    console.error('Failed to submit contact submission:', error);
+    return NextResponse.json(
+      { error: 'Failed to submit inquiry', details: error.message },
+      { status: 500 }
+    );
+  }
+}
+
 export async function GET(request: Request) {
   try {
     await ensureContactTable();

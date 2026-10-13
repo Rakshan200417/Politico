@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Eye, Trash2 } from "lucide-react";
+import { Eye, Trash2, X, FileText } from "lucide-react";
 
 interface AdvertiseLead {
   id: number;
@@ -19,6 +19,9 @@ interface AdvertiseLead {
 export default function AdvertiseLeads() {
   const [leads, setLeads] = useState<AdvertiseLead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedService, setSelectedService] = useState("All Services");
+  const [viewItem, setViewItem] = useState<AdvertiseLead | null>(null);
 
   useEffect(() => {
     fetch("/api/advertise")
@@ -45,6 +48,9 @@ export default function AdvertiseLeads() {
       setLeads((prev) =>
         prev.map((lead) => (lead.id === id ? { ...lead, status: newStatus } : lead))
       );
+      if (viewItem && viewItem.id === id) {
+        setViewItem((prev) => (prev ? { ...prev, status: newStatus } : null));
+      }
     } catch (err) {
       console.error("Failed to update status", err);
     }
@@ -55,6 +61,9 @@ export default function AdvertiseLeads() {
     try {
       await fetch(`/api/advertise?id=${id}`, { method: "DELETE" });
       setLeads((prev) => prev.filter((lead) => lead.id !== id));
+      if (viewItem && viewItem.id === id) {
+        setViewItem(null);
+      }
     } catch (err) {
       console.error("Failed to delete lead", err);
     }
@@ -92,6 +101,22 @@ export default function AdvertiseLeads() {
     }
   };
 
+  const filteredLeads = leads.filter((lead) => {
+    const q = searchQuery.toLowerCase().trim();
+    const matchesSearch =
+      !q ||
+      lead.name.toLowerCase().includes(q) ||
+      lead.email.toLowerCase().includes(q) ||
+      (lead.company && lead.company.toLowerCase().includes(q)) ||
+      (lead.requirements && lead.requirements.toLowerCase().includes(q));
+
+    const matchesService =
+      selectedService === "All Services" ||
+      lead.service_option.toLowerCase() === selectedService.toLowerCase();
+
+    return matchesSearch && matchesService;
+  });
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
       <div className="mb-6">
@@ -101,21 +126,27 @@ export default function AdvertiseLeads() {
         </p>
       </div>
 
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 mb-6">
         <div className="flex-1 max-w-md">
           <input
             type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search name, company, message..."
             className="w-full px-4 py-2 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-gray-400"
           />
         </div>
-        <div className="ml-4">
-          <select className="px-4 py-2 border border-[#ce1126] text-[#ce1126] font-medium rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-[#ce1126]">
+        <div>
+          <select
+            value={selectedService}
+            onChange={(e) => setSelectedService(e.target.value)}
+            className="w-full sm:w-auto px-4 py-2 border border-gray-200 rounded-lg text-xs text-gray-600 focus:outline-none focus:border-gray-400"
+          >
             <option>All Services</option>
             <option>Publish Company Article</option>
             <option>Publish CEO Profile</option>
             <option>Report News</option>
-            <option>Washington Times Magazine</option>
+            <option>Washington Global Times Magazine</option>
           </select>
         </div>
       </div>
@@ -141,14 +172,14 @@ export default function AdvertiseLeads() {
                   Loading...
                 </td>
               </tr>
-            ) : leads.length === 0 ? (
+            ) : filteredLeads.length === 0 ? (
               <tr>
                 <td colSpan={8} className="py-8 text-center text-sm text-gray-500">
-                  No leads found.
+                  No leads found matching criteria.
                 </td>
               </tr>
             ) : (
-              leads.map((lead) => (
+              filteredLeads.map((lead) => (
                 <tr key={lead.id} className="hover:bg-gray-50/50 transition-colors group">
                   <td className="py-4 px-4 text-[11px] text-gray-500 whitespace-nowrap">
                     {formatDate(lead.created_at)}
@@ -187,11 +218,19 @@ export default function AdvertiseLeads() {
                     </select>
                   </td>
                   <td className="py-4 px-4 text-right">
-                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors" title="View details">
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => setViewItem(lead)}
+                        className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                        title="View details"
+                      >
                         <Eye size={14} />
                       </button>
-                      <button onClick={() => handleDelete(lead.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors" title="Delete">
+                      <button
+                        onClick={() => handleDelete(lead.id)}
+                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                        title="Delete"
+                      >
                         <Trash2 size={14} />
                       </button>
                     </div>
@@ -202,6 +241,119 @@ export default function AdvertiseLeads() {
           </tbody>
         </table>
       </div>
+
+      {/* View Details Modal */}
+      {viewItem && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border border-gray-100 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/70">
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-600" />
+                <h3 className="text-base font-bold text-gray-900">Advertise Lead Details</h3>
+              </div>
+              <button
+                onClick={() => setViewItem(null)}
+                className="text-gray-400 hover:text-gray-600 p-1 rounded-md hover:bg-gray-200 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4 text-xs sm:text-sm">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
+                    Contact Name
+                  </span>
+                  <p className="font-bold text-gray-900">{viewItem.name}</p>
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
+                    Company
+                  </span>
+                  <p className="font-bold text-gray-900">{viewItem.company || "N/A"}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
+                    Email
+                  </span>
+                  <a href={`mailto:${viewItem.email}`} className="text-blue-600 hover:underline font-medium">
+                    {viewItem.email}
+                  </a>
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
+                    Service Option
+                  </span>
+                  <span className="inline-block px-2.5 py-0.5 text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded">
+                    {viewItem.service_option}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
+                    Phone
+                  </span>
+                  <p className="font-mono text-gray-700">{viewItem.phone || "-"}</p>
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
+                    WhatsApp
+                  </span>
+                  <p className="font-mono text-gray-700">{viewItem.whatsapp || "-"}</p>
+                </div>
+              </div>
+
+              <div>
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
+                  Submitted Date
+                </span>
+                <p className="text-gray-600 font-mono text-xs">
+                  {new Date(viewItem.created_at).toLocaleString()}
+                </p>
+              </div>
+
+              <div>
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
+                  Requirements & Brand Details
+                </span>
+                <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-800 whitespace-pre-wrap leading-relaxed text-xs">
+                  {viewItem.requirements}
+                </div>
+              </div>
+
+              <div className="pt-2 flex items-center justify-between border-t border-gray-100">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-500 font-semibold">Status:</span>
+                  <select
+                    value={viewItem.status}
+                    onChange={(e) => handleStatusChange(viewItem.id, e.target.value)}
+                    className={`text-xs font-bold px-2.5 py-1 rounded border focus:outline-none cursor-pointer ${getStatusColor(viewItem.status)}`}
+                  >
+                    {statusOptions.map((opt) => (
+                      <option key={opt} value={opt} className="text-gray-900 bg-white">
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <button
+                  onClick={() => handleDelete(viewItem.id)}
+                  className="px-3 py-1.5 text-xs font-bold text-red-600 hover:bg-red-50 rounded transition-colors flex items-center gap-1.5"
+                >
+                  <Trash2 size={13} />
+                  <span>Delete</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

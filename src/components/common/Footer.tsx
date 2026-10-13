@@ -4,20 +4,21 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   const links = [
-    "About Us",
-    "Advertising",
-    "Breaking News Alerts",
-    "Careers",
-    "Credit Card Payments",
-    "FAQ",
-    "Feedback",
-    "Headlines",
-    "Photos",
-    "Press",
-    "Request A Correction",
-    "Write For Us",
-    "RSS",
-    "Site Map",
+    { label: "About Us", href: "#" },
+    { label: "Advertise Us", href: "/advertise" },
+    { label: "Contact Us", href: "/contact-us" },
+    { label: "Breaking News Alerts", href: "#" },
+    { label: "Careers", href: "#" },
+    { label: "Credit Card Payments", href: "#" },
+    { label: "FAQ", href: "#" },
+    { label: "Feedback", href: "#" },
+    { label: "Headlines", href: "#" },
+    { label: "Photos", href: "#" },
+    { label: "Press", href: "#" },
+    { label: "Request A Correction", href: "#" },
+    { label: "Write For Us", href: "/writer" },
+    { label: "RSS", href: "#" },
+    { label: "Site Map", href: "#" },
   ];
 
   return (
@@ -26,9 +27,9 @@ export default function Footer() {
         {/* Main Nav Links Horizontal Bar */}
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] font-semibold text-gray-300">
           {links.map((link, idx) => (
-            <React.Fragment key={link}>
-              <a href="#" className="hover:text-white transition hover:underline">
-                {link}
+            <React.Fragment key={link.label}>
+              <a href={link.href} className="hover:text-white transition hover:underline">
+                {link.label}
               </a>
               {idx < links.length - 1 && (
                 <span className="text-gray-600 font-normal">|</span>
