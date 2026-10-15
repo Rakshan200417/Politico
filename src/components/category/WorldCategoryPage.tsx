@@ -89,26 +89,29 @@ export default async function WorldCategoryPage({
 }: {
   searchParams?: { page?: string };
 }) {
-  const currentPageParam = Number(searchParams?.page) || 1;
-  let { articles, totalPages, currentPage } = await getPublishedArticlesByCategory(
+  const currentPageParam = Math.max(1, Number(searchParams?.page) || 1);
+  const MORE_PAGE_SIZE = 10;
+
+  // 1. Fetch top 3 featured articles (Lead + 2 side stories) - always fixed on every page
+  const { articles: topArticles } = await getPublishedArticlesByCategory(
     "World",
-    15,
+    3,
     false,
-    currentPageParam
+    1,
+    false,
+    0
   );
 
-  if (!articles) {
-    articles = [];
-  }
+  let initialArticles = topArticles || [];
 
   // If fewer than 3 articles in DB, supplement with realistic mock stories with world region tags
   const sampleRegions = ["Asia", "Europe", "United States", "China", "Middle East", "Britain", "Africa"];
-  if (articles.length < 3) {
-    const missingCount = 3 - articles.length;
+  if (initialArticles.length < 3) {
+    const missingCount = 3 - initialArticles.length;
     const mockArticles = Array.from({ length: missingCount }).map((_, i) => {
       const region = sampleRegions[i % sampleRegions.length];
       return {
-        id: 8800 + articles.length + i,
+        id: 8800 + initialArticles.length + i,
         slug: `world-${region.toLowerCase().replace(/\s+/g, "-")}-update-${i + 1}`,
         title: `${region} Summit: Landmark Diplomatic & Economic Accord Finalized in Major Policy Shift`,
         deck: `Key leaders and trade officials from ${region} reach consensus on pivotal international trade, security cooperation, and technology standards.`,
@@ -119,8 +122,22 @@ export default async function WorldCategoryPage({
         updated_at: new Date(Date.now() - (i + 1) * 3600000).toISOString(),
       } as any;
     });
-    articles = [...articles, ...mockArticles];
+    initialArticles = [...initialArticles, ...mockArticles];
   }
+
+  // 2. Fetch the paginated "More News" stories (10 per page, offset by top 3)
+  const moreOffset = 3 + (currentPageParam - 1) * MORE_PAGE_SIZE;
+  const { articles: moreArticlesRaw, totalArticles = 0 } = await getPublishedArticlesByCategory(
+    "World",
+    MORE_PAGE_SIZE,
+    false,
+    currentPageParam,
+    false,
+    moreOffset
+  );
+
+  const totalMoreNewsCount = Math.max(0, totalArticles - 3);
+  const totalMorePages = Math.ceil(totalMoreNewsCount / MORE_PAGE_SIZE);
 
   const mapToStory = (article: any, index: number): CategoryStory => {
     const storySlug = article.slug || slugify(article.title);
@@ -136,9 +153,9 @@ export default async function WorldCategoryPage({
     };
   };
 
-  const leadArticle = mapToStory(articles[0], 0);
-  const sideStories = articles.slice(1, 3).map((a, i) => mapToStory(a, i + 1));
-  const moreStories = articles.slice(3).map((a, i) => mapToStory(a, i + 3));
+  const leadArticle = mapToStory(initialArticles[0], 0);
+  const sideStories = initialArticles.slice(1, 3).map((a, i) => mapToStory(a, i + 1));
+  const moreStories = (moreArticlesRaw || []).map((a, i) => mapToStory(a, i + 3));
 
   const categoryData: CategoryPageData = {
     slug: "world",
@@ -147,8 +164,8 @@ export default async function WorldCategoryPage({
     lead: leadArticle,
     sideStories: sideStories,
     moreStories: moreStories,
-    totalPages,
-    currentPage,
+    totalPages: totalMorePages,
+    currentPage: currentPageParam,
   };
 
   return (

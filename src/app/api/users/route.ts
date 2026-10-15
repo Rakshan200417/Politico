@@ -94,7 +94,7 @@ export async function DELETE(request: Request) {
     const userToDelete = userRows[0];
 
     // No one can delete default admin
-    if (userToDelete.email === DEFAULT_ADMIN_EMAIL || userToDelete.email === 'admin@example.com') {
+    if (userToDelete.email === DEFAULT_ADMIN_EMAIL) {
       return NextResponse.json({ error: 'Cannot delete the default admin' }, { status: 403 });
     }
 
@@ -130,7 +130,7 @@ export async function PUT(request: Request) {
     const userToUpdate = userRows[0];
 
     // No one can edit default admin data except default admin themselves
-    const isTargetDefaultAdmin = userToUpdate.email === DEFAULT_ADMIN_EMAIL || userToUpdate.email === 'admin@example.com';
+    const isTargetDefaultAdmin = userToUpdate.email === DEFAULT_ADMIN_EMAIL;
     if (isTargetDefaultAdmin && loggedInEmail !== DEFAULT_ADMIN_EMAIL) {
       return NextResponse.json({ error: 'Cannot edit default admin account' }, { status: 403 });
     }

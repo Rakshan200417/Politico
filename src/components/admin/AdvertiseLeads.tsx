@@ -151,18 +151,18 @@ export default function AdvertiseLeads() {
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="w-full overflow-hidden">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-y border-gray-100 bg-gray-50/50">
-              <th className="py-3 px-4 text-[10px] font-black text-gray-400 uppercase tracking-wider">Date</th>
-              <th className="py-3 px-4 text-[10px] font-black text-gray-400 uppercase tracking-wider">Submitter / Company</th>
-              <th className="py-3 px-4 text-[10px] font-black text-gray-400 uppercase tracking-wider">Email</th>
-              <th className="py-3 px-4 text-[10px] font-black text-gray-400 uppercase tracking-wider">Phone / WhatsApp</th>
-              <th className="py-3 px-4 text-[10px] font-black text-gray-400 uppercase tracking-wider">Service Option</th>
-              <th className="py-3 px-4 text-[10px] font-black text-gray-400 uppercase tracking-wider">Requirements</th>
-              <th className="py-3 px-4 text-[10px] font-black text-gray-400 uppercase tracking-wider">Status</th>
-              <th className="py-3 px-4 text-[10px] font-black text-gray-400 uppercase tracking-wider text-right">Actions</th>
+              <th className="py-3 px-3 text-[10px] font-black text-gray-400 uppercase tracking-wider whitespace-nowrap">Date</th>
+              <th className="py-3 px-3 text-[10px] font-black text-gray-400 uppercase tracking-wider">Submitter / Company</th>
+              <th className="py-3 px-3 text-[10px] font-black text-gray-400 uppercase tracking-wider">Email</th>
+              <th className="py-3 px-3 text-[10px] font-black text-gray-400 uppercase tracking-wider whitespace-nowrap">Phone / WhatsApp</th>
+              <th className="py-3 px-3 text-[10px] font-black text-gray-400 uppercase tracking-wider">Service Option</th>
+              <th className="py-3 px-3 text-[10px] font-black text-gray-400 uppercase tracking-wider">Requirements</th>
+              <th className="py-3 px-3 text-[10px] font-black text-gray-400 uppercase tracking-wider">Status</th>
+              <th className="py-3 px-3 text-[10px] font-black text-gray-400 uppercase tracking-wider text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -181,29 +181,29 @@ export default function AdvertiseLeads() {
             ) : (
               filteredLeads.map((lead) => (
                 <tr key={lead.id} className="hover:bg-gray-50/50 transition-colors group">
-                  <td className="py-4 px-4 text-[11px] text-gray-500 whitespace-nowrap">
+                  <td className="py-3.5 px-3 text-[11px] text-gray-500 whitespace-nowrap">
                     {formatDate(lead.created_at)}
                   </td>
-                  <td className="py-4 px-4">
+                  <td className="py-3.5 px-3">
                     <div className="text-xs font-bold text-gray-900">{lead.name}</div>
                     <div className="text-[10px] text-gray-400">{lead.company || "N/A"}</div>
                   </td>
-                  <td className="py-4 px-4 text-[11px] text-gray-600">
+                  <td className="py-3.5 px-3 text-[11px] text-gray-600 break-all">
                     {lead.email}
                   </td>
-                  <td className="py-4 px-4 whitespace-nowrap">
+                  <td className="py-3.5 px-3 whitespace-nowrap">
                     <div className="text-[10px] font-bold text-gray-600">P: {lead.phone || "-"}</div>
                     <div className="text-[10px] font-bold text-gray-600">W: {lead.whatsapp || "-"}</div>
                   </td>
-                  <td className="py-4 px-4">
-                    <span className="inline-block px-3 py-1 text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-full whitespace-nowrap">
+                  <td className="py-3.5 px-3">
+                    <span className="inline-block px-2.5 py-1 text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-full whitespace-nowrap">
                       {lead.service_option}
                     </span>
                   </td>
-                  <td className="py-4 px-4 text-[11px] text-gray-700 max-w-[200px] truncate">
+                  <td className="py-3.5 px-3 text-[11px] text-gray-700 max-w-[180px] truncate" title={lead.requirements}>
                     {lead.requirements}
                   </td>
-                  <td className="py-4 px-4">
+                  <td className="py-3.5 px-3">
                     <select
                       value={lead.status}
                       onChange={(e) => handleStatusChange(lead.id, e.target.value)}

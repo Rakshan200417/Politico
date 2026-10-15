@@ -310,7 +310,13 @@ export default function AdminDashboard() {
   const handleDeletePublishedPost = async (id: number) => {
     if (!window.confirm("Are you sure you want to permanently delete this published post?")) return;
     try {
-      await fetch(`/api/articles?id=${id}&action=permanent`, { method: "DELETE" });
+      const res = await fetch(`/api/articles?id=${id}&action=permanent`, { method: "DELETE" });
+      if (res.ok) {
+        setPublishedPosts(prev => prev.filter(p => p.id !== id));
+        try {
+          localStorage.setItem("article_updated", Date.now().toString());
+        } catch {}
+      }
       loadPublishedPosts();
     } catch (err) {
       console.error("Failed to delete published post:", err);
@@ -410,7 +416,7 @@ export default function AdminDashboard() {
     setIsEditing(true);
   };
 
-  const handleEditorSaveSuccess = (savedArticle: ArticleData, action: "draft" | "pending" | "trash" | "published") => {
+  const handleEditorSaveSuccess = (savedArticle: ArticleData, action: "draft" | "pending" | "trash" | "published" | "rejected") => {
     setIsEditing(false);
     setEditingArticle(null);
     // Reload articles to reflect the status change
@@ -861,7 +867,7 @@ export default function AdminDashboard() {
                 <option value="Home - Bottom Panel">Home - Bottom Panel</option>
                 <option value="Home - More Top Headlines">Home - More Top Headlines</option>
                 <option value="Home - Spotlight">Home - Spotlight</option>
-                <option value="Home - More Read">Home - More Read</option>
+                <option value="Home - Most Read">Home - Most Read</option>
               </select>
             </div>
             <div className="flex flex-col gap-1.5 flex-[2] min-w-[200px]">
@@ -1051,9 +1057,9 @@ export default function AdminDashboard() {
                     .filter(u => userActiveTab === 'all' || u.role === userActiveTab.replace('s', ''))
                     .map((sysUser, idx) => {
                       const DEFAULT_ADMIN_EMAIL = 'akramyoonos006@gmail.com';
-                      const isDefaultAdmin = sysUser.email === DEFAULT_ADMIN_EMAIL || sysUser.email === 'admin@example.com';
+                      const isDefaultAdmin = sysUser.email === DEFAULT_ADMIN_EMAIL;
                       const isCurrentUser = sysUser.email === user?.email;
-                      const isDefaultAdminLoggedIn = user?.email === DEFAULT_ADMIN_EMAIL || user?.email === 'admin@example.com';
+                      const isDefaultAdminLoggedIn = user?.email === DEFAULT_ADMIN_EMAIL;
 
                       // Permission logic:
                       // Default admin data cannot be edited by anyone except default admin themselves

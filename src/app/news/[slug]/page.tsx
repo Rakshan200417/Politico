@@ -163,27 +163,27 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
 
 
           {/* New Author Template (with top/bottom borders) */}
-          <div className="border-t border-b border-[#e3e3e3] py-5 flex items-center gap-4">
-            <div className="flex items-center gap-4">
-              <a href={`/author/${slugify(articleData.writer_name)}`} className="group">
-                <img src={authorAvatarUrl} className="w-12 h-12 rounded-full object-cover shadow-sm group-hover:opacity-90 transition-opacity" alt="Author" />
+          <div className="border-t border-b border-[#e3e3e3] py-3.5 mb-2 flex items-center gap-3">
+            <div className="flex items-center gap-3">
+              <a href={`/author/${slugify(articleData.writer_name)}`} className="group flex-shrink-0">
+                <img src={authorAvatarUrl} className="w-10 h-10 rounded-full object-cover shadow-sm group-hover:opacity-90 transition-opacity" alt="Author" />
               </a>
               <div className="flex flex-col gap-0.5">
                 <div className="flex items-center gap-2">
-                  <a href={`/author/${slugify(articleData.writer_name)}`} className="text-[15px] font-black uppercase text-[#111] hover:text-[#d71920] transition-colors">
+                  <a href={`/author/${slugify(articleData.writer_name)}`} className="text-[13px] font-black uppercase text-[#111] hover:text-[#d71920] transition-colors leading-tight">
                     BY {articleData.writer_name}
                   </a>
                   <a
                     href={authorLinkedInUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center w-[18px] h-[18px] rounded-[3px] bg-[#0077b5] hover:bg-[#005582] text-white font-bold text-[10px] leading-none transition-transform hover:scale-110 shadow-sm"
+                    className="inline-flex items-center justify-center w-[16px] h-[16px] rounded-[2px] bg-[#0077b5] hover:bg-[#005582] text-white font-bold text-[9px] leading-none transition-transform hover:scale-110 shadow-sm"
                     title={`${articleData.writer_name}'s LinkedIn Profile`}
                   >
                     in
                   </a>
                 </div>
-                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wide font-sans">
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide font-sans">
                   Published {formattedDate.toUpperCase()}
                 </span>
               </div>
@@ -192,14 +192,14 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
         </header>
 
         {/* Main Article 2-Column Content Grid */}
-        <section className="grid gap-8 pt-8 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
+        <section className="grid gap-8 pt-2 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
           {/* Main Editorial Column */}
           <article className="min-w-0">
             {/* Hero Image is rendered as part of articleData.content */}
 
             {/* Article Body Paragraphs */}
             <div 
-              className="space-y-6 pt-8 font-sans text-[17px] sm:text-[18px] leading-[1.65] text-[#292929] article-content overflow-x-hidden"
+              className="pt-0 font-sans text-[17px] sm:text-[18px] leading-[1.65] text-[#292929] article-content overflow-x-hidden"
               dangerouslySetInnerHTML={{ __html: articleData.content }}
             />
 
@@ -249,11 +249,11 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
                   {relatedStories.slice(0, 2).map((story) => (
                     <article key={story.title} className="border-b border-[#e1e1e1] pb-4">
                       <a href={`/news/${story.slug}`} className="group block">
-                        <div className="aspect-[16/10] overflow-hidden bg-gray-100 rounded-sm mb-2">
+                        <div className="aspect-[16/10] overflow-hidden bg-gray-100 rounded-none mb-2">
                           <img
                             src={story.image || `https://picsum.photos/seed/${story.id}/800/600`}
                             alt=""
-                            className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+                            className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-300 rounded-none"
                           />
                         </div>
                         <h4 className="text-[15px] font-bold leading-tight text-[#111] group-hover:text-[#d71920] transition-colors">

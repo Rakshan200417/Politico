@@ -6,9 +6,9 @@ export default async function RightListCategorySection({ category, isMostRead = 
   let articles: any[] = [];
   
   if (isMostRead) {
-    articles = await getArticlesByPlacement('Home - More Read', 4);
+    articles = await getArticlesByPlacement('Home - Most Read', 4);
     if (!articles || articles.length === 0) {
-      articles = await getArticlesByPlacement('Home - Most Read', 4);
+      articles = await getArticlesByPlacement('Home - More Read', 4);
     }
     if (!articles || articles.length === 0) {
       articles = await getLatestPublishedArticles(4, true);
@@ -42,7 +42,7 @@ export default async function RightListCategorySection({ category, isMostRead = 
       <div className="flex items-center gap-2 pb-2 mb-3 border-b border-[#d9d9d9]">
         <span className="w-2.5 h-2.5 rounded-full border-2 border-[#d32f2f] bg-transparent inline-block"></span>
         <h2 className="text-[10px] font-extrabold tracking-[0.12em] text-[#222222] uppercase font-sans">
-          {isMostRead ? "MORE READ" : category}
+          {isMostRead ? "MOST READ" : category}
         </h2>
       </div>
       

@@ -344,7 +344,7 @@ export default function WriterDashboard() {
   // Handler: Save success from WriterEditor
   const handleSaveSuccess = (
     savedArticle: ArticleData,
-    action: "draft" | "pending" | "trash" | "published",
+    action: "draft" | "pending" | "trash" | "published" | "rejected",
   ) => {
     setArticles((prev) => {
       const idx = prev.findIndex((a) => a.id === savedArticle.id);
@@ -362,6 +362,10 @@ export default function WriterDashboard() {
     setEditingArticle(null);
     if (action === "pending") {
       setActiveTab("pending");
+    } else if (action === "rejected") {
+      setActiveTab("rejected");
+    } else if (action === "published") {
+      setActiveTab("published");
     } else {
       setActiveTab("drafts");
     }

@@ -176,7 +176,7 @@ export default async function Home() {
             <div className="flex flex-col space-y-8 h-full">
               {/* LEADERS */}
               <div className="w-full">
-                <LeftCategorySection category="Leaders" />
+                <LeftCategorySection category="Leaders" count={1} />
               </div>
 
               {/* MOST READ */}

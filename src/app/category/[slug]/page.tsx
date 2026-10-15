@@ -28,38 +28,50 @@ export default async function CategoryRoute({ params, searchParams }: { params: 
   // Convert slug back to proper category string (e.g. 'technology' -> 'Technology')
   const categoryName = params.slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   
-  const currentPageParam = Number(searchParams?.page) || 1;
-  let { articles, totalPages, currentPage } = await getPublishedArticlesByCategory(categoryName, 50, false, currentPageParam);
+  const currentPageParam = Math.max(1, Number(searchParams?.page) || 1);
+  const MORE_PAGE_SIZE = 10;
 
-  if (!articles) {
-    articles = [];
-  }
+  // 1. Fetch top 3 featured articles (Lead + 2 side stories) - always fixed on every page
+  const { articles: topArticles } = await getPublishedArticlesByCategory(
+    categoryName,
+    3,
+    false,
+    1,
+    false,
+    0
+  );
 
-  // If there are fewer than 3 articles in this category, fill with mock stories so the page doesn't look empty
-  if (articles.length < 3) {
-    const missingCount = 3 - articles.length;
-    const mockArticles = Array.from({ length: missingCount }).map((_, i) => ({
-      id: 9000 + articles.length + i,
-      slug: `mock-${params.slug}-${articles.length + i}`,
-      title: `${categoryName} Update: Major Developments By POLITICO Staff Part ${articles.length + i + 1}`,
+  let initialArticles = topArticles || [];
+
+  // If there are no articles at all in this category, fill with mock stories so page doesn't look empty
+  if (initialArticles.length === 0) {
+    const mockArticles = Array.from({ length: 3 }).map((_, i) => ({
+      id: 9000 + i,
+      slug: `mock-${params.slug}-${i}`,
+      title: `${categoryName} Update: Major Developments By POLITICO Staff Part ${i + 1}`,
       deck: `This is a comprehensive overview of the latest events in ${categoryName}, bringing you the details that matter most.`,
       writer_name: 'POLITICO STAFF',
-      image: `https://picsum.photos/seed/${params.slug}${articles.length + i}/800/600`
+      image: `https://picsum.photos/seed/${params.slug}${i}/800/600`
     })) as any;
-    articles = [...articles, ...mockArticles];
+    initialArticles = mockArticles;
   }
 
-  const mapToStory = (article: any): CategoryStory => {
-    let subTag = undefined;
-    try {
-      if (Array.isArray(article.subcategories) && article.subcategories.length > 0) {
-        subTag = article.subcategories[0];
-      } else if (typeof article.subcategories === 'string' && article.subcategories.trim()) {
-        const parsed = article.subcategories.startsWith('[') ? JSON.parse(article.subcategories) : article.subcategories.split(',');
-        if (parsed.length > 0 && parsed[0]) subTag = parsed[0].trim();
-      }
-    } catch {}
+  // 2. Fetch the paginated "More News" stories (10 per page, offset by top 3)
+  const moreOffset = 3 + (currentPageParam - 1) * MORE_PAGE_SIZE;
+  const { articles: moreArticlesRaw, totalArticles = 0 } = await getPublishedArticlesByCategory(
+    categoryName,
+    MORE_PAGE_SIZE,
+    false,
+    currentPageParam,
+    false,
+    moreOffset
+  );
 
+  // Remaining articles for the "More News" section after the top 3
+  const totalMoreNewsCount = Math.max(0, totalArticles - 3);
+  const totalMorePages = Math.ceil(totalMoreNewsCount / MORE_PAGE_SIZE);
+
+  const mapToStory = (article: any): CategoryStory => {
     return {
       title: article.title,
       deck: article.deck,
@@ -67,14 +79,14 @@ export default async function CategoryRoute({ params, searchParams }: { params: 
       image: article.image || `https://picsum.photos/seed/${article.id}/800/600`,
       slug: article.slug,
       date: formatPublishDate(article.updated_at || article.created_at),
-      categoryTag: subTag,
+      categoryTag: undefined, // Only World category displays #region tag
       category: categoryName,
     };
   };
 
-  const leadArticle = mapToStory(articles[0]);
-  const sideStories = articles.slice(1, 3).map(mapToStory);
-  const moreStories = articles.slice(3).map(mapToStory);
+  const leadArticle = mapToStory(initialArticles[0]);
+  const sideStories = initialArticles.slice(1, 3).map(mapToStory);
+  const moreStories = (moreArticlesRaw || []).map(mapToStory);
 
   const categoryData: CategoryPageData = {
     slug: params.slug,
@@ -83,8 +95,8 @@ export default async function CategoryRoute({ params, searchParams }: { params: 
     lead: leadArticle,
     sideStories: sideStories,
     moreStories: moreStories,
-    totalPages,
-    currentPage,
+    totalPages: totalMorePages,
+    currentPage: currentPageParam,
   };
 
   return (

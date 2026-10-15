@@ -98,10 +98,17 @@ export async function POST(request: Request) {
     }
 
     const prefix = folderType === 'avatars' ? 'avatar' : 'article';
-    const filename = `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 8)}${extension}`;
+    const filename = `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.webp`;
     const filePath = path.join(uploadDir, filename);
 
-    await writeFile(filePath, buffer);
+    // Convert and save buffer directly as optimized WebP format
+    try {
+      const sharp = (await import('sharp')).default;
+      await sharp(buffer).webp({ quality: 85 }).toFile(filePath);
+    } catch (sharpErr) {
+      console.warn('[upload] Sharp conversion failed, falling back to raw buffer:', sharpErr);
+      await writeFile(filePath, buffer);
+    }
 
     const publicUrl = `/uploads/${subDir}/${filename}`;
 
@@ -109,7 +116,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       url: publicUrl,
       filename: originalName,
-      message: 'Image uploaded and saved to database successfully',
+      message: 'Image uploaded and converted to WebP successfully',
     }, { status: 200 });
   } catch (error: any) {
     console.error('Upload error:', error);

@@ -66,7 +66,7 @@ export interface ArticleData {
 interface WriterEditorProps {
   initialArticle?: ArticleData | null;
   onCancel: () => void;
-  onSaveSuccess: (article: ArticleData, action: "draft" | "pending" | "trash" | "published") => void;
+  onSaveSuccess: (article: ArticleData, action: "draft" | "pending" | "trash" | "published" | "rejected") => void;
   userEmail: string;
   userName: string;
   isAdminMode?: boolean;
@@ -187,7 +187,7 @@ export default function WriterEditor({
     !initialArticle?.meta_description,
   );
 
-  // Helper to extract main focus keywords from head (excluding common stop words)
+  // Helper to extract main focus keywords from head: 2 to 3 main words on the heading
   const extractFocusKeywords = (head: string): string => {
     if (!head || !head.trim()) return "";
     const stopWords = new Set([
@@ -204,8 +204,8 @@ export default function WriterEditor({
     if (words.length === 0) {
       return head.split(/\s+/).slice(0, 3).join(" ");
     }
-    // Return the top 3-4 key topical words
-    return words.slice(0, 4).join(" ");
+    // Return 2 to 3 main words
+    return words.slice(0, Math.min(3, Math.max(2, words.length))).join(" ");
   };
 
   // Auto-generate SEO in real-time as writer types
@@ -218,26 +218,32 @@ export default function WriterEditor({
   useEffect(() => {
     const rawContent = editorRef.current?.innerText || content.replace(/<[^>]+>/g, " ") || "";
     
-    // First line summary for card summary
+    // Card summary contains the description's first 2 lines and ...
     if (isCardSummaryAuto) {
       const source = deck.trim() || rawContent.replace(/\s+/g, " ").trim();
       if (source) {
-        // Take first sentence or first line
-        const firstLine = source.split(/\r?\n|\.(?:\s|$)/)[0]?.trim();
-        setCardSummary(firstLine ? `${firstLine}.` : source.slice(0, 100));
+        // Split by sentences or line breaks to get the first 2 lines/sentences
+        const sentences = source.split(/(?<=[.?!])\s+|\r?\n/).filter(Boolean);
+        if (sentences.length >= 2) {
+          setCardSummary(`${sentences[0]} ${sentences[1]}...`);
+        } else if (sentences.length === 1) {
+          const first = sentences[0].replace(/\.+$/, "");
+          setCardSummary(`${first}...`);
+        } else {
+          setCardSummary(`${source.slice(0, 120)}...`);
+        }
       } else {
         setCardSummary("");
       }
     }
 
-    // First 160 words of description for meta description
+    // Meta description contains the first 160 letters/characters of description
     if (isMetaDescriptionAuto) {
       const combined = [deck.trim(), rawContent.replace(/\s+/g, " ").trim()]
         .filter(Boolean)
         .join(" ");
-      const words = combined.split(/\s+/).filter(Boolean);
-      if (words.length > 0) {
-        setMetaDescription(words.slice(0, 160).join(" "));
+      if (combined.length > 0) {
+        setMetaDescription(combined.slice(0, 160));
       } else {
         setMetaDescription("");
       }
@@ -378,14 +384,23 @@ export default function WriterEditor({
     }
   }, [initialArticle]);
 
-  // Ensure title textarea auto-expands to show the entire heading without cutting off
+  // Ensure title and deck textareas auto-expand to show entire text without cutting off
   const titleTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const deckTextareaRef = useRef<HTMLTextAreaElement>(null);
+
   useEffect(() => {
     if (titleTextareaRef.current) {
       titleTextareaRef.current.style.height = "auto";
       titleTextareaRef.current.style.height = `${titleTextareaRef.current.scrollHeight}px`;
     }
   }, [title]);
+
+  useEffect(() => {
+    if (deckTextareaRef.current) {
+      deckTextareaRef.current.style.height = "auto";
+      deckTextareaRef.current.style.height = `${deckTextareaRef.current.scrollHeight}px`;
+    }
+  }, [deck]);
 
   // Auto-calculate read time based on word count
   useEffect(() => {
@@ -957,14 +972,32 @@ export default function WriterEditor({
 
   // Auto-generate SEO
   const handleAutoGenerateSEO = () => {
-    const rawContent = editorRef.current?.innerText || content || "";
-    const cleanText = (deck.trim() || rawContent.replace(/\s+/g, " ").trim()).slice(0, 160);
-    setCardSummary(cleanText);
-    setFocusKeyword(title);
-    setMetaDescription(cleanText);
+    const rawContent = editorRef.current?.innerText || content.replace(/<[^>]+>/g, " ") || "";
+    const source = deck.trim() || rawContent.replace(/\s+/g, " ").trim();
+
+    // 1. Focus keyword: 2 to 3 main words on heading
+    setFocusKeyword(extractFocusKeywords(title));
     setIsFocusKeywordAuto(true);
+
+    // 2. Card summary: first 2 lines and ...
+    if (source) {
+      const sentences = source.split(/(?<=[.?!])\s+|\r?\n/).filter(Boolean);
+      if (sentences.length >= 2) {
+        setCardSummary(`${sentences[0]} ${sentences[1]}...`);
+      } else if (sentences.length === 1) {
+        setCardSummary(`${sentences[0].replace(/\.+$/, "")}...`);
+      } else {
+        setCardSummary(`${source.slice(0, 120)}...`);
+      }
+    } else {
+      setCardSummary("");
+    }
     setIsCardSummaryAuto(true);
+
+    // 3. Meta description: first 160 letters of description
+    setMetaDescription(source.slice(0, 160));
     setIsMetaDescriptionAuto(true);
+
     showToast("✨ SEO fields auto-generated successfully!");
   };
 
@@ -977,7 +1010,7 @@ export default function WriterEditor({
   };
 
   // Save to DB (and fallback to localStorage)
-  const saveArticle = async (status: "draft" | "pending" | "trash" | "published") => {
+  const saveArticle = async (status: "draft" | "pending" | "trash" | "published" | "rejected") => {
     if (!title.trim()) {
       alert("Please enter a title for your article before saving.");
       return;
@@ -1028,7 +1061,7 @@ export default function WriterEditor({
       is_sponsored: isSponsored,
     };
 
-    if (status === "draft") {
+    if (status === "draft" || status === "trash" || status === "rejected") {
       setIsSavingDraft(true);
     } else {
       setIsSubmitting(true);
@@ -1084,6 +1117,9 @@ export default function WriterEditor({
         } else if (status === "trash") {
           setIsSavingDraft(false);
           showToast("✔ REJECTED TO TRASH!");
+        } else if (status === "rejected") {
+          setIsSavingDraft(false);
+          showToast("✔ ARTICLE REJECTED!");
         } else if (status === "published") {
           setIsSubmitting(false);
           showToast("✔ APPROVED & PUBLISHED!");
@@ -1093,7 +1129,7 @@ export default function WriterEditor({
         }
         setPendingImages([]); // clear pending images after save
         onSaveSuccess(savedArticle, status);
-      }, 700);
+      }, 600);
     } catch (err) {
       console.error("Error saving article:", err);
       setIsSavingDraft(false);
@@ -1251,7 +1287,7 @@ export default function WriterEditor({
 
             <div className="border border-gray-300 rounded-xl p-3 bg-white space-y-4 max-h-[300px] overflow-y-auto custom-scrollbar">
               <div className="grid grid-cols-2 gap-2 text-xs">
-                {navbarCategories.filter(c => c !== category).map((sub) => {
+                {navbarCategories.filter(c => c !== category && c !== "World").map((sub) => {
                   const checked = selectedSubcategories.includes(sub);
                   const disabled =
                     !checked && selectedSubcategories.length >= 5;
@@ -1386,7 +1422,7 @@ export default function WriterEditor({
                   <option value="Home - Bottom Panel">Home - Bottom Panel</option>
                   <option value="Home - More Top Headlines">Home - More Top Headlines</option>
                   <option value="Home - Spotlight">Home - Spotlight</option>
-                  <option value="Home - More Read">Home - More Read</option>
+                  <option value="Home - Most Read">Home - Most Read</option>
                 </select>
                 <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-600 pointer-events-none" />
               </div>
@@ -1636,19 +1672,19 @@ export default function WriterEditor({
 
           {isAdminMode ? (
             <>
-              {/* Reject to Trash Button */}
+              {/* Reject Article Button */}
               <button
                 disabled={isSavingDraft || isSubmitting}
-                onClick={() => saveArticle("trash")}
+                onClick={() => saveArticle("rejected")}
                 className="flex items-center justify-center gap-1.5 p-2 sm:px-3.5 sm:py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-red-700 hover:bg-red-800 disabled:opacity-70 transition shadow-sm"
-                title="Reject to Trash"
+                title="Reject Article"
               >
                 {isSavingDraft ? (
                   <Loader2 size={16} className="animate-spin text-white" />
                 ) : (
                   <X size={16} />
                 )}
-                <span className="hidden md:inline">REJECT TO TRASH</span>
+                <span className="hidden md:inline">REJECT ARTICLE</span>
               </button>
 
               {/* Approve & Publish Button */}
@@ -1832,6 +1868,7 @@ export default function WriterEditor({
           {/* Subheading / Deck Input Field (Sub head) */}
           <div className="mb-6 sm:mb-8">
             <textarea
+              ref={deckTextareaRef}
               rows={1}
               value={deck}
               onChange={(e) => {
@@ -2265,15 +2302,13 @@ export default function WriterEditor({
                   </h1>
                   
                   {deck && (
-                    <p className="text-lg text-gray-600 font-medium mb-6 leading-relaxed break-words [overflow-wrap:anywhere] [word-break:break-word]">
+                    <p className="text-lg text-gray-600 font-medium mb-3 leading-relaxed break-words [overflow-wrap:anywhere] [word-break:break-word]">
                       {deck}
                     </p>
                   )}
 
-
-
                   {/* Author Block */}
-                  <div className="flex items-center gap-3 mb-10 pb-6 border-b border-gray-100">
+                  <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
                     <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
                       {writerAvatar ? (
                         <img src={writerAvatar} alt="Author" className="w-full h-full object-cover" />
@@ -2283,12 +2318,12 @@ export default function WriterEditor({
                     </div>
                     <div className="flex flex-col">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-black uppercase text-gray-900">
+                        <span className="text-xs font-black uppercase text-gray-900 leading-tight">
                           By {initialArticle?.writer_name || userName || userEmail.split("@")[0]}
                         </span>
-                        <div className="w-4 h-4 bg-blue-600 rounded text-white flex items-center justify-center text-[10px] font-bold">in</div>
+                        <div className="w-3.5 h-3.5 bg-blue-600 rounded-[2px] text-white flex items-center justify-center text-[9px] font-bold">in</div>
                       </div>
-                      <span className="text-[10px] text-gray-400 mt-1 uppercase tracking-wider font-bold">
+                      <span className="text-[10px] text-gray-400 mt-0.5 uppercase tracking-wider font-bold">
                         Published {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} • {new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} EDT
                       </span>
                     </div>

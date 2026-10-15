@@ -25,9 +25,16 @@ export interface Article {
   is_sponsored?: boolean | number;
 }
 
-export async function getPublishedArticlesByCategory(category: string, limit: number = 5, excludePlaced: boolean = false, page: number = 1, mainCategoryOnly: boolean = false): Promise<{articles: Article[], totalPages: number, currentPage: number}> {
+export async function getPublishedArticlesByCategory(
+  category: string,
+  limit: number = 5,
+  excludePlaced: boolean = false,
+  page: number = 1,
+  mainCategoryOnly: boolean = false,
+  customOffset?: number
+): Promise<{articles: Article[], totalPages: number, currentPage: number, totalArticles?: number}> {
   try {
-    const offset = (page - 1) * limit;
+    const offset = typeof customOffset === "number" ? customOffset : (page - 1) * limit;
     let placementFilter = "";
     if (excludePlaced) {
       placementFilter = " AND (homepage_placement IS NULL OR homepage_placement = 'None' OR homepage_placement = '')";
@@ -66,7 +73,7 @@ export async function getPublishedArticlesByCategory(category: string, limit: nu
         `SELECT * FROM articles WHERE ${condition} ORDER BY COALESCE(updated_at, created_at) DESC LIMIT ? OFFSET ?`,
         [limit, offset]
       );
-      return { articles: rows as Article[], totalPages, currentPage: page };
+      return { articles: rows as Article[], totalPages, currentPage: page, totalArticles };
     } else {
       let condition = "";
       let params: any[] = [];
@@ -83,14 +90,14 @@ export async function getPublishedArticlesByCategory(category: string, limit: nu
       const totalPages = Math.ceil(totalArticles / limit);
 
       const [rows] = await pool.query(
-        `SELECT * FROM articles WHERE ${condition} ORDER BY updated_at DESC LIMIT ? OFFSET ?`,
+        `SELECT * FROM articles WHERE ${condition} ORDER BY COALESCE(updated_at, created_at) DESC LIMIT ? OFFSET ?`,
         [...params, limit, offset]
       );
-      return { articles: rows as Article[], totalPages, currentPage: page };
+      return { articles: rows as Article[], totalPages, currentPage: page, totalArticles };
     }
   } catch (error) {
     console.error(`Error fetching articles for category ${category}:`, error);
-    return { articles: [], totalPages: 0, currentPage: 1 };
+    return { articles: [], totalPages: 0, currentPage: 1, totalArticles: 0 };
   }
 }
 

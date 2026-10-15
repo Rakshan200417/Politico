@@ -24,8 +24,9 @@ export default async function MainCategorySection({ category, count = 4 }: { cat
     }
   }
 
+  const isWorld = category.toLowerCase() === "world";
   const mainArticle = articles[0];
-  const sideArticles = articles.slice(1, count);
+  const sideArticles = isWorld ? articles : articles.slice(1, count);
 
   return (
     <div className="w-full mb-10 border-t border-gray-200 pt-8 first:border-t-0 first:pt-0">
@@ -35,17 +36,20 @@ export default async function MainCategorySection({ category, count = 4 }: { cat
           {category}
         </h2>
       </div>
-      <a href={`/news/${mainArticle.slug}`} className="mb-6 group cursor-pointer border-b border-gray-200 pb-6 block">
-        <div className="w-full aspect-[16/9] bg-gray-200 mb-4 overflow-hidden">
-          <img src={mainArticle.image || `https://picsum.photos/seed/${mainArticle.id}/800/600`} alt={category} className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
-        </div>
-        <h3 className="text-[26px] font-bold leading-[1.1] tracking-[-0.02em] text-[#111111] group-hover:text-[#d32f2f] transition-colors mb-2 font-sans line-clamp-2 overflow-hidden text-ellipsis break-words [word-break:break-word]">
-          {mainArticle.title}
-        </h3>
-        <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mt-2 font-sans">
-          BY {mainArticle.writer_name} <span className="mx-1">|</span> {formatPublishDate(mainArticle.updated_at || mainArticle.created_at)}
-        </p>
-      </a>
+
+      {!isWorld && mainArticle && (
+        <a href={`/news/${mainArticle.slug}`} className="mb-6 group cursor-pointer border-b border-gray-200 pb-6 block">
+          <div className="w-full aspect-[16/9] bg-gray-200 mb-4 overflow-hidden">
+            <img src={mainArticle.image || `https://picsum.photos/seed/${mainArticle.id}/800/600`} alt={category} className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
+          </div>
+          <h3 className="text-[26px] font-bold leading-[1.1] tracking-[-0.02em] text-[#111111] group-hover:text-[#d32f2f] transition-colors mb-2 font-sans line-clamp-2 overflow-hidden text-ellipsis break-words [word-break:break-word]">
+            {mainArticle.title}
+          </h3>
+          <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500 mt-2 font-sans">
+            BY {mainArticle.writer_name} <span className="mx-1">|</span> {formatPublishDate(mainArticle.updated_at || mainArticle.created_at)}
+          </p>
+        </a>
+      )}
 
       {sideArticles.length > 0 && (
         <div className="flex flex-col space-y-4 pb-4 border-b border-gray-200">
