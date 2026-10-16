@@ -84,13 +84,9 @@ export default function CategoryPage({ category }: { category: CategoryPageData 
 
   return (
     <main className="mx-auto w-full max-w-[1080px] px-4 pb-16 font-sans sm:px-6 overflow-x-hidden">
-      {/* Top Banner Box */}
-      <div className="flex h-[150px] items-center justify-center border-b border-[#ededed] sm:h-[180px]">
-        <div className="w-full max-w-[650px] bg-[#f2f2f2] px-5 py-4 text-center">
-          <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#d71920]">POLITICO</span>
-          <p className="mt-1 text-[15px] font-bold text-[#222] sm:text-[18px]">Your first read on {category.name} politics and policy</p>
-          <button className="mt-2 rounded-full bg-[#d71920] px-5 py-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-white">Subscribe now</button>
-        </div>
+      {/* Top Banner Advertisement Slot (matching home page top banner size) */}
+      <div className="w-full flex justify-center border-b border-[#ededed] py-4">
+        <AdvertisementSlot variant="banner" dimensions="970 x 250" className="!my-0" />
       </div>
 
       {/* Header */}
@@ -136,17 +132,17 @@ export default function CategoryPage({ category }: { category: CategoryPageData 
           </article>
         )}
 
-        <aside className="border-t border-[#e1e1e1] pt-6 lg:border-t-0 lg:border-l lg:pl-6 lg:pt-0 min-w-0 overflow-hidden">
+        <aside className="border-t border-[#e1e1e1] pt-6 lg:border-t-0 lg:border-l lg:pl-6 lg:pt-0 min-w-0 overflow-hidden flex flex-col justify-between">
           {category.sideStories && category.sideStories.map((story, i) => {
             const storySlug = story.slug || slugify(story.title);
             return (
-              <article key={`${story.title}-${i}`} className="border-b border-[#e1e1e1] pb-5 pt-5 first:pt-0 overflow-hidden">
-                <a href={`/news/${storySlug}`} className="grid grid-cols-[125px_minmax(0,1fr)] gap-4 sm:grid-cols-1 group">
-                  <div className="aspect-[4/3] w-full overflow-hidden bg-[#f2f2f2]">
+              <article key={`${story.title}-${i}`} className="border-b border-[#e1e1e1] last:border-b-0 pb-4 pt-4 first:pt-0 overflow-hidden">
+                <a href={`/news/${storySlug}`} className="grid grid-cols-[125px_minmax(0,1fr)] gap-3 sm:grid-cols-1 group">
+                  <div className="aspect-[16/9] w-full overflow-hidden bg-[#f2f2f2] rounded-xs">
                     <img src={story.image} alt="" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
                   </div>
                   <div className="min-w-0 overflow-hidden">
-                    <h3 className="mt-0 text-[17px] font-bold leading-[1.15] tracking-[-0.02em] text-[#111] group-hover:text-[#d71920] sm:mt-2 sm:text-[20px] line-clamp-2 overflow-hidden text-ellipsis break-words [overflow-wrap:anywhere] [word-break:break-word]">
+                    <h3 className="mt-0 text-[15px] sm:text-[17px] font-bold leading-[1.18] tracking-[-0.02em] text-[#111] group-hover:text-[#d71920] sm:mt-1.5 line-clamp-2 overflow-hidden text-ellipsis break-words [overflow-wrap:anywhere] [word-break:break-word]">
                       {story.title}
                     </h3>
                     <StoryMeta
@@ -167,7 +163,7 @@ export default function CategoryPage({ category }: { category: CategoryPageData 
 
       {/* Ad Banner directly under the top 3 news stories (no gaps) matching user requirement */}
       <div className="mt-2 mb-6">
-        <AdvertisementSlot variant="in-article" className="my-2" />
+        <AdvertisementSlot variant="in-article" dimensions="970 x 250" className="my-2" />
       </div>
 
       {/* More News Section */}

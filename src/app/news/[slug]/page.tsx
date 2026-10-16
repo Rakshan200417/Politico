@@ -117,19 +117,7 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
       {/* ── Top Banner Advertisement (In the Beige Gap) ── */}
       <div className="w-full bg-[#f3eadd] py-6 border-b border-gray-200">
         <div className="w-full max-w-[970px] mx-auto hidden lg:block">
-          <div className="w-full font-sans text-center">
-            <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-gray-400 mb-2">
-              Advertisement
-            </span>
-            <div className="w-full min-h-[110px] sm:min-h-[140px] bg-[#f9fafb] border border-[#e5e7eb] flex flex-col items-center justify-center p-6 relative overflow-hidden">
-              <span className="text-[10px] font-mono font-bold tracking-widest text-gray-400 uppercase border border-gray-300 px-2.5 py-0.5 rounded mb-1">
-                AD
-              </span>
-              <span className="text-[11px] font-sans font-medium text-gray-400">
-                POLITICO Commercial Network
-              </span>
-            </div>
-          </div>
+          <AdvertisementSlot variant="banner" dimensions="970 x 250" className="!my-0" />
         </div>
       </div>
 
@@ -226,17 +214,57 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
               category={articleData.category}
               articleAuthor={articleData.writer_name}
             />
+
+            {/* Bottom Section: More News Rows directly under comments */}
+            <section className="mt-8 border-t border-[#e1e1e1] pt-6">
+              <div className="mb-6 flex items-center gap-2 border-b border-[#d9d9d9] pb-2">
+                <span className="h-2 w-2 rounded-full border border-[#d71920]" />
+                <h2 className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#222]">
+                  MORE POLITICO STORIES
+                </h2>
+              </div>
+
+              <div className="max-w-[760px] space-y-6">
+                {moreNews.map((story) => (
+                  <article key={story.title} className="border-b border-[#e1e1e1] pb-6 last:border-b-0">
+                    <a
+                      href={`/news/${story.slug}`}
+                      className="grid grid-cols-[140px_minmax(0,1fr)] sm:grid-cols-[200px_minmax(0,1fr)] gap-5 group"
+                    >
+                      <div className="aspect-[4/3] overflow-hidden bg-[#f2f2f2] rounded-sm">
+                        <img
+                          src={story.image || `https://picsum.photos/seed/${story.id}/800/600`}
+                          alt=""
+                          className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+                        />
+                      </div>
+                      <div>
+                        <h3 className="text-[18px] sm:text-[21px] font-bold leading-[1.1] tracking-[-0.02em] text-[#111] group-hover:text-[#d71920] transition-colors">
+                          {story.title}
+                        </h3>
+                        <p className="mt-2 font-sans text-[14px] sm:text-[16px] leading-[1.25] text-[#666]">
+                          {story.deck}
+                        </p>
+                        <p className="mt-2 text-[9px] font-bold uppercase tracking-[0.14em] text-[#666]">
+                          BY {story.writer_name}
+                        </p>
+                      </div>
+                    </a>
+                  </article>
+                ))}
+              </div>
+            </section>
           </article>
 
           {/* Sidebar Column identical to Category Pages */}
           <aside className="border-l border-[#e1e1e1] pl-0 lg:pl-6">
             <div className="flex flex-col h-full">
-              {/* Small Ad block (like Ad 01) */}
-              <div className="w-full max-w-[280px] mx-auto mb-8 aspect-square bg-[#e5e7eb] flex items-center justify-center border border-gray-300 relative z-10">
-                <span className="text-[#111111] font-bold text-[32px] tracking-tight">Ad</span>
+              {/* Small Square Ad block - Ad 06 */}
+              <div className="w-full flex justify-center mb-8">
+                <AdvertisementSlot variant="square" dimensions="300 x 250" label="Ad 06" className="!my-0" />
               </div>
 
-              {/* Related Stories (First 2) */}
+              {/* Related Stories (Exactly 3 stories) */}
               <div>
                 <div className="flex items-center gap-2 pb-2 mb-3 border-b border-[#d9d9d9]">
                   <span className="w-2 h-2 rounded-full bg-[#d71920]" />
@@ -245,9 +273,9 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
                   </h3>
                 </div>
 
-                <div className="space-y-4 mb-8">
-                  {relatedStories.slice(0, 2).map((story) => (
-                    <article key={story.title} className="border-b border-[#e1e1e1] pb-4">
+                <div className="space-y-4 mb-4">
+                  {relatedStories.slice(0, 3).map((story, idx) => (
+                    <article key={`${story.title}-${idx}`} className="border-b border-[#e1e1e1] pb-4 last:border-b-0">
                       <a href={`/news/${story.slug}`} className="group block">
                         <div className="aspect-[16/10] overflow-hidden bg-gray-100 rounded-none mb-2">
                           <img
@@ -267,73 +295,8 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
                   ))}
                 </div>
               </div>
-
-              {/* Sticky Container for Last 2 Stories */}
-              <div className="space-y-6 w-full lg:sticky lg:top-[120px] self-start pb-8">
-                <div className="space-y-4">
-                  {relatedStories.slice(2, 4).map((story) => (
-                    <article key={story.title} className="border-b border-[#e1e1e1] pb-4 last:border-b-0">
-                      <a href={`/news/${story.slug}`} className="group block">
-                        <div className="aspect-[16/10] overflow-hidden bg-gray-100 rounded-sm mb-2">
-                          <img
-                            src={story.image || `https://picsum.photos/seed/${story.id}/800/600`}
-                            alt=""
-                            className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
-                          />
-                        </div>
-                        <h4 className="text-[15px] font-bold leading-tight text-[#111] group-hover:text-[#d71920] transition-colors">
-                          {story.title}
-                        </h4>
-                        <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.14em] text-[#666]">
-                          BY {story.writer_name}
-                        </p>
-                      </a>
-                    </article>
-                  ))}
-                </div>
-              </div>
             </div>
           </aside>
-        </section>
-
-        {/* Bottom Section: More News Rows matching CategoryPage */}
-        <section className="mt-10 border-t border-[#e1e1e1] pt-8">
-          <div className="mb-6 flex items-center gap-2 border-b border-[#d9d9d9] pb-2">
-            <span className="h-2 w-2 rounded-full border border-[#d71920]" />
-            <h2 className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#222]">
-              MORE POLITICO STORIES
-            </h2>
-          </div>
-
-          <div className="max-w-[760px] space-y-6">
-            {moreNews.map((story) => (
-              <article key={story.title} className="border-b border-[#e1e1e1] pb-6 last:border-b-0">
-                <a
-                  href={`/news/${story.slug}`}
-                  className="grid grid-cols-[140px_minmax(0,1fr)] sm:grid-cols-[200px_minmax(0,1fr)] gap-5 group"
-                >
-                  <div className="aspect-[4/3] overflow-hidden bg-[#f2f2f2] rounded-sm">
-                    <img
-                      src={story.image || `https://picsum.photos/seed/${story.id}/800/600`}
-                      alt=""
-                      className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
-                    />
-                  </div>
-                  <div>
-                    <h3 className="text-[18px] sm:text-[21px] font-bold leading-[1.1] tracking-[-0.02em] text-[#111] group-hover:text-[#d71920] transition-colors">
-                      {story.title}
-                    </h3>
-                    <p className="mt-2 font-sans text-[14px] sm:text-[16px] leading-[1.25] text-[#666]">
-                      {story.deck}
-                    </p>
-                    <p className="mt-2 text-[9px] font-bold uppercase tracking-[0.14em] text-[#666]">
-                      BY {story.writer_name}
-                    </p>
-                  </div>
-                </a>
-              </article>
-            ))}
-          </div>
         </section>
       </main>
 

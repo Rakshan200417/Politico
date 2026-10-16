@@ -17,12 +17,20 @@ export default function Header() {
   const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      setIsCompact((prev) => {
-        if (prev && window.scrollY < 20) return false;
-        if (!prev && window.scrollY > 100) return true;
-        return prev;
-      });
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const scrollY = window.scrollY;
+          setIsCompact((prev) => {
+            if (prev && scrollY < 20) return false;
+            if (!prev && scrollY > 80) return true;
+            return prev;
+          });
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
     handleScroll();
@@ -170,17 +178,17 @@ export default function Header() {
   };
 
   return (
-    <header className={`w-full bg-white ${isMenuOpen ? "border-b-0" : "border-b border-gray-200"} sticky top-0 z-50 shadow-sm font-sans transition-all duration-300 ease-out`}>
+    <header className={`w-full bg-white ${isMenuOpen ? "border-b-0" : "border-b border-gray-200"} sticky top-0 z-50 shadow-sm font-sans md:transition-all md:duration-300 md:ease-out will-change-[height]`}>
       {/* Top Header Bar */}
       <div
-        className={`w-full px-3 flex items-center justify-between relative z-20 border-b border-gray-200 transition-all duration-300 ease-out ${isCompact ? "h-10 min-[1280px]:h-12" : "h-20 min-[1280px]:h-[90px]"
+        className={`w-full px-3 flex items-center justify-between relative z-20 border-b border-gray-200 transition-[height] duration-200 ease-out ${isCompact ? "h-12 min-[1280px]:h-12" : "h-16 md:h-20 min-[1280px]:h-[90px]"
           }`}
       >
         {/* Left Menu Toggle Button pinned to the far left */}
         <div className="flex items-center justify-start flex-1 flex-shrink-0">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className={`p-1 text-gray-800 transition-all duration-300 ease-out focus:outline-none flex items-center justify-center`}
+            className={`p-1 text-gray-800 transition-colors focus:outline-none flex items-center justify-center`}
             aria-label="Toggle navigation menu"
           >
             {isMenuOpen ? (
@@ -195,9 +203,9 @@ export default function Header() {
         <div className="flex-1 flex justify-center items-center pointer-events-none absolute left-0 right-0">
           <a href="/" className="pointer-events-auto">
             <span
-              className={`font-black tracking-[-0.04em] text-[#d71920] uppercase leading-none transition-all duration-300 ease-out ${isCompact
-                ? "text-[28px] font-medium"
-                : "text-[40px] min-[1280px]:text-[56px] font-bold"
+              className={`font-black tracking-[-0.04em] text-[#d71920] uppercase leading-none transition-all duration-200 ease-out ${isCompact
+                ? "text-[26px] md:text-[28px] font-medium"
+                : "text-[34px] sm:text-[38px] md:text-[40px] min-[1280px]:text-[56px] font-bold"
                 }`}
             >
               POLITICO
@@ -349,13 +357,13 @@ export default function Header() {
 
       {/* Mobile/Tablet Responsive Category Nav */}
       <nav className="lg:hidden bg-white border-b border-gray-200">
-        <div className="px-4 py-2 overflow-x-auto whitespace-nowrap scrollbar-hide">
-          <div className="flex items-center gap-4 text-[12px] font-bold text-gray-800">
+        <div className="px-3 py-2 overflow-x-auto whitespace-nowrap scrollbar-hide overscroll-x-contain touch-pan-x">
+          <div className="inline-flex items-center gap-5 text-[13px] font-bold text-gray-800 pr-6">
             {activeCategories.map((cat) => (
               <a
                 key={cat.name}
                 href={cat.href}
-                className={`transition-colors flex-shrink-0 hover:text-[#ce1126] ${pathname === cat.href ? "text-[#ce1126] border-b-2 border-[#ce1126]" : ""}`}
+                className={`transition-colors shrink-0 whitespace-nowrap inline-block hover:text-[#ce1126] py-0.5 ${pathname === cat.href ? "text-[#ce1126] border-b-2 border-[#ce1126]" : ""}`}
               >
                 {cat.name}
               </a>

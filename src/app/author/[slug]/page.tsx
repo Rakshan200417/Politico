@@ -4,6 +4,7 @@ import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
 import Link from "next/link";
 import BackButton from "@/components/common/BackButton";
+import AdvertisementSlot from "@/components/common/AdvertisementSlot";
 import { getArticlesByAuthorSlug, getAuthorProfile, getAuthorProfileByName } from "@/lib/articleService";
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
@@ -246,15 +247,9 @@ export default async function AuthorProfilePage({ params, searchParams }: { para
                 </div>
               </div>
 
-              {/* Advertisement Image */}
+              {/* Advertisement Slot (Taller Half-Page Size - Ad 07) */}
               <div className="w-full">
-                <div className="w-full aspect-[3/4] bg-gray-100 overflow-hidden rounded shadow-sm">
-                  <img 
-                    src="https://images.unsplash.com/photo-1543087903-1ac2ec7aa8c5?auto=format&fit=crop&w=600&q=80" 
-                    alt="Advertisement" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+                <AdvertisementSlot variant="square" dimensions="300 x 600" label="Ad 07" className="!my-0" />
               </div>
               
             </div>

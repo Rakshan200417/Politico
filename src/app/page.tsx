@@ -32,19 +32,7 @@ export default async function Home() {
       >
         {/* ── Top Banner Advertisement (In the Grey Gap) ── */}
         <div className="w-full max-w-[970px] mx-auto mt-6 hidden lg:block">
-          <div className="w-full font-sans text-center">
-            <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-gray-400 mb-2">
-              Advertisement
-            </span>
-            <div className="w-full min-h-[110px] sm:min-h-[140px] bg-[#f9fafb] border border-[#e5e7eb] rounded-xs flex flex-col items-center justify-center p-6 relative overflow-hidden">
-              <span className="text-[10px] font-mono font-bold tracking-widest text-gray-400 uppercase border border-gray-300 px-2.5 py-0.5 rounded mb-1">
-                AD
-              </span>
-              <span className="text-[11px] font-sans font-medium text-gray-400">
-                POLITICO Commercial Network
-              </span>
-            </div>
-          </div>
+          <AdvertisementSlot variant="banner" dimensions="970 x 250" className="!my-0" />
         </div>
 
         <main id="newsfeed" className="flex-1 max-w-[1440px] w-[98%] xl:w-[95%] 2xl:w-[1440px] mx-auto mt-6 lg:mt-10 px-4 lg:px-8 pt-6 lg:pt-8 pb-0 space-y-6 bg-white shadow-2xl">
@@ -67,10 +55,8 @@ export default async function Home() {
               <HomeRightPanel />
 
               {/* Ad 01 */}
-              <div className="w-full mt-4 border-t border-gray-200 pt-6 lg:sticky lg:top-[120px] z-10">
-                <div className="w-full max-w-[280px] mx-auto aspect-square bg-[#e5e7eb] flex items-center justify-center">
-                  <span className="text-[#111111] font-bold text-[32px] tracking-tight">Ad 01</span>
-                </div>
+              <div className="w-full mt-4 border-t border-gray-200 pt-6 lg:sticky lg:top-[120px] z-10 flex justify-center">
+                <AdvertisementSlot variant="square" dimensions="300 x 250" label="Ad 01" className="!my-0" />
               </div>
             </div>
           </div>
@@ -151,12 +137,12 @@ export default async function Home() {
                   </a>
                 </div>
               
-                <div className="space-y-6 lg:sticky lg:top-[calc(100vh-620px)] tall-static">
+                <div className="space-y-6 lg:sticky lg:top-[calc(100vh-620px)] tall-static flex flex-col items-center">
                   {[2, 3].map((i) => (
-                  <div key={i} className="w-full max-w-[280px] mx-auto aspect-square bg-[#e5e7eb] flex items-center justify-center relative z-10">
-                    <span className="text-[#111111] font-bold text-[32px] tracking-tight">Ad 0{i}</span>
-                  </div>
-                ))}
+                    <div key={i} className="w-full flex justify-center">
+                      <AdvertisementSlot variant="square" dimensions="300 x 250" label={`Ad 0${i}`} className="!my-0" />
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -258,10 +244,10 @@ export default async function Home() {
                   </li>
                 </ul>
                 
-                <div className="space-y-6 lg:sticky lg:top-[calc(100vh-620px)] tall-static">
+                <div className="space-y-6 lg:sticky lg:top-[calc(100vh-620px)] tall-static flex flex-col items-center">
                   {[4, 5].map((i) => (
-                    <div key={i} className="w-full max-w-[280px] mx-auto aspect-square bg-[#e5e7eb] flex items-center justify-center border border-gray-300 relative z-10">
-                      <span className="text-[#111111] font-bold text-[32px] tracking-tight">Ad 0{i}</span>
+                    <div key={i} className="w-full flex justify-center">
+                      <AdvertisementSlot variant="square" dimensions="300 x 250" label={`Ad 0${i}`} className="!my-0" />
                     </div>
                   ))}
                 </div>
