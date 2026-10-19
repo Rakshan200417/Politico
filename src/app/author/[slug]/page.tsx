@@ -5,7 +5,8 @@ import Footer from "@/components/common/Footer";
 import Link from "next/link";
 import BackButton from "@/components/common/BackButton";
 import AdvertisementSlot from "@/components/common/AdvertisementSlot";
-import { getArticlesByAuthorSlug, getAuthorProfile, getAuthorProfileByName } from "@/lib/articleService";
+import { getArticlesByAuthorSlug, getAuthorProfile, getAuthorProfileByName, getMostReadArticlesByAuthor } from "@/lib/articleService";
+import { slugify } from "@/data/newsArticles";
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const authorName = params.slug
@@ -66,13 +67,11 @@ export default async function AuthorProfilePage({ params, searchParams }: { para
     authorLinkedInUrl = `https://www.linkedin.com/search/results/all/?keywords=${encodeURIComponent(authorName)}`;
   }
 
-  const mostRead = [
-    { title: "New Exclusive Decoration Design & Fit Out LLC – Structural Acrylic Pioneers in the UAE", views: "70 views" },
-    { title: "Trump Declares Iran Ceasefire 'Over,' Raising Questions About the Next Phase of the Conflict", views: "46 views" },
-    { title: "Lakhan Gandhi", views: "42 views" },
-    { title: "Phillip Johnston: The Entrepreneur Building the Future of AI in Space", views: "18 views" },
-    { title: "Trump's Hormuz Retreat Highlights Struggles to End Iran Conflict", views: "17 views" }
-  ];
+  // Fetch top most read articles written specifically by this author
+  let mostReadArticles: any[] = await getMostReadArticlesByAuthor(authorName, 5);
+  if (!mostReadArticles || mostReadArticles.length === 0) {
+    mostReadArticles = (articles || []).slice(0, 5);
+  }
 
   const generatePageLinks = () => {
     const pages = [];
@@ -216,8 +215,8 @@ export default async function AuthorProfilePage({ params, searchParams }: { para
           </div>
 
           {/* Sidebar */}
-          <aside className="border-t lg:border-t-0 lg:border-l border-[#e1e1e1] pt-8 lg:pt-0 lg:pl-8">
-            <div className="w-full lg:sticky lg:top-[120px] self-start space-y-10 pb-8">
+          <aside className="border-t lg:border-t-0 lg:border-l border-[#e1e1e1] pt-8 lg:pt-0 lg:pl-8 h-full">
+            <div className="w-full flex flex-col min-h-full space-y-10 pb-8">
               
               {/* Most Read Section */}
               <div>
@@ -229,17 +228,19 @@ export default async function AuthorProfilePage({ params, searchParams }: { para
                 </div>
                 
                 <div className="space-y-6">
-                  {mostRead.map((item, index) => (
-                    <article key={index} className="flex gap-4 group cursor-pointer border-b border-gray-100 pb-6 last:border-0 last:pb-0">
+                  {mostReadArticles.map((item: any, index: number) => (
+                    <article key={item.id || index} className="flex gap-4 group cursor-pointer border-b border-gray-100 pb-6 last:border-0 last:pb-0">
                       <span className="text-[32px] font-serif font-black text-[#e2e8f0] leading-none shrink-0 group-hover:text-[#cbd5e0] transition-colors">
                         {index + 1}
                       </span>
                       <div>
                         <h4 className="text-[13px] sm:text-[14px] font-bold text-[#1a202c] leading-snug group-hover:text-[#d71920] transition-colors">
-                          {item.title}
+                          <Link href={`/news/${item.slug || slugify(item.title)}`}>
+                            {item.title}
+                          </Link>
                         </h4>
                         <p className="text-[10px] text-gray-400 mt-2 font-medium">
-                          {item.views}
+                          {item.views ?? 0} views
                         </p>
                       </div>
                     </article>
@@ -247,8 +248,8 @@ export default async function AuthorProfilePage({ params, searchParams }: { para
                 </div>
               </div>
 
-              {/* Advertisement Slot (Taller Half-Page Size - Ad 07) */}
-              <div className="w-full">
+              {/* Advertisement Slot (Taller Half-Page Size - Ad 07) - Sticky */}
+              <div className="w-full lg:sticky lg:top-[120px] self-start">
                 <AdvertisementSlot variant="square" dimensions="300 x 600" label="Ad 07" className="!my-0" />
               </div>
               

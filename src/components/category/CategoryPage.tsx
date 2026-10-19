@@ -163,7 +163,7 @@ export default function CategoryPage({ category }: { category: CategoryPageData 
 
       {/* Ad Banner directly under the top 3 news stories (no gaps) matching user requirement */}
       <div className="mt-2 mb-6">
-        <AdvertisementSlot variant="in-article" dimensions="970 x 250" className="my-2" />
+        <AdvertisementSlot variant="in-article" slotKey="banner_category_mid" dimensions="970 x 250" className="my-2" />
       </div>
 
       {/* More News Section */}

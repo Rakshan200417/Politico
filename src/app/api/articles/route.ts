@@ -86,30 +86,37 @@ export async function GET(request: Request) {
     const status = searchParams.get('status');
     const search = searchParams.get('search');
 
-    let query = 'SELECT * FROM articles WHERE 1=1';
+    let query = `
+      SELECT 
+        a.*,
+        COUNT(c.id) AS comments_count
+      FROM articles a
+      LEFT JOIN comments c ON a.slug = c.article_slug
+      WHERE 1=1
+    `;
     const params: any[] = [];
 
     if (email) {
       const nameParam = searchParams.get('name') || '';
       if (nameParam) {
-        query += ' AND (writer_email = ? OR writer_name = ?)';
+        query += ' AND (a.writer_email = ? OR a.writer_name = ?)';
         params.push(email, nameParam);
       } else {
-        query += ' AND (writer_email = ? OR writer_name = ?)';
+        query += ' AND (a.writer_email = ? OR a.writer_name = ?)';
         params.push(email, email.split('@')[0]);
       }
     }
     if (status) {
-      query += ' AND status = ?';
+      query += ' AND a.status = ?';
       params.push(status);
     }
     if (search) {
-      query += ' AND (title LIKE ? OR writer_name LIKE ? OR deck LIKE ? OR category LIKE ?)';
+      query += ' AND (a.title LIKE ? OR a.writer_name LIKE ? OR a.deck LIKE ? OR a.category LIKE ?)';
       const likeSearch = `%${search}%`;
       params.push(likeSearch, likeSearch, likeSearch, likeSearch);
     }
 
-    query += ' ORDER BY updated_at DESC';
+    query += ' GROUP BY a.id ORDER BY a.updated_at DESC';
 
     const [rows]: any = await pool.execute(query, params);
 

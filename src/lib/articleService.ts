@@ -154,25 +154,32 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
       [slug]
     );
     const articles = rows as Article[];
-    return articles.length > 0 ? articles[0] : null;
+    if (articles.length > 0) {
+      const art = articles[0];
+      // Increment real view count asynchronously whenever someone visits the article
+      pool.query("UPDATE articles SET views = COALESCE(views, 0) + 1 WHERE id = ?", [art.id]).catch(() => {});
+      return art;
+    }
+    return null;
   } catch (error) {
     console.error(`Error fetching article with slug ${slug}:`, error);
     return null;
   }
 }
 
-export async function getArticlesByAuthor(authorName: string, limit: number = 20): Promise<Article[]> {
+export async function getMostReadArticlesByAuthor(authorName: string, limit: number = 5): Promise<Article[]> {
   try {
     const [rows] = await pool.query(
-      "SELECT * FROM articles WHERE status = 'published' AND writer_name = ? ORDER BY updated_at DESC LIMIT ?",
-      [authorName, limit]
+      "SELECT * FROM articles WHERE status = 'published' AND (LOWER(writer_name) = ? OR writer_email = ?) ORDER BY views DESC, updated_at DESC LIMIT ?",
+      [authorName.toLowerCase(), authorName, limit]
     );
     return rows as Article[];
   } catch (error) {
-    console.error(`Error fetching articles for author ${authorName}:`, error);
+    console.error(`Error fetching most read articles for author ${authorName}:`, error);
     return [];
   }
 }
+
 
 export async function getArticlesByAuthorSlug(slug: string, limit: number = 10, page: number = 1): Promise<{ articles: Article[], totalPages: number, currentPage: number }> {
   try {

@@ -263,15 +263,15 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
           </article>
 
           {/* Sidebar Column identical to Category Pages */}
-          <aside className="border-l border-[#e1e1e1] pl-0 lg:pl-6 h-full relative">
-            <div className="flex flex-col h-full">
+          <aside className="border-l border-[#e1e1e1] pl-0 lg:pl-6 h-full">
+            <div className="w-full">
               {/* Small Square Ad block - Ad 06 */}
               <div className="w-full flex justify-center mb-8">
                 <AdvertisementSlot variant="square" dimensions="300 x 250" label="Ad 06" className="!my-0" />
               </div>
 
-              {/* Related Stories (Exactly 3 stories: 1 static, last 2 sticky within sidebar) */}
-              <div className="flex-1">
+              {/* Related Stories */}
+              <div className="xl:sticky xl:top-[100px] xl:self-start">
                 <div className="flex items-center gap-2 pb-2 mb-3 border-b border-[#d9d9d9]">
                   <span className="w-2 h-2 rounded-full bg-[#d71920]" />
                   <h3 className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#222]">
@@ -279,7 +279,7 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
                   </h3>
                 </div>
 
-                {/* First story (non-sticky) */}
+                {/* First story (sticky on desktop xl: alongside all stories, but non-sticky on laptop lg:) */}
                 {relatedStories.slice(0, 1).map((story, idx) => (
                   <article key={`${story.title}-${idx}`} className="border-b border-[#e1e1e1] pb-4 mb-4">
                     <a href={`/news/${story.slug}`} className="group block">
@@ -300,8 +300,8 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
                   </article>
                 ))}
 
-                {/* Last 2 stories (sticky up to the bottom of the section before footer) */}
-                <div className="lg:sticky lg:top-24 space-y-4 pt-1 z-10 bg-white">
+                {/* Last 2 stories (sticky on laptop lg:top-[100px], and part of sticky block on desktop xl:) */}
+                <div className="lg:sticky lg:top-[100px] lg:self-start xl:static xl:top-auto space-y-4 pt-1 z-10 bg-white">
                   {relatedStories.slice(1, 3).map((story, idx) => (
                     <article key={`${story.title}-${idx + 1}`} className="border-b border-[#e1e1e1] pb-4 last:border-b-0">
                       <a href={`/news/${story.slug}`} className="group block">

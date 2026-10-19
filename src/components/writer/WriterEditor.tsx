@@ -318,8 +318,87 @@ export default function WriterEditor({
   const [toolbarPosition, setToolbarPosition] = useState({ top: 0, left: 0 });
   const [imageRect, setImageRect] = useState({ top: 0, left: 0, width: 0, height: 0 });
   const [imageRenderTick, setImageRenderTick] = useState(0);
-
   const editorRef = useRef<HTMLDivElement>(null);
+
+  // Global clipboard copy filter: ensures copying description NEVER copies images/figures
+  useEffect(() => {
+    const handleCopy = (e: ClipboardEvent) => {
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0) return;
+
+      const anchorNode = selection.anchorNode;
+      const focusNode = selection.focusNode;
+      const isInsideEditor =
+        (anchorNode && editorRef.current?.contains(anchorNode)) ||
+        (focusNode && editorRef.current?.contains(focusNode));
+
+      const container = document.createElement("div");
+      for (let i = 0; i < selection.rangeCount; i++) {
+        container.appendChild(selection.getRangeAt(i).cloneContents());
+      }
+
+      const hasImages =
+        container.querySelector("img, figure, svg, picture, video, iframe") !== null ||
+        container.getElementsByTagName("img").length > 0;
+
+      if (hasImages || isInsideEditor) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        // 1. Physically remove all media elements from the cloned container
+        const mediaNodes = container.querySelectorAll("img, figure, svg, picture, video, iframe");
+        mediaNodes.forEach((node) => node.remove());
+
+        // 2. Also strip any residual <img> or <figure> tags using RegExp as fail-safe
+        let cleanHtml = container.innerHTML
+          .replace(/<img[^>]*>/gi, "")
+          .replace(/<figure[^>]*>[\s\S]*?<\/figure>/gi, "")
+          .replace(/<svg[^>]*>[\s\S]*?<\/svg>/gi, "");
+
+        const plainText = (container.innerText || container.textContent || "").trim();
+
+        if (e.clipboardData) {
+          e.clipboardData.clearData();
+          e.clipboardData.setData("text/plain", plainText);
+          e.clipboardData.setData("text/html", cleanHtml);
+        }
+
+        // Also update navigator.clipboard if available to ensure system clipboard sync
+        if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(plainText).catch(() => {});
+        }
+      }
+    };
+
+    const handlePaste = (e: ClipboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (editorRef.current && (target === editorRef.current || editorRef.current.contains(target))) {
+        // If user is pasting into the editor canvas, ensure that pasted HTML doesn't re-introduce unapproved images
+        const html = e.clipboardData?.getData("text/html");
+        if (html && (html.includes("<img") || html.includes("<figure"))) {
+          e.preventDefault();
+          const cleanHtml = html
+            .replace(/<img[^>]*>/gi, "")
+            .replace(/<figure[^>]*>[\s\S]*?<\/figure>/gi, "");
+          const plainText = e.clipboardData?.getData("text/plain") || "";
+          if (cleanHtml.trim()) {
+            document.execCommand("insertHTML", false, cleanHtml);
+          } else if (plainText.trim()) {
+            document.execCommand("insertText", false, plainText);
+          }
+        }
+      }
+    };
+
+    document.addEventListener("copy", handleCopy, true);
+    window.addEventListener("copy", handleCopy, true);
+    document.addEventListener("paste", handlePaste, true);
+    return () => {
+      document.removeEventListener("copy", handleCopy, true);
+      window.removeEventListener("copy", handleCopy, true);
+      document.removeEventListener("paste", handlePaste, true);
+    };
+  }, []);
 
   // Manage ResizeObserver and scroll/window resize for the selected image
   useEffect(() => {
@@ -2056,24 +2135,34 @@ export default function WriterEditor({
                 const selection = window.getSelection();
                 if (!selection || selection.rangeCount === 0) return;
                 
-                // Extract selected html/text
+                e.preventDefault();
+                e.stopPropagation();
+
                 const container = document.createElement("div");
                 for (let i = 0; i < selection.rangeCount; i++) {
                   container.appendChild(selection.getRangeAt(i).cloneContents());
                 }
 
-                // Check if selection contains any images or figures
-                if (container.querySelector("img, figure")) {
-                  e.preventDefault();
-                  // Remove all images and figures completely so only text/description is copied
-                  const images = container.querySelectorAll("img, figure");
-                  images.forEach((img) => img.remove());
+                // Remove all media elements
+                const mediaElements = container.querySelectorAll("img, figure, svg, picture, video, iframe, figcaption");
+                mediaElements.forEach((el) => el.remove());
 
-                  const plainText = container.innerText || container.textContent || "";
-                  const cleanHtml = container.innerHTML;
+                // Regex pass to ensure no orphaned img/figure remains
+                const cleanHtml = container.innerHTML
+                  .replace(/<figure[^>]*>[\s\S]*?<\/figure>/gi, "")
+                  .replace(/<img[^>]*>/gi, "")
+                  .replace(/<svg[^>]*>[\s\S]*?<\/svg>/gi, "");
 
+                const plainText = (container.innerText || container.textContent || "").trim();
+
+                if (e.clipboardData) {
+                  e.clipboardData.clearData();
                   e.clipboardData.setData("text/plain", plainText);
                   e.clipboardData.setData("text/html", cleanHtml);
+                }
+
+                if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
+                  navigator.clipboard.writeText(plainText).catch(() => {});
                 }
               }}
               onClick={(e) => {
@@ -2090,7 +2179,7 @@ export default function WriterEditor({
                 }
               }}
               data-placeholder="Start writing or type / for plugins"
-              className="w-full min-h-[400px] sm:min-h-[550px] outline-none text-base sm:text-lg leading-relaxed text-gray-800 prose max-w-none focus:ring-0 break-words [word-break:break-word] overflow-wrap-anywhere empty:before:content-[attr(data-placeholder)] empty:before:text-gray-300 empty:before:pointer-events-none"
+              className="editor-canvas w-full min-h-[400px] sm:min-h-[550px] outline-none text-base sm:text-lg leading-relaxed text-gray-800 prose max-w-none focus:ring-0 break-words [word-break:break-word] overflow-wrap-anywhere empty:before:content-[attr(data-placeholder)] empty:before:text-gray-300 empty:before:pointer-events-none"
             />
           </div>
 

@@ -141,3 +141,16 @@ img.float-right {
   display: block;
   margin: 0 auto;
 }
+
+/* Prevent images in editor from being highlighted during text selection */
+.editor-canvas img,
+.editor-canvas figure,
+[contenteditable="true"] img,
+[contenteditable="true"] figure {
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  -webkit-user-drag: none !important;
+}
+
