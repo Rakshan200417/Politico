@@ -50,76 +50,57 @@ const adminNavItems: NavItem[] = [
 ];
 
 const menubarCategoryOptions: string[] = [
-  // World & Countries
-  "World",
-  "China",
-  "United States",
-  "Europe",
-  "Britain",
-  "Middle East",
   "Africa",
-  "Asia",
-
-  // Companies & Subcategories
-  "Companies",
-  "Corporate Announcements",
-  "Mergers & Acquisitions",
-  "Leadership Changes",
-
-  // Startups & Subcategories
-  "Startups",
-  "Funding & Investment",
-  "Founder Stories",
-  "Venture Capital",
-  "Startup Failures",
-
-  // Markets & Subcategories
-  "Markets",
-  "Stock Market",
-  "Bonds",
-  "Mutual Funds",
-
-  // Economy & Subcategories
-  "Economy",
-  "GDP & Economic Growth",
-  "Employment",
-  "Government Economic Policies",
-
-  // Finance & Subcategories
-  "Finance",
-  "Digital Banking",
-  "FinTech",
-  "Banking Industry",
-  "Loans & Lending",
-
-  // Technology & Subcategories
-  "Technology",
-  "Artificial Intelligence",
-  "Cybersecurity",
-  "Gadgets & Devices",
-  "Software",
-
-  // Industries & Subcategories
-  "Industries",
-  "Manufacturing",
-  "Energy",
-  "Pharmaceuticals",
-  "Automobile",
   "Agriculture Business",
-  "Construction",
-  "Design",
-  "Textiles",
-  "Entertainment",
-
-  // Leaders & Subcategories
-  "Leaders",
+  "Artificial Intelligence",
+  "Asia",
+  "Automobile",
+  "Banking Industry",
+  "Bonds",
+  "Britain",
   "Business Leaders",
   "CEO Interviews",
+  "China",
+  "Companies",
+  "Construction",
+  "Corporate Announcements",
+  "Cybersecurity",
+  "Design",
+  "Digital Banking",
+  "Economy",
+  "Employment",
+  "Energy",
+  "Entertainment",
+  "Europe",
   "Executive Appointments",
-  "Leadership Strategies",
-
-  // Interview
+  "Finance",
+  "FinTech",
+  "Founder Stories",
+  "Funding & Investment",
+  "Gadgets & Devices",
+  "GDP & Economic Growth",
+  "Government Economic Policies",
+  "Industries",
   "Interview",
+  "Leaders",
+  "Leadership Changes",
+  "Leadership Strategies",
+  "Loans & Lending",
+  "Manufacturing",
+  "Markets",
+  "Mergers & Acquisitions",
+  "Middle East",
+  "Mutual Funds",
+  "Pharmaceuticals",
+  "Software",
+  "Startup Failures",
+  "Startups",
+  "Stock Market",
+  "Technology",
+  "Textiles",
+  "United States",
+  "Venture Capital",
+  "World",
 ];
 
 export default function AdminDashboard() {

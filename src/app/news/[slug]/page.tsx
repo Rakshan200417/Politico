@@ -101,14 +101,20 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
 
   const tagsArray = articleData.tags ? articleData.tags.split(',').map(t => t.trim()) : [];
   
-  const formattedDate = new Date(articleData.created_at).toLocaleDateString('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    timeZoneName: 'short'
-  });
+  const rawDate = articleData.updated_at || articleData.created_at;
+  const publishObj = rawDate ? new Date(rawDate) : new Date();
+  const formattedDate = !isNaN(publishObj.getTime())
+    ? publishObj.toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+      })
+    : "OCTOBER 19, 2026 10:00 AM";
+
+  const categorySlug = slugify(articleData.category);
 
   return (
     <div className="min-h-screen bg-white font-sans text-[#111] flex flex-col overflow-x-hidden w-full max-w-full">
@@ -121,7 +127,7 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
         </div>
       </div>
 
-      <main className="mx-auto w-full max-w-[1080px] px-4 pb-16 font-sans sm:px-6 min-w-0 overflow-x-hidden">
+      <main className="mx-auto w-full max-w-[1080px] px-4 pb-16 font-sans sm:px-6 min-w-0">
 
         {/* Back to Newsfeed */}
         <div className="pt-6 pb-4 border-b border-[#e3e3e3] mb-8">
@@ -133,7 +139,7 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
           {/* Category Tag */}
           <div className="mb-4">
             <a
-              href={`/category/${articleData.category.toLowerCase()}`}
+              href={`/category/${categorySlug}`}
               className="text-[12px] font-black uppercase tracking-[0.1em] text-[#1a202c] hover:underline"
             >
               {articleData.category}
@@ -257,15 +263,15 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
           </article>
 
           {/* Sidebar Column identical to Category Pages */}
-          <aside className="border-l border-[#e1e1e1] pl-0 lg:pl-6">
+          <aside className="border-l border-[#e1e1e1] pl-0 lg:pl-6 h-full relative">
             <div className="flex flex-col h-full">
               {/* Small Square Ad block - Ad 06 */}
               <div className="w-full flex justify-center mb-8">
                 <AdvertisementSlot variant="square" dimensions="300 x 250" label="Ad 06" className="!my-0" />
               </div>
 
-              {/* Related Stories (Exactly 3 stories) */}
-              <div>
+              {/* Related Stories (Exactly 3 stories: 1 static, last 2 sticky within sidebar) */}
+              <div className="flex-1">
                 <div className="flex items-center gap-2 pb-2 mb-3 border-b border-[#d9d9d9]">
                   <span className="w-2 h-2 rounded-full bg-[#d71920]" />
                   <h3 className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#222]">
@@ -273,9 +279,31 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
                   </h3>
                 </div>
 
-                <div className="space-y-4 mb-4">
-                  {relatedStories.slice(0, 3).map((story, idx) => (
-                    <article key={`${story.title}-${idx}`} className="border-b border-[#e1e1e1] pb-4 last:border-b-0">
+                {/* First story (non-sticky) */}
+                {relatedStories.slice(0, 1).map((story, idx) => (
+                  <article key={`${story.title}-${idx}`} className="border-b border-[#e1e1e1] pb-4 mb-4">
+                    <a href={`/news/${story.slug}`} className="group block">
+                      <div className="aspect-[16/10] overflow-hidden bg-gray-100 rounded-none mb-2">
+                        <img
+                          src={story.image || `https://picsum.photos/seed/${story.id}/800/600`}
+                          alt=""
+                          className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-300 rounded-none"
+                        />
+                      </div>
+                      <h4 className="text-[15px] font-bold leading-tight text-[#111] group-hover:text-[#d71920] transition-colors">
+                        {story.title}
+                      </h4>
+                      <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.14em] text-[#666]">
+                        BY {story.writer_name}
+                      </p>
+                    </a>
+                  </article>
+                ))}
+
+                {/* Last 2 stories (sticky up to the bottom of the section before footer) */}
+                <div className="lg:sticky lg:top-24 space-y-4 pt-1 z-10 bg-white">
+                  {relatedStories.slice(1, 3).map((story, idx) => (
+                    <article key={`${story.title}-${idx + 1}`} className="border-b border-[#e1e1e1] pb-4 last:border-b-0">
                       <a href={`/news/${story.slug}`} className="group block">
                         <div className="aspect-[16/10] overflow-hidden bg-gray-100 rounded-none mb-2">
                           <img

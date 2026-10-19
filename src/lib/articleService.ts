@@ -78,11 +78,27 @@ export async function getPublishedArticlesByCategory(
       let condition = "";
       let params: any[] = [];
       if (mainCategoryOnly) {
-        condition = `status = 'published' AND category = ?${placementFilter}`;
-        params = [category];
+        if (category.toLowerCase() === "startups" || category.toLowerCase() === "startup") {
+          condition = `status = 'published' AND (category = 'Startups' OR category = 'Startup' OR LOWER(category) = 'startups' OR LOWER(category) = 'startup')${placementFilter}`;
+          params = [];
+        } else if (category.toLowerCase() === "interview" || category.toLowerCase() === "interviews") {
+          condition = `status = 'published' AND (category = 'Interview' OR category = 'Interviews' OR LOWER(category) = 'interview' OR LOWER(category) = 'interviews' OR category = 'CEO Interviews')${placementFilter}`;
+          params = [];
+        } else {
+          condition = `status = 'published' AND (category = ? OR LOWER(category) = LOWER(?))${placementFilter}`;
+          params = [category, category];
+        }
       } else {
-        condition = `status = 'published' AND (category = ? OR subcategories LIKE ?)${placementFilter}`;
-        params = [category, `%"${category}"%`];
+        if (category.toLowerCase() === "startups" || category.toLowerCase() === "startup") {
+          condition = `status = 'published' AND (category = 'Startups' OR category = 'Startup' OR LOWER(category) = 'startups' OR LOWER(category) = 'startup' OR subcategories LIKE '%"Startups"%' OR subcategories LIKE '%"Startup"%' OR LOWER(subcategories) LIKE '%startup%')${placementFilter}`;
+          params = [];
+        } else if (category.toLowerCase() === "interview" || category.toLowerCase() === "interviews") {
+          condition = `status = 'published' AND (category = 'Interview' OR category = 'Interviews' OR LOWER(category) = 'interview' OR LOWER(category) = 'interviews' OR category = 'CEO Interviews' OR subcategories LIKE '%"Interview"%' OR subcategories LIKE '%"CEO Interviews"%' OR LOWER(subcategories) LIKE '%interview%')${placementFilter}`;
+          params = [];
+        } else {
+          condition = `status = 'published' AND (category = ? OR LOWER(category) = LOWER(?) OR subcategories LIKE ? OR LOWER(subcategories) LIKE ?)${placementFilter}`;
+          params = [category, category, `%"${category}"%`, `%${category.toLowerCase()}%`];
+        }
       }
       
       const [countRows] = await pool.query(`SELECT COUNT(*) as total FROM articles WHERE ${condition}`, params);

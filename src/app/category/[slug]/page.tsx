@@ -14,8 +14,93 @@ import { formatPublishDate } from "@/utils/dateFormatter";
 // Note: Removed generateStaticParams so this page dynamically renders on every request
 // or you can implement it to query all distinct categories from DB if needed.
 
+const categorySlugMap: Record<string, string> = {
+  // Main Sections
+  "world": "World",
+  "companies": "Companies",
+  "startups": "Startups",
+  "markets": "Markets",
+  "economy": "Economy",
+  "finance": "Finance",
+  "leaders": "Leaders",
+  "industries": "Industries",
+  "technology": "Technology",
+  "interview": "Interview",
+  "business": "Business",
+
+  // World Regions
+  "asia": "Asia",
+  "middle-east": "Middle East",
+  "europe": "Europe",
+  "britain": "Britain",
+  "africa": "Africa",
+  "china": "China",
+  "united-states": "United States",
+
+  // Companies Subcategories
+  "corporate-announcements": "Corporate Announcements",
+  "mergers-acquisitions": "Mergers & Acquisitions",
+  "leadership-changes": "Leadership Changes",
+
+  // Startups Subcategories
+  "funding-investment": "Funding & Investment",
+  "founder-stories": "Founder Stories",
+  "venture-capital": "Venture Capital",
+  "startup-failures": "Startup Failures",
+
+  // Markets Subcategories
+  "stock-market": "Stock Market",
+  "bonds": "Bonds",
+  "mutual-funds": "Mutual Funds",
+
+  // Economy Subcategories
+  "gdp-economic-growth": "GDP & Economic Growth",
+  "employment": "Employment",
+  "government-economic-policies": "Government Economic Policies",
+
+  // Finance Subcategories
+  "digital-banking": "Digital Banking",
+  "fintech": "FinTech",
+  "banking-industry": "Banking Industry",
+  "loans-lending": "Loans & Lending",
+
+  // Technology Subcategories
+  "artificial-intelligence": "Artificial Intelligence",
+  "cybersecurity": "Cybersecurity",
+  "gadgets-devices": "Gadgets & Devices",
+  "software": "Software",
+
+  // Industries Subcategories
+  "manufacturing": "Manufacturing",
+  "energy": "Energy",
+  "pharmaceuticals": "Pharmaceuticals",
+  "automobile": "Automobile",
+  "agriculture-business": "Agriculture Business",
+  "construction": "Construction",
+  "design": "Design",
+  "textiles": "Textiles",
+  "entertainment": "Entertainment",
+
+  // Leaders Subcategories
+  "business-leaders": "Business Leaders",
+  "ceo-interviews": "CEO Interviews",
+  "executive-appointments": "Executive Appointments",
+  "leadership-strategies": "Leadership Strategies",
+};
+
+function resolveCategoryName(slug: string): string {
+  const normalized = slug.toLowerCase().trim();
+  if (categorySlugMap[normalized]) {
+    return categorySlugMap[normalized];
+  }
+  return slug
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const formattedName = params.slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  const formattedName = resolveCategoryName(params.slug);
   return {
     title: `${formattedName} News, Analysis and Updates - POLITICO`,
     description: `Latest news and updates about ${formattedName}.`,
@@ -27,8 +112,8 @@ export default async function CategoryRoute({ params, searchParams }: { params: 
     return <WorldCategoryPage searchParams={searchParams} />;
   }
 
-  // Convert slug back to proper category string (e.g. 'technology' -> 'Technology')
-  const categoryName = params.slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  // Convert slug back to proper category string
+  const categoryName = resolveCategoryName(params.slug);
   
   const currentPageParam = Math.max(1, Number(searchParams?.page) || 1);
   const MORE_PAGE_SIZE = 10;

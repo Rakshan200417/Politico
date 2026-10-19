@@ -149,64 +149,66 @@ export default function ContactUsSubmissions() {
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+      <div className="overflow-x-auto custom-scrollbar">
+        <table className="w-full text-left border-collapse table-auto">
           <thead>
             <tr className="border-y border-gray-100 bg-gray-50/50">
-              <th className="py-3 px-4 text-[10px] font-black text-gray-400 uppercase tracking-wider">Date</th>
-              <th className="py-3 px-4 text-[10px] font-black text-gray-400 uppercase tracking-wider">Name / Company</th>
-              <th className="py-3 px-4 text-[10px] font-black text-gray-400 uppercase tracking-wider">Email</th>
-              <th className="py-3 px-4 text-[10px] font-black text-gray-400 uppercase tracking-wider">Phone / WhatsApp</th>
-              <th className="py-3 px-4 text-[10px] font-black text-gray-400 uppercase tracking-wider">Type</th>
-              <th className="py-3 px-4 text-[10px] font-black text-gray-400 uppercase tracking-wider">Message</th>
-              <th className="py-3 px-4 text-[10px] font-black text-gray-400 uppercase tracking-wider">Status</th>
-              <th className="py-3 px-4 text-[10px] font-black text-gray-400 uppercase tracking-wider text-right">Actions</th>
+              <th className="py-3 px-3 text-[10px] font-black text-gray-400 uppercase tracking-wider whitespace-nowrap">Date</th>
+              <th className="py-3 px-3 text-[10px] font-black text-gray-400 uppercase tracking-wider">Name / Company</th>
+              <th className="py-3 px-3 text-[10px] font-black text-gray-400 uppercase tracking-wider">Contact</th>
+              <th className="py-3 px-3 text-[10px] font-black text-gray-400 uppercase tracking-wider">Type</th>
+              <th className="py-3 px-3 text-[10px] font-black text-gray-400 uppercase tracking-wider">Message</th>
+              <th className="py-3 px-3 text-[10px] font-black text-gray-400 uppercase tracking-wider">Status</th>
+              <th className="py-3 px-3 text-[10px] font-black text-gray-400 uppercase tracking-wider text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {isLoading ? (
               <tr>
-                <td colSpan={8} className="py-8 text-center text-sm text-gray-500">
+                <td colSpan={7} className="py-8 text-center text-sm text-gray-500">
                   Loading...
                 </td>
               </tr>
             ) : filteredSubmissions.length === 0 ? (
               <tr>
-                <td colSpan={8} className="py-8 text-center text-sm text-gray-500">
+                <td colSpan={7} className="py-8 text-center text-sm text-gray-500">
                   No submissions found matching criteria.
                 </td>
               </tr>
             ) : (
               filteredSubmissions.map((sub) => (
                 <tr key={sub.id} className="hover:bg-gray-50/50 transition-colors group">
-                  <td className="py-4 px-4 text-[11px] text-gray-500 whitespace-nowrap">
+                  <td className="py-3 px-3 text-[11px] text-gray-500 whitespace-nowrap">
                     {formatDate(sub.created_at)}
                   </td>
-                  <td className="py-4 px-4">
-                    <div className="text-xs font-bold text-gray-900">{sub.name}</div>
+                  <td className="py-3 px-3">
+                    <div className="text-xs font-bold text-gray-900 leading-tight">{sub.name}</div>
                     <div className="text-[10px] text-gray-400">{sub.company || "N/A"}</div>
                   </td>
-                  <td className="py-4 px-4 text-[11px] text-gray-600">
-                    {sub.email}
+                  <td className="py-3 px-3 text-[11px] text-gray-600">
+                    <div className="truncate max-w-[150px]">{sub.email}</div>
+                    {(sub.phone || sub.whatsapp) && (
+                      <div className="text-[10px] text-gray-400 whitespace-nowrap">
+                        {sub.phone ? `P: ${sub.phone}` : ""} {sub.whatsapp ? `W: ${sub.whatsapp}` : ""}
+                      </div>
+                    )}
                   </td>
-                  <td className="py-4 px-4 whitespace-nowrap">
-                    <div className="text-[10px] text-gray-500">P: {sub.phone || "-"}</div>
-                    <div className="text-[10px] text-gray-500">W: {sub.whatsapp || "-"}</div>
-                  </td>
-                  <td className="py-4 px-4">
-                    <span className="inline-block px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-gray-600 bg-gray-100 rounded-md whitespace-nowrap">
+                  <td className="py-3 px-3 whitespace-nowrap">
+                    <span className="inline-block px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-gray-600 bg-gray-100 rounded-md">
                       {sub.inquiry_type}
                     </span>
                   </td>
-                  <td className="py-4 px-4 text-[11px] text-gray-700 max-w-[200px] truncate">
-                    {sub.message}
+                  <td className="py-3 px-3 text-[11px] text-gray-700 max-w-[220px]">
+                    <div className="truncate" title={sub.message}>
+                      {sub.message}
+                    </div>
                   </td>
-                  <td className="py-4 px-4">
+                  <td className="py-3 px-3 whitespace-nowrap">
                     <select
                       value={sub.status}
                       onChange={(e) => handleStatusChange(sub.id, e.target.value)}
-                      className={`text-[11px] font-bold px-2 py-1.5 rounded border focus:outline-none cursor-pointer appearance-none ${getStatusColor(sub.status)}`}
-                      style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right .5rem top 50%', backgroundSize: '.65rem auto', paddingRight: '1.5rem' }}
+                      className={`text-[11px] font-bold px-2 py-1 rounded border focus:outline-none cursor-pointer appearance-none ${getStatusColor(sub.status)}`}
+                      style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right .4rem top 50%', backgroundSize: '.6rem auto', paddingRight: '1.25rem' }}
                     >
                       {statusOptions.map((opt) => (
                         <option key={opt} value={opt} className="text-gray-900 bg-white">
@@ -215,8 +217,8 @@ export default function ContactUsSubmissions() {
                       ))}
                     </select>
                   </td>
-                  <td className="py-4 px-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
+                  <td className="py-3 px-3 text-right whitespace-nowrap">
+                    <div className="flex items-center justify-end gap-1.5">
                       <button
                         onClick={() => setViewItem(sub)}
                         className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"

@@ -72,8 +72,7 @@ interface WriterEditorProps {
   isAdminMode?: boolean;
 }
 
-export const navbarCategories = [
-  "World",
+export const mainSectionCategories = [
   "Companies",
   "Startups",
   "Markets",
@@ -83,6 +82,17 @@ export const navbarCategories = [
   "Industries",
   "Technology",
   "Interview",
+];
+
+export const allAvailableSubcategories = [
+  // World / Regions
+  "Asia",
+  "Middle East",
+  "Europe",
+  "Britain",
+  "Africa",
+  "China",
+  "United States",
   // Companies
   "Corporate Announcements",
   "Mergers & Acquisitions",
@@ -115,7 +125,22 @@ export const navbarCategories = [
   "Energy",
   "Pharmaceuticals",
   "Automobile",
+  "Agriculture Business",
+  "Construction",
+  "Design",
+  "Textiles",
+  "Entertainment",
+  // Leaders
+  "Business Leaders",
+  "CEO Interviews",
+  "Executive Appointments",
   "Leadership Strategies",
+];
+
+export const navbarCategories = [
+  "World",
+  ...mainSectionCategories,
+  ...allAvailableSubcategories,
 ];
 
 export const worldRegions = [
@@ -129,7 +154,7 @@ export const worldRegions = [
 ];
 
 export const navbarSubcategoriesMap: Record<string, string[]> = {
-  // kept for potential fallback usage elsewhere if needed, though removed Global
+  // kept for potential fallback usage elsewhere if needed
 };
 
 export default function WriterEditor({
@@ -1197,7 +1222,7 @@ export default function WriterEditor({
                     onClick={() => setIsCategoryDropdownOpen(false)}
                   ></div>
                   <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg py-1 max-h-60 overflow-y-auto">
-                    {/* 1. Business (Default Option) */}
+                    {/* 1. Business */}
                     <button
                       type="button"
                       onClick={() => {
@@ -1210,7 +1235,7 @@ export default function WriterEditor({
                       Business
                     </button>
 
-                    {/* 2. World (Click to expand accordion) */}
+                    {/* 2. World (Click to expand accordion showing regions) */}
                     <div>
                       <div 
                         className={`w-full text-left px-4 py-2 text-xs flex items-center justify-between cursor-pointer transition-colors ${category === "World" || worldRegions.includes(category) ? "bg-red-50 text-[#ce1126] font-bold" : "text-gray-700 hover:bg-gray-50 font-medium"}`}
@@ -1225,18 +1250,6 @@ export default function WriterEditor({
 
                       {activeHoverCategory === "World" && (
                         <div className="bg-gray-50 py-1 border-y border-gray-100">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setCategory("World");
-                              setIsCategoryDropdownOpen(false);
-                              setSelectedSubcategories([]);
-                              setActiveHoverCategory(null);
-                            }}
-                            className={`w-full text-left px-6 py-2 text-xs transition-colors ${category === "World" ? "bg-red-100 text-[#ce1126] font-bold" : "text-gray-600 hover:bg-gray-200 font-medium"}`}
-                          >
-                            World (General)
-                          </button>
                           {worldRegions.map((region) => (
                             <button
                               key={region}
@@ -1256,8 +1269,8 @@ export default function WriterEditor({
                       )}
                     </div>
 
-                    {/* 3. The rest of the categories */}
-                    {navbarCategories.filter(c => c !== "Business").map((cat) => (
+                    {/* 3. The rest of the main section categories */}
+                    {mainSectionCategories.map((cat) => (
                       <button
                         key={cat}
                         type="button"
@@ -1271,6 +1284,26 @@ export default function WriterEditor({
                         {cat}
                       </button>
                     ))}
+
+                    {/* 4. All Other Menubar Categories / Subcategories */}
+                    <div className="border-t border-gray-100 my-1 pt-1">
+                      {allAvailableSubcategories
+                        .filter((sub) => !worldRegions.includes(sub))
+                        .map((cat) => (
+                          <button
+                            key={cat}
+                            type="button"
+                            onClick={() => {
+                              setCategory(cat);
+                              setIsCategoryDropdownOpen(false);
+                              setSelectedSubcategories([]);
+                            }}
+                            className={`w-full text-left px-4 py-2 text-xs transition-colors ${category === cat ? "bg-red-50 text-[#ce1126] font-bold" : "text-gray-700 hover:bg-gray-50 font-medium"}`}
+                          >
+                            {cat}
+                          </button>
+                        ))}
+                    </div>
                   </div>
                 </>
               )}
@@ -1286,39 +1319,14 @@ export default function WriterEditor({
             </div>
 
             <div className="border border-gray-300 rounded-xl p-3 bg-white space-y-4 max-h-[300px] overflow-y-auto custom-scrollbar">
+              {/* General, Main Section & Specific Subcategories (Excluding World) */}
               <div className="grid grid-cols-2 gap-2 text-xs">
-                {navbarCategories.filter(c => c !== category && c !== "World").map((sub) => {
-                  const checked = selectedSubcategories.includes(sub);
-                  const disabled =
-                    !checked && selectedSubcategories.length >= 5;
-                  return (
-                    <label
-                      key={sub}
-                      className={`flex items-center gap-2 p-1.5 rounded cursor-pointer transition ${
-                        checked
-                          ? "bg-red-50 text-red-700 font-bold"
-                          : disabled
-                            ? "opacity-40 cursor-not-allowed text-gray-400"
-                            : "hover:bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        disabled={disabled}
-                        onChange={() => toggleSubcategory(sub)}
-                        className="rounded border-gray-600 bg-transparent text-[#ce1126] focus:ring-0 w-3.5 h-3.5"
-                      />
-                      <span className="truncate">{sub}</span>
-                    </label>
-                  );
-                })}
-              </div>
-
-              <div>
-                <h4 className="text-[10px] font-black uppercase tracking-wider text-gray-500 mb-2 mt-2">WORLD</h4>
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  {worldRegions.filter(c => c !== category).map((sub) => {
+                {[
+                  ...mainSectionCategories,
+                  ...allAvailableSubcategories.filter((c) => !worldRegions.includes(c)),
+                ]
+                  .filter((c, idx, arr) => arr.indexOf(c) === idx && c !== category)
+                  .map((sub) => {
                     const checked = selectedSubcategories.includes(sub);
                     const disabled =
                       !checked && selectedSubcategories.length >= 5;
@@ -1344,6 +1352,42 @@ export default function WriterEditor({
                       </label>
                     );
                   })}
+              </div>
+
+              {/* WORLD Section Subcategories (Asia, Middle East, Europe, Britain, Africa, China, United States) */}
+              <div className="border-t border-gray-100 pt-2">
+                <h4 className="text-[10px] font-black uppercase tracking-wider text-gray-400 mb-2">
+                  WORLD
+                </h4>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  {worldRegions
+                    .filter((c) => c !== category)
+                    .map((sub) => {
+                      const checked = selectedSubcategories.includes(sub);
+                      const disabled =
+                        !checked && selectedSubcategories.length >= 5;
+                      return (
+                        <label
+                          key={sub}
+                          className={`flex items-center gap-2 p-1.5 rounded cursor-pointer transition ${
+                            checked
+                              ? "bg-red-50 text-red-700 font-bold"
+                              : disabled
+                                ? "opacity-40 cursor-not-allowed text-gray-400"
+                                : "hover:bg-gray-100 text-gray-700"
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            disabled={disabled}
+                            onChange={() => toggleSubcategory(sub)}
+                            className="rounded border-gray-600 bg-transparent text-[#ce1126] focus:ring-0 w-3.5 h-3.5"
+                          />
+                          <span className="truncate">{sub}</span>
+                        </label>
+                      );
+                    })}
                 </div>
               </div>
             </div>
@@ -2008,6 +2052,30 @@ export default function WriterEditor({
             <div
               ref={editorRef}
               contentEditable
+              onCopy={(e) => {
+                const selection = window.getSelection();
+                if (!selection || selection.rangeCount === 0) return;
+                
+                // Extract selected html/text
+                const container = document.createElement("div");
+                for (let i = 0; i < selection.rangeCount; i++) {
+                  container.appendChild(selection.getRangeAt(i).cloneContents());
+                }
+
+                // Check if selection contains any images or figures
+                if (container.querySelector("img, figure")) {
+                  e.preventDefault();
+                  // Remove all images and figures completely so only text/description is copied
+                  const images = container.querySelectorAll("img, figure");
+                  images.forEach((img) => img.remove());
+
+                  const plainText = container.innerText || container.textContent || "";
+                  const cleanHtml = container.innerHTML;
+
+                  e.clipboardData.setData("text/plain", plainText);
+                  e.clipboardData.setData("text/html", cleanHtml);
+                }
+              }}
               onClick={(e) => {
                 const target = e.target as HTMLElement;
                 if (target.tagName === "IMG") {
@@ -2333,7 +2401,7 @@ export default function WriterEditor({
 
                   {/* Content */}
                   <div
-                    className="prose prose-lg max-w-none text-gray-800 leading-relaxed font-serif prose-p:mb-6 prose-img:rounded-none prose-headings:font-sans prose-a:text-[#ce1126] break-words"
+                    className="prose prose-lg max-w-none text-gray-800 leading-relaxed font-serif prose-p:mb-6 prose-img:rounded-none prose-headings:font-sans prose-a:text-[#ce1126] break-words [overflow-wrap:anywhere] overflow-x-hidden"
                     dangerouslySetInnerHTML={{
                       __html:
                         editorRef.current?.innerHTML ||
