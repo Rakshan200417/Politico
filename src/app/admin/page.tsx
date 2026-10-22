@@ -27,6 +27,7 @@ import WriterEditor, { ArticleData } from "@/components/writer/WriterEditor";
 import ManageAds from "@/components/admin/ManageAds";
 import ContactUsSubmissions from "@/components/admin/ContactUsSubmissions";
 import AdvertiseLeads from "@/components/admin/AdvertiseLeads";
+import ShortsManager from "@/components/admin/ShortsManager";
 import SkeletonLoading from "@/components/common/SkeletonLoading";
 
 interface AdminArticleData extends ArticleData {
@@ -1153,6 +1154,10 @@ export default function AdminDashboard() {
 
       {activeTab === "leads" && (
         <AdvertiseLeads />
+      )}
+
+      {activeTab === "shorts" && (
+        <ShortsManager />
       )}
 
       {/* User Modals */}

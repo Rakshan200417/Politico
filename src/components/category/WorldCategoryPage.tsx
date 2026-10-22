@@ -136,8 +136,32 @@ export default async function WorldCategoryPage({
     moreOffset
   );
 
-  const totalMoreNewsCount = Math.max(0, totalArticles - 3);
-  const totalMorePages = Math.ceil(totalMoreNewsCount / MORE_PAGE_SIZE);
+  let moreArticlesList = moreArticlesRaw || [];
+  if (moreArticlesList.length === 0) {
+    const mockWorldMore = [
+      { r: "Europe", t: "European leaders gather in Brussels to negotiate strategic defense pact" },
+      { r: "Middle East", t: "Ceasefire diplomatic negotiations advance with international mediator assistance" },
+      { r: "Asia", t: "Pacific trade alliance establishes cross-border green energy investment framework" },
+      { r: "China", t: "Beijing outlines comprehensive industrial and technological manufacturing goals" },
+      { r: "Britain", t: "UK Parliament introduces new parliamentary measures on international data flow" },
+      { r: "Africa", t: "African Union launches continent-wide digital infrastructure and fintech roadmap" }
+    ];
+
+    moreArticlesList = mockWorldMore.map((item, idx) => ({
+      id: 9300 + idx,
+      slug: `world-${item.r.toLowerCase()}-more-${idx + 1}`,
+      title: item.t,
+      deck: `Comprehensive coverage on critical international policy developments across ${item.r}.`,
+      writer_name: "POLITICO STAFF",
+      category: item.r,
+      subcategories: [item.r],
+      image: `https://picsum.photos/seed/world-${item.r.toLowerCase()}-${idx}/800/600`,
+      updated_at: new Date(Date.now() - (idx + 1) * 3600000 * 2).toISOString(),
+    })) as any;
+  }
+
+  const totalMoreNewsCount = Math.max(moreArticlesList.length, totalArticles - 3);
+  const totalMorePages = Math.max(1, Math.ceil(totalMoreNewsCount / MORE_PAGE_SIZE));
 
   const mapToStory = (article: any, index: number): CategoryStory => {
     const storySlug = article.slug || slugify(article.title);
@@ -155,7 +179,7 @@ export default async function WorldCategoryPage({
 
   const leadArticle = mapToStory(initialArticles[0], 0);
   const sideStories = initialArticles.slice(1, 3).map((a, i) => mapToStory(a, i + 1));
-  const moreStories = (moreArticlesRaw || []).map((a, i) => mapToStory(a, i + 3));
+  const moreStories = moreArticlesList.map((a, i) => mapToStory(a, i + 3));
 
   const categoryData: CategoryPageData = {
     slug: "world",

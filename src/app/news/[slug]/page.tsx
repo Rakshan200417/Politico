@@ -94,10 +94,88 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
     authorLinkedInUrl = `https://www.linkedin.com/search/results/all/?keywords=${encodeURIComponent(articleData.writer_name)}`;
   }
 
-  // Fetch some dynamic latest stories for related/more news
+  // Fetch dynamic latest stories for related/more news with guaranteed mock fallbacks
   const allLatest = await getLatestPublishedArticles(10);
-  const relatedStories = allLatest.filter(a => a.id !== articleData.id).slice(0, 4);
-  const moreNews = allLatest.filter(a => a.id !== articleData.id).slice(4, 7);
+  let relatedCandidates = allLatest.filter(a => a.id !== articleData.id);
+  
+  const mockRelatedFallback = [
+    {
+      id: 9801,
+      slug: "senate-advances-bipartisan-legislation",
+      title: "Senate Committee Approves High-Stakes Regulatory Overhaul After Marathon Hearing",
+      deck: "Key lawmakers on both sides of the aisle reached an accord setting new guidelines for cross-border investments.",
+      writer_name: "POLITICO STAFF",
+      image: "https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      id: 9802,
+      slug: "tech-leaders-testify-before-subcommittee",
+      title: "Silicon Valley Executives Testify on Global Tech Competition and Infrastructure",
+      deck: "Industry leaders warn that federal supply chain rules could impact research and development timelines.",
+      writer_name: "SARAH FERRIS",
+      image: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      id: 9803,
+      slug: "economic-growth-exceeds-projections",
+      title: "Quarterly Growth Outpaces Federal Forecasts as Labor Markets Remain Resilient",
+      deck: "Surging consumer spending and corporate earnings bolster confidence across major economic sectors.",
+      writer_name: "VICTORIA GUIDA",
+      image: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      id: 9804,
+      slug: "white-house-signals-new-trade-strategy",
+      title: "White House Trade Officials Signal New Bilateral Tariffs in Strategic Shift",
+      deck: "Negotiators emphasize reciprocal concessions as global supply chains face tightening security reviews.",
+      writer_name: "ALEX BURNS",
+      image: "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=800&q=80"
+    }
+  ];
+
+  const mockMoreNewsFallback = [
+    {
+      id: 9805,
+      slug: "governors-convene-for-national-policy-forum",
+      title: "State Governors Convene to Tackle Infrastructure and Energy Grid Modernization",
+      deck: "Governors across twenty states draft coordinated plans to speed up renewable power permitting.",
+      writer_name: "JONATHAN MARTIN",
+      image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      id: 9806,
+      slug: "central-banks-evaluate-interest-rate-trajectories",
+      title: "Central Banks Weigh Next Monetary Steps as Inflation Indicators Cool Worldwide",
+      deck: "Policymakers caution against premature easing while international markets price in rate stability.",
+      writer_name: "ZACK COLMAN",
+      image: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      id: 9807,
+      slug: "diplomatic-talks-advance-in-geneva",
+      title: "Diplomatic Envoys Conclude Landmark Security Dialogue in Geneva",
+      deck: "Officials announce joint protocols covering cybersecurity safeguards and maritime trade corridors.",
+      writer_name: "NAHAL TOOSI",
+      image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80"
+    }
+  ];
+
+  // Fill related stories up to 4
+  const relatedStories = [...relatedCandidates];
+  let relIdx = 0;
+  while (relatedStories.length < 4 && relIdx < mockRelatedFallback.length) {
+    relatedStories.push(mockRelatedFallback[relIdx] as any);
+    relIdx++;
+  }
+
+  // Fill more news up to 3
+  const moreCandidates = allLatest.filter(a => a.id !== articleData.id && !relatedStories.some(r => r.id === a.id));
+  const moreNews = [...moreCandidates];
+  let moreIdx = 0;
+  while (moreNews.length < 3 && moreIdx < mockMoreNewsFallback.length) {
+    moreNews.push(mockMoreNewsFallback[moreIdx] as any);
+    moreIdx++;
+  }
 
   const tagsArray = articleData.tags ? articleData.tags.split(',').map(t => t.trim()) : [];
   
@@ -117,7 +195,7 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
   const categorySlug = slugify(articleData.category);
 
   return (
-    <div className="min-h-screen bg-white font-sans text-[#111] flex flex-col overflow-x-hidden w-full max-w-full">
+    <div className="min-h-screen bg-white font-sans text-[#111] flex flex-col overflow-x-clip w-full max-w-full">
       <Header />
 
       {/* ── Top Banner Advertisement (In the Beige Gap) ── */}
@@ -263,15 +341,15 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
           </article>
 
           {/* Sidebar Column identical to Category Pages */}
-          <aside className="border-l border-[#e1e1e1] pl-0 lg:pl-6 h-full">
-            <div className="w-full">
+          <aside className="border-l border-[#e1e1e1] pl-0 lg:pl-6 h-full relative">
+            <div className="w-full h-full">
               {/* Small Square Ad block - Ad 06 */}
               <div className="w-full flex justify-center mb-8">
                 <AdvertisementSlot variant="square" dimensions="300 x 250" label="Ad 06" className="!my-0" />
               </div>
 
-              {/* Related Stories */}
-              <div className="xl:sticky xl:top-[100px] xl:self-start">
+              {/* Related Stories Section: Fully sticky until page scroll finishes */}
+              <div className="sticky top-[80px] self-start z-10 bg-white space-y-4 pt-1">
                 <div className="flex items-center gap-2 pb-2 mb-3 border-b border-[#d9d9d9]">
                   <span className="w-2 h-2 rounded-full bg-[#d71920]" />
                   <h3 className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#222]">
@@ -279,9 +357,9 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
                   </h3>
                 </div>
 
-                {/* First story (sticky on desktop xl: alongside all stories, but non-sticky on laptop lg:) */}
-                {relatedStories.slice(0, 1).map((story, idx) => (
-                  <article key={`${story.title}-${idx}`} className="border-b border-[#e1e1e1] pb-4 mb-4">
+                {/* All Related Stories */}
+                {relatedStories.slice(0, 3).map((story, idx) => (
+                  <article key={`${story.title}-${idx}`} className="border-b border-[#e1e1e1] pb-4 last:border-b-0">
                     <a href={`/news/${story.slug}`} className="group block">
                       <div className="aspect-[16/10] overflow-hidden bg-gray-100 rounded-none mb-2">
                         <img
@@ -299,29 +377,6 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
                     </a>
                   </article>
                 ))}
-
-                {/* Last 2 stories (sticky on laptop lg:top-[100px], and part of sticky block on desktop xl:) */}
-                <div className="lg:sticky lg:top-[100px] lg:self-start xl:static xl:top-auto space-y-4 pt-1 z-10 bg-white">
-                  {relatedStories.slice(1, 3).map((story, idx) => (
-                    <article key={`${story.title}-${idx + 1}`} className="border-b border-[#e1e1e1] pb-4 last:border-b-0">
-                      <a href={`/news/${story.slug}`} className="group block">
-                        <div className="aspect-[16/10] overflow-hidden bg-gray-100 rounded-none mb-2">
-                          <img
-                            src={story.image || `https://picsum.photos/seed/${story.id}/800/600`}
-                            alt=""
-                            className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-300 rounded-none"
-                          />
-                        </div>
-                        <h4 className="text-[15px] font-bold leading-tight text-[#111] group-hover:text-[#d71920] transition-colors">
-                          {story.title}
-                        </h4>
-                        <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.14em] text-[#666]">
-                          BY {story.writer_name}
-                        </p>
-                      </a>
-                    </article>
-                  ))}
-                </div>
               </div>
             </div>
           </aside>

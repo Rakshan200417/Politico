@@ -154,9 +154,32 @@ export default async function CategoryRoute({ params, searchParams }: { params: 
     moreOffset
   );
 
+  let moreArticlesList = moreArticlesRaw || [];
+  if (moreArticlesList.length === 0) {
+    const mockMoreTitles = [
+      `Policy shifts in ${categoryName}: How regulators are adjusting frameworks for 2026`,
+      `Inside the boardroom: Leading executives discuss trends transforming ${categoryName}`,
+      `Market reaction: Key financial indicators and investor sentiment in ${categoryName}`,
+      `Analysis: What bipartisan negotiations mean for future ${categoryName} investments`,
+      `Exclusive survey: Industry stakeholders weigh in on emerging ${categoryName} challenges`,
+      `The global perspective: How international partners view new US ${categoryName} strategies`,
+      `Behind closed doors: Lawmakers debate critical reforms affecting ${categoryName}`
+    ];
+
+    moreArticlesList = mockMoreTitles.map((t, idx) => ({
+      id: 9100 + idx,
+      slug: `mock-${params.slug}-more-${idx + 1}`,
+      title: t,
+      deck: `Detailed reporting and exclusive industry perspectives on key developments in ${categoryName}.`,
+      writer_name: 'POLITICO STAFF',
+      image: `https://picsum.photos/seed/${params.slug}-more-${idx}/800/600`,
+      created_at: new Date(Date.now() - (idx + 1) * 7200000).toISOString()
+    })) as any;
+  }
+
   // Remaining articles for the "More News" section after the top 3
-  const totalMoreNewsCount = Math.max(0, totalArticles - 3);
-  const totalMorePages = Math.ceil(totalMoreNewsCount / MORE_PAGE_SIZE);
+  const totalMoreNewsCount = Math.max(moreArticlesList.length, totalArticles - 3);
+  const totalMorePages = Math.max(1, Math.ceil(totalMoreNewsCount / MORE_PAGE_SIZE));
 
   const mapToStory = (article: any): CategoryStory => {
     return {
@@ -173,7 +196,7 @@ export default async function CategoryRoute({ params, searchParams }: { params: 
 
   const leadArticle = mapToStory(initialArticles[0]);
   const sideStories = initialArticles.slice(1, 3).map(mapToStory);
-  const moreStories = (moreArticlesRaw || []).map(mapToStory);
+  const moreStories = moreArticlesList.map(mapToStory);
 
   const categoryData: CategoryPageData = {
     slug: params.slug,

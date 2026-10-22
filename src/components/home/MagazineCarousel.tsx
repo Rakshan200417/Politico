@@ -170,7 +170,19 @@ const magazineArticles = [
 ];
 
 export default function MagazineCarousel({ articles }: { articles?: any[] }) {
-  const displayedArticles = articles || magazineArticles.slice(0, 12);
+  // Guarantee exactly 12 articles in the carousel even without backend connection or with partial articles
+  const default12 = magazineArticles.slice(0, 12);
+  let displayedArticles = default12;
+
+  if (articles && articles.length > 0) {
+    const combined = [...articles];
+    let fillIdx = 0;
+    while (combined.length < 12 && fillIdx < default12.length) {
+      combined.push(default12[fillIdx]);
+      fillIdx++;
+    }
+    displayedArticles = combined.slice(0, 12);
+  }
   const [startIndex, setStartIndex] = useState(0);
   const [visibleCount, setVisibleCount] = useState(3);
   const [cardWidth, setCardWidth] = useState(280);
@@ -275,7 +287,7 @@ export default function MagazineCarousel({ articles }: { articles?: any[] }) {
             willChange: "transform"
           }}
         >
-          {displayedArticles.map((article) => (
+          {displayedArticles.map((article: any) => (
             <a
               key={article.id}
               href={`/news/${slugify(article.title)}`}
