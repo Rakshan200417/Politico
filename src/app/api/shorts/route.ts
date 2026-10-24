@@ -105,6 +105,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const {
       slot_number,
+      old_slot_number,
       title,
       video_url,
       platform = 'YouTube',
@@ -123,6 +124,14 @@ export async function POST(request: Request) {
     }
 
     const isActiveVal = active === true || active === 1 || active === '1' || active === 'Active' ? 1 : 0;
+
+    // If this video was moved from another slot, remove it from old slot so old slot becomes empty
+    if (old_slot_number !== undefined && old_slot_number !== null) {
+      const oldSlotNum = parseInt(old_slot_number, 10);
+      if (oldSlotNum && oldSlotNum >= 1 && oldSlotNum <= 4 && oldSlotNum !== slotNum) {
+        await pool.execute('DELETE FROM shorts_reels WHERE slot_number = ?', [oldSlotNum]);
+      }
+    }
 
     // Strict 1 video per slot: REPLACE / UPSERT
     await pool.execute(

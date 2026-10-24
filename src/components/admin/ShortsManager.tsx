@@ -30,6 +30,7 @@ export default function ShortsManager() {
   const [targetSlot, setTargetSlot] = useState<number>(1);
   const [status, setStatus] = useState<"Active" | "Inactive">("Active");
   const [isEditingId, setIsEditingId] = useState<number | null>(null);
+  const [editingOriginalSlot, setEditingOriginalSlot] = useState<number | null>(null);
 
   useEffect(() => {
     fetchVideos();
@@ -167,6 +168,7 @@ export default function ShortsManager() {
     try {
       const payload = {
         slot_number: targetSlot,
+        old_slot_number: editingOriginalSlot,
         title: title.trim(),
         video_url: videoUrl.trim(),
         platform,
@@ -194,6 +196,7 @@ export default function ShortsManager() {
       setDuration("0:45");
       setStatus("Active");
       setIsEditingId(null);
+      setEditingOriginalSlot(null);
 
       fetchVideos();
     } catch (err: any) {
@@ -249,6 +252,7 @@ export default function ShortsManager() {
   // Edit an existing slot
   const handleEditSlot = (v: ShortReelVideo) => {
     setIsEditingId(v.id || null);
+    setEditingOriginalSlot(v.slot_number);
     setTargetSlot(v.slot_number);
     setVideoUrl(v.video_url);
     setTitle(v.title);
@@ -289,7 +293,7 @@ export default function ShortsManager() {
             <h2 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
               Shorts & Reels Manager
             </h2>
-            <span className="bg-orange-100 text-orange-700 text-[11px] font-black px-2.5 py-0.5 rounded-full border border-orange-200">
+            <span className="bg-red-50 text-[#ce1126] text-[11px] font-black px-2.5 py-0.5 rounded-full border border-red-200">
               {videos.length} Videos
             </span>
           </div>
@@ -317,8 +321,8 @@ export default function ShortsManager() {
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8">
         <div className="flex items-center justify-between pb-4 border-b border-gray-100 mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#fff2eb] flex items-center justify-center shadow-xs border border-orange-100 flex-shrink-0">
-              <div className="w-0 h-0 border-t-[7px] border-t-transparent border-b-[7px] border-b-transparent border-l-[11px] border-l-[#e85d1e] ml-1"></div>
+            <div className="w-10 h-10 rounded-2xl bg-red-50 flex items-center justify-center shadow-xs border border-red-100 flex-shrink-0">
+              <div className="w-0 h-0 border-t-[7px] border-t-transparent border-b-[7px] border-b-transparent border-l-[11px] border-l-[#ce1126] ml-1"></div>
             </div>
             <div>
               <h3 className="text-base font-bold text-gray-900">
@@ -334,6 +338,7 @@ export default function ShortsManager() {
             <button
               onClick={() => {
                 setIsEditingId(null);
+                setEditingOriginalSlot(null);
                 setVideoUrl("");
                 setTitle("");
                 setThumbnailUrl("");
@@ -361,7 +366,7 @@ export default function ShortsManager() {
                     <button
                       type="button"
                       onClick={handleAutoFetch}
-                      className="text-[10px] font-bold text-orange-600 hover:text-orange-700 flex items-center gap-1 transition-colors"
+                      className="text-[10px] font-bold text-[#ce1126] hover:text-[#b71c1c] flex items-center gap-1 transition-colors"
                     >
                       <Sparkles size={12} /> Auto-Fetch Title, Image & Duration
                     </button>
@@ -372,7 +377,7 @@ export default function ShortsManager() {
                     onChange={(e) => handleUrlChange(e.target.value)}
                     placeholder="e.g. https://www.youtube.com/shorts/... or https://rumble.com/..."
                     required
-                    className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all font-sans"
+                    className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-[#ce1126] focus:ring-2 focus:ring-red-100 transition-all font-sans"
                   />
                   <span className="text-[9px] text-gray-400 mt-1 block">
                     Supports YouTube Shorts, YouTube, Rumble videos, Instagram Reels, and Facebook Reels.
@@ -386,7 +391,7 @@ export default function ShortsManager() {
                   <select
                     value={platform}
                     onChange={(e) => setPlatform(e.target.value)}
-                    className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all font-medium text-gray-800"
+                    className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white focus:outline-none focus:border-[#ce1126] focus:ring-2 focus:ring-red-100 transition-all font-medium text-gray-800"
                   >
                     <option value="YouTube">YouTube</option>
                     <option value="Rumble">Rumble</option>
@@ -407,7 +412,7 @@ export default function ShortsManager() {
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. Supreme Court Hearing Highlights & Legal Analysis"
                   required
-                  className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all font-sans"
+                  className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-[#ce1126] focus:ring-2 focus:ring-red-100 transition-all font-sans"
                 />
               </div>
 
@@ -422,7 +427,7 @@ export default function ShortsManager() {
                     value={thumbnailUrl}
                     onChange={(e) => setThumbnailUrl(e.target.value)}
                     placeholder="e.g. https://images.unsplash.com/... or auto-fetched"
-                    className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all font-sans"
+                    className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-[#ce1126] focus:ring-2 focus:ring-red-100 transition-all font-sans"
                   />
                 </div>
 
@@ -458,7 +463,7 @@ export default function ShortsManager() {
                     value={duration}
                     onChange={(e) => setDuration(e.target.value)}
                     placeholder="0:45"
-                    className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all font-sans"
+                    className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-[#ce1126] focus:ring-2 focus:ring-red-100 transition-all font-sans"
                   />
                 </div>
 
@@ -469,13 +474,14 @@ export default function ShortsManager() {
                   <select
                     value={targetSlot}
                     onChange={(e) => setTargetSlot(Number(e.target.value))}
-                    className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white font-semibold text-gray-800 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all"
+                    className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white font-semibold text-gray-800 focus:outline-none focus:border-[#ce1126] focus:ring-2 focus:ring-red-100 transition-all"
                   >
                     {[1, 2, 3, 4].map((slot) => {
                       const existing = getSlotVideo(slot);
+                      const isCurrentEditingSlot = editingOriginalSlot === slot;
                       return (
                         <option key={slot} value={slot}>
-                          Slot #{slot} {existing ? `(Occupied: ${existing.title.slice(0, 24)}...)` : "(Available / Empty)"}
+                          Slot #{slot} {isCurrentEditingSlot ? "(Current video)" : existing ? `(Occupied: ${existing.title.slice(0, 24)}...)` : "(Available / Empty)"}
                         </option>
                       );
                     })}
@@ -489,7 +495,7 @@ export default function ShortsManager() {
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value as "Active" | "Inactive")}
-                    className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white font-bold text-gray-800 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all"
+                    className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white font-bold text-gray-800 focus:outline-none focus:border-[#ce1126] focus:ring-2 focus:ring-red-100 transition-all"
                   >
                     <option value="Active">Active (Shows on Homepage)</option>
                     <option value="Inactive">Inactive (Hidden from Homepage)</option>
@@ -568,7 +574,7 @@ export default function ShortsManager() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full mt-5 py-3 px-6 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs font-bold uppercase tracking-widest rounded-xl shadow-md shadow-orange-500/25 transition-all hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full mt-5 py-3 px-6 bg-gradient-to-r from-[#ce1126] to-[#a00d1e] hover:from-[#b00d1f] hover:to-[#8c0a19] text-white text-xs font-bold uppercase tracking-widest rounded-xl shadow-md shadow-red-600/20 transition-all hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isSubmitting ? (
                   <>
@@ -615,12 +621,12 @@ export default function ShortsManager() {
                     setTargetSlot(slotNum);
                     window.scrollTo({ top: 300, behavior: "smooth" });
                   }}
-                  className="rounded-2xl border-2 border-dashed border-gray-200 hover:border-orange-400 bg-gray-50/50 hover:bg-orange-50/30 p-5 flex flex-col items-center justify-center min-h-[360px] text-center cursor-pointer transition-all group"
+                  className="rounded-2xl border-2 border-dashed border-gray-200 hover:border-[#ce1126]/60 bg-gray-50/50 hover:bg-red-50/20 p-5 flex flex-col items-center justify-center min-h-[360px] text-center cursor-pointer transition-all group"
                 >
-                  <div className="w-12 h-12 rounded-full bg-gray-100 group-hover:bg-orange-100 flex items-center justify-center text-gray-400 group-hover:text-orange-600 mb-3 transition-colors">
+                  <div className="w-12 h-12 rounded-full bg-gray-100 group-hover:bg-red-50 flex items-center justify-center text-gray-400 group-hover:text-[#ce1126] mb-3 transition-colors">
                     <VideoIcon size={24} />
                   </div>
-                  <span className="text-xs font-bold text-orange-600 uppercase tracking-wider mb-1">
+                  <span className="text-xs font-bold text-[#ce1126] uppercase tracking-wider mb-1">
                     Slot #{slotNum} {slotNum === 1 ? "(Top Video)" : slotNum === 4 ? "(Last Video)" : ""}
                   </span>
                   <span className="text-sm font-semibold text-gray-800 mb-1">Slot is Empty</span>
@@ -684,7 +690,7 @@ export default function ShortsManager() {
 
                     {/* Slot Indicator Tag */}
                     <div className="absolute top-10 right-3 z-10">
-                      <span className="text-[9px] font-black px-2 py-0.5 rounded bg-orange-500 text-white shadow">
+                      <span className="text-[9px] font-black px-2 py-0.5 rounded bg-[#111111]/90 text-white border border-white/20 shadow">
                         Slot #{slotNum} {slotNum === 1 ? "(Top)" : slotNum === 4 ? "(Last)" : ""}
                       </span>
                     </div>
@@ -697,7 +703,7 @@ export default function ShortsManager() {
                       className="absolute inset-0 flex items-center justify-center z-10 group/play"
                       title="Open Video in New Tab"
                     >
-                      <div className="w-12 h-12 rounded-full bg-black/40 backdrop-blur-sm group-hover/play:bg-orange-500 flex items-center justify-center text-white transition-all transform group-hover/play:scale-110 shadow-lg">
+                      <div className="w-12 h-12 rounded-full bg-black/40 backdrop-blur-sm group-hover/play:bg-[#ce1126] flex items-center justify-center text-white transition-all transform group-hover/play:scale-110 shadow-lg">
                         <Play size={20} className="fill-white translate-x-0.5" />
                       </div>
                     </a>
@@ -712,7 +718,7 @@ export default function ShortsManager() {
                       href={video.video_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="absolute bottom-3 right-3 text-[10px] font-bold text-orange-400 hover:text-white flex items-center gap-1 z-10"
+                      className="absolute bottom-3 right-3 text-[10px] font-bold text-gray-300 hover:text-white flex items-center gap-1 z-10"
                     >
                       Watch <ExternalLink size={11} />
                     </a>
@@ -720,7 +726,7 @@ export default function ShortsManager() {
 
                   {/* Title & Info */}
                   <div className="p-4">
-                    <h4 className="text-xs font-bold text-gray-900 leading-snug line-clamp-2 min-h-[34px] group-hover:text-orange-600 transition-colors">
+                    <h4 className="text-xs font-bold text-gray-900 leading-snug line-clamp-2 min-h-[34px] group-hover:text-[#ce1126] transition-colors">
                       {video.title}
                     </h4>
 
@@ -754,7 +760,7 @@ export default function ShortsManager() {
                 <div className="p-3 bg-gray-50/70 border-t border-gray-100 flex items-center justify-between gap-2">
                   <button
                     onClick={() => handleEditSlot(video)}
-                    className="flex-1 py-1.5 px-3 text-[10px] font-bold uppercase tracking-wider text-gray-700 hover:text-orange-600 hover:bg-orange-50 rounded-lg border border-gray-200 transition-colors flex items-center justify-center gap-1.5"
+                    className="flex-1 py-1.5 px-3 text-[10px] font-bold uppercase tracking-wider text-gray-700 hover:text-[#ce1126] hover:bg-red-50 rounded-lg border border-gray-200 transition-colors flex items-center justify-center gap-1.5"
                   >
                     <Edit3 size={12} /> Edit
                   </button>
