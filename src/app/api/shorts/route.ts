@@ -133,6 +133,23 @@ export async function POST(request: Request) {
       }
     }
 
+    let finalThumbnail = thumbnail_url;
+    if (finalThumbnail && typeof finalThumbnail === 'string' && finalThumbnail.startsWith('data:image/')) {
+      try {
+        const sharp = (await import('sharp')).default;
+        const match = finalThumbnail.match(/^data:image\/[a-zA-Z0-9+]+;base64,(.+)$/);
+        if (match) {
+          const inputBuffer = Buffer.from(match[1], 'base64');
+          const webpBuffer = await sharp(inputBuffer).webp({ quality: 85 }).toBuffer();
+          const filename = `reel_thumb_${slotNum}_${Date.now()}.webp`;
+          const { uploadToFolder } = await import('@/lib/b2Storage');
+          finalThumbnail = await uploadToFolder('reels', filename, webpBuffer, 'image/webp');
+        }
+      } catch (err) {
+        console.warn('[shorts] Failed to upload thumbnail to B2 reels:', err);
+      }
+    }
+
     // Strict 1 video per slot: REPLACE / UPSERT
     await pool.execute(
       `INSERT INTO shorts_reels (slot_number, title, video_url, platform, thumbnail_url, duration, active)
@@ -145,7 +162,7 @@ export async function POST(request: Request) {
          duration = VALUES(duration),
          active = VALUES(active),
          updated_at = CURRENT_TIMESTAMP`,
-      [slotNum, title.trim(), video_url.trim(), platform, thumbnail_url, duration, isActiveVal]
+      [slotNum, title.trim(), video_url.trim(), platform, finalThumbnail, duration, isActiveVal]
     );
 
     return NextResponse.json({ success: true, message: `Slot #${slotNum} updated successfully` });

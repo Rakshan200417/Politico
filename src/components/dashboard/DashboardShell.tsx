@@ -155,12 +155,12 @@ export default function DashboardShell({
 
           {/* Navigation Links */}
           <div className="p-4 lg:p-5 space-y-1.5">
-            <div className="px-3 mb-2.5 flex justify-center">
+            <div className="px-3.5 mb-3 flex items-center justify-start">
               <a
                 href="/"
-                className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-[#ce1126] transition-colors"
+                className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-white transition-colors group"
               >
-                <ArrowLeft size={14} strokeWidth={2.5} />
+                <ArrowLeft size={14} strokeWidth={2.5} className="group-hover:-translate-x-0.5 transition-transform" />
                 <span>Back to Home</span>
               </a>
             </div>

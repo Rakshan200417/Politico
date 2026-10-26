@@ -146,7 +146,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'ID or slot_key is required' }, { status: 400 });
     }
 
-    // If an image is uploaded (e.g. data URL base64), convert it to WEBP format
+    // If an image is uploaded (e.g. data URL base64), convert to WebP and upload directly to Backblaze B2 'ads' folder
     if (image && typeof image === 'string' && image.startsWith('data:image/')) {
       try {
         const sharp = (await import('sharp')).default;
@@ -154,10 +154,14 @@ export async function PUT(request: Request) {
         if (match) {
           const inputBuffer = Buffer.from(match[1], 'base64');
           const webpBuffer = await sharp(inputBuffer).webp({ quality: 85 }).toBuffer();
-          image = `data:image/webp;base64,${webpBuffer.toString('base64')}`;
+          
+          // Upload to Backblaze B2 ads folder
+          const filename = `ad_${slot_key || id || Date.now()}_${Date.now()}.webp`;
+          const { uploadToFolder } = await import('@/lib/b2Storage');
+          image = await uploadToFolder('ads', filename, webpBuffer, 'image/webp');
         }
       } catch (sharpErr) {
-        console.warn('[ads] Sharp WebP conversion failed, saving original:', sharpErr);
+        console.warn('[ads] B2/Sharp upload failed, falling back:', sharpErr);
       }
     }
     

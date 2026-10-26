@@ -30,7 +30,14 @@ export async function POST(request: Request) {
 
     const contentType = request.headers.get('content-type') || '';
     const { searchParams } = new URL(request.url);
-    const folderType = searchParams.get('type') || 'articles'; // default to articles
+    const requestedFolder = searchParams.get('type') || 'articles';
+
+    // Map to the correct B2 folder matching your standard structure:
+    // ads, articles, avatars, database, database-backups, media, reels
+    const validFolders = ['ads', 'articles', 'avatars', 'database', 'database-backups', 'media', 'reels'];
+    const targetFolder = validFolders.includes(requestedFolder.toLowerCase())
+      ? requestedFolder.toLowerCase()
+      : 'articles';
 
     let buffer: Buffer;
     let extension = '.png';
@@ -40,9 +47,8 @@ export async function POST(request: Request) {
     let seoKeywords = '';
     let uploaderEmail = '';
 
-    // Ensure upload directory exists
-    const subDir = folderType === 'avatars' ? 'avatars' : 'articles';
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', subDir);
+    // Local temporary fallback folder
+    const uploadDir = path.join(process.cwd(), 'public', 'uploads', targetFolder);
     await mkdir(uploadDir, { recursive: true });
 
     if (contentType.includes('application/json')) {
@@ -97,24 +103,35 @@ export async function POST(request: Request) {
       buffer = Buffer.from(bytes);
     }
 
-    const prefix = folderType === 'avatars' ? 'avatar' : 'article';
+    const prefix = targetFolder === 'avatars' ? 'avatar' : targetFolder === 'ads' ? 'ad' : targetFolder === 'reels' ? 'reel' : 'article';
     const filename = `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.webp`;
     const filePath = path.join(uploadDir, filename);
 
-    // Convert and save buffer directly as optimized WebP format
+    // Convert buffer to WebP
+    let webpBuffer: Buffer = buffer;
     try {
       const sharp = (await import('sharp')).default;
-      await sharp(buffer).webp({ quality: 85 }).toFile(filePath);
+      webpBuffer = await sharp(buffer).webp({ quality: 85 }).toBuffer();
+      // Keep a local copy if needed
+      await writeFile(filePath, webpBuffer);
     } catch (sharpErr) {
       console.warn('[upload] Sharp conversion failed, falling back to raw buffer:', sharpErr);
       await writeFile(filePath, buffer);
+      webpBuffer = buffer;
     }
 
-    const publicUrl = `/uploads/${subDir}/${filename}`;
+    // Upload directly to Backblaze B2 under the matching folder
+    let finalUrl = `/uploads/${targetFolder}/${filename}`;
+    try {
+      const { uploadToFolder } = await import('@/lib/b2Storage');
+      finalUrl = await uploadToFolder(targetFolder, filename, webpBuffer, 'image/webp');
+    } catch (b2Err) {
+      console.error('[upload] Backblaze B2 upload failed, falling back to local file URL:', b2Err);
+    }
 
     // Return the URL and metadata so the client can save it later
     return NextResponse.json({
-      url: publicUrl,
+      url: finalUrl,
       filename: originalName,
       message: 'Image uploaded and converted to WebP successfully',
     }, { status: 200 });

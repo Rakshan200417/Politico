@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { 
   Database, 
   Cloud, 
@@ -28,113 +28,215 @@ export interface BackupItem {
   status: "available" | "restoring" | "completed";
 }
 
-const INITIAL_MOCK_BACKUPS: BackupItem[] = [
-  {
-    id: "b1",
-    filename: "db_backup_manual_2026_09_27_20_21_24.json",
-    date: "Sep 28, 2026, 01:51 AM",
-    size: "28.65 MB",
-    source: "Backblaze B2",
-    status: "available",
-  },
-  {
-    id: "b2",
-    filename: "db_backup_manual_2026_09_10_12_04_07.json",
-    date: "Sep 10, 2026, 05:34 PM",
-    size: "28.09 MB",
-    source: "Backblaze B2",
-    status: "available",
-  },
-  {
-    id: "b3",
-    filename: "db_backup_manual_2026_09_10_07_58_01.json",
-    date: "Sep 10, 2026, 01:28 PM",
-    size: "28.01 MB",
-    source: "Backblaze B2",
-    status: "available",
-  },
-  {
-    id: "b4",
-    filename: "db_backup_manual_2026_09_09_15_04_15.json",
-    date: "Sep 9, 2026, 08:34 PM",
-    size: "28.24 MB",
-    source: "Backblaze B2",
-    status: "available",
-  },
-  {
-    id: "b5",
-    filename: "db_backup_manual_2026_09_08_08_32_57.json",
-    date: "Sep 8, 2026, 02:02 PM",
-    size: "28.07 MB",
-    source: "Backblaze B2",
-    status: "available",
-  },
-];
-
 export default function DatabaseBackups() {
-  const [backups, setBackups] = useState<BackupItem[]>(INITIAL_MOCK_BACKUPS);
-  const [isScanning, setIsScanning] = useState(false);
+  const [backups, setBackups] = useState<BackupItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isCreatingBackup, setIsCreatingBackup] = useState(false);
-  const [selectedBackup, setSelectedBackup] = useState<BackupItem | null>(null);
-  const [showRestoreModal, setShowRestoreModal] = useState(false);
-  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [notification, setNotification] = useState<{ type: "success" | "info" | "error"; message: string } | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const showToast = (type: "success" | "info" | "error", message: string) => {
     setNotification({ type, message });
     setTimeout(() => setNotification(null), 4000);
   };
 
-  const handleCreateB2Backup = () => {
+  // Fetch live backups from Backblaze B2 on load
+  React.useEffect(() => {
+    fetchBackups();
+  }, []);
+
+  const fetchBackups = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/database-backups");
+      const data = await res.json();
+      if (data.success && Array.isArray(data.backups)) {
+        setBackups(data.backups);
+      } else {
+        setBackups([]);
+      }
+    } catch {
+      setBackups([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCreateB2Backup = async () => {
     setIsCreatingBackup(true);
-    showToast("info", "Initiating automated database snapshot for Backblaze B2...");
-    setTimeout(() => {
-      const now = new Date();
-      const dateStr = now.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-      const timeStr = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
-      const pad = (n: number) => String(n).padStart(2, "0");
-      const timestampName = `${now.getFullYear()}_${pad(now.getMonth() + 1)}_${pad(now.getDate())}_${pad(now.getHours())}_${pad(now.getMinutes())}_${pad(now.getSeconds())}`;
-      
-      const newBackup: BackupItem = {
-        id: `b_${Date.now()}`,
-        filename: `db_backup_manual_${timestampName}.json`,
-        date: `${dateStr}, ${timeStr}`,
-        size: "28.72 MB",
-        source: "Backblaze B2",
-        status: "available",
-      };
-
-      setBackups([newBackup, ...backups]);
+    showToast("info", "Initiating real database snapshot and uploading to Backblaze B2...");
+    try {
+      const res = await fetch("/api/database-backups", { method: "POST" });
+      const data = await res.json();
+      if (data.success && data.backup) {
+        await fetchBackups();
+        showToast("success", "Database snapshot saved to Backblaze B2 (database-backups/)!");
+      } else {
+        throw new Error(data.error || "Failed to create backup");
+      }
+    } catch (err: any) {
+      showToast("error", err.message || "Backup failed");
+    } finally {
       setIsCreatingBackup(false);
-      showToast("success", "Backup snapshot created! (UI template ready for Backblaze B2 integration)");
-    }, 1800);
+    }
   };
 
-  const handleScanStorage = () => {
-    setIsScanning(true);
-    setTimeout(() => {
-      setIsScanning(false);
-      showToast("success", "Backblaze B2 storage scan complete. All 5 snapshots verified.");
-    }, 1200);
+  // Download directly prompting save location instead of opening raw text in a browser tab
+  const handleDownload = async (backup: BackupItem) => {
+    try {
+      showToast("info", `Preparing download for ${backup.filename}...`);
+      const key = (backup as any).key || `database-backups/${backup.filename}`;
+
+      // Use the direct attachment download endpoint
+      const downloadUrl = `/api/database-backups/download?key=${encodeURIComponent(key)}&filename=${encodeURIComponent(backup.filename)}`;
+      
+      const res = await fetch(downloadUrl);
+      if (!res.ok) {
+        // Fallback to direct download using blob if endpoint failed
+        const fallbackUrl = (backup as any).url || `https://Politico.s3.us-east-005.backblazeb2.com/database-backups/${backup.filename}`;
+        const blobRes = await fetch(fallbackUrl);
+        const blob = await blobRes.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = backup.filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(blobUrl);
+      } else {
+        const blob = await res.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = backup.filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(blobUrl);
+      }
+
+      showToast("success", `Download completed: ${backup.filename}`);
+    } catch (err: any) {
+      showToast("error", err.message || "Failed to download backup file");
+    }
   };
 
-  const handleDownload = (backup: BackupItem) => {
-    showToast("info", `Preparing download for ${backup.filename}...`);
+  const handleDelete = async (id: string, filename: string) => {
+    if (!confirm(`Are you sure you want to delete ${filename} from Backblaze B2?`)) return;
+    try {
+      const key = (backups.find((b) => b.id === id) as any)?.key || `database-backups/${filename}`;
+      const res = await fetch(`/api/database-backups?key=${encodeURIComponent(key)}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        setBackups((prev) => prev.filter((b) => b.id !== id));
+        showToast("success", `Removed ${filename} from Backblaze B2`);
+      } else {
+        throw new Error(data.error || "Failed to delete");
+      }
+    } catch (err: any) {
+      showToast("error", err.message || "Failed to delete from storage");
+    }
   };
 
-  const handleDelete = (id: string, filename: string) => {
-    if (!confirm(`Are you sure you want to delete ${filename} from storage?`)) return;
-    setBackups(backups.filter((b) => b.id !== id));
-    showToast("success", `Removed ${filename}`);
+  // Browser alert confirmation matching image
+  const handleRestoreClick = async (backup: BackupItem) => {
+    const confirmed = window.confirm(
+      `⚠️ WARNING: Are you sure you want to restore database from backup "${backup.filename}"? This will overwrite ALL current database records!`
+    );
+
+    if (!confirmed) return;
+
+    setIsRestoring(true);
+    showToast("info", `Restoring database from ${backup.filename}... Please wait.`);
+
+    try {
+      const key = (backup as any).key || `database-backups/${backup.filename}`;
+      const res = await fetch("/api/database-backups/restore", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        showToast("success", `Database restored successfully from "${backup.filename}"!`);
+      } else {
+        throw new Error(data.error || "Failed to restore database");
+      }
+    } catch (err: any) {
+      showToast("error", err.message || "Database restore failed");
+    } finally {
+      setIsRestoring(false);
+    }
   };
 
-  const openRestoreModal = (backup: BackupItem) => {
-    setSelectedBackup(backup);
-    setShowRestoreModal(true);
+  // Direct trigger to PC file browser
+  const handleUploadButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  // Handle uploaded JSON file from computer and restore
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith(".json")) {
+      showToast("error", "Please select a valid .json database backup file.");
+      e.target.value = "";
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `⚠️ WARNING: Are you sure you want to restore database from backup "${file.name}"? This will overwrite ALL current database records!`
+    );
+
+    if (!confirmed) {
+      e.target.value = "";
+      return;
+    }
+
+    setIsUploading(true);
+    showToast("info", `Uploading and restoring database from ${file.name}...`);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/database-backups/restore", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        showToast("success", `Database restored successfully from uploaded file "${file.name}"!`);
+        await fetchBackups();
+      } else {
+        throw new Error(data.error || "Restore from uploaded file failed");
+      }
+    } catch (err: any) {
+      showToast("error", err.message || "Failed to restore uploaded database");
+    } finally {
+      setIsUploading(false);
+      if (e.target) e.target.value = "";
+    }
   };
 
   return (
     <div className="space-y-8">
+      {/* Hidden File Input for Direct PC File Browsing */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        accept=".json,application/json"
+        className="hidden"
+      />
+
       {/* Toast Notification */}
       {notification && (
         <div
@@ -180,7 +282,7 @@ export default function DatabaseBackups() {
             {/* Create B2 Backup Button */}
             <button
               onClick={handleCreateB2Backup}
-              disabled={isCreatingBackup}
+              disabled={isCreatingBackup || isRestoring || isUploading}
               className="px-4 py-2.5 bg-white border border-[#ce1126] text-[#ce1126] hover:bg-red-50 text-[11px] font-bold uppercase tracking-wider rounded-xl flex items-center gap-2 transition-all shadow-xs disabled:opacity-50 cursor-pointer"
             >
               {isCreatingBackup ? (
@@ -196,13 +298,23 @@ export default function DatabaseBackups() {
               )}
             </button>
 
-            {/* Upload JSON Restore Button */}
+            {/* Upload JSON Restore Button - Direct browsing on PC */}
             <button
-              onClick={() => setShowUploadModal(true)}
-              className="px-4 py-2.5 bg-[#111111] hover:bg-black text-white text-[11px] font-bold uppercase tracking-wider rounded-xl flex items-center gap-2 transition-all shadow-sm cursor-pointer"
+              onClick={handleUploadButtonClick}
+              disabled={isUploading || isRestoring || isCreatingBackup}
+              className="px-4 py-2.5 bg-[#111111] hover:bg-black text-white text-[11px] font-bold uppercase tracking-wider rounded-xl flex items-center gap-2 transition-all shadow-sm cursor-pointer disabled:opacity-50"
             >
-              <Upload size={14} />
-              <span>Upload JSON Restore</span>
+              {isUploading ? (
+                <>
+                  <RefreshCw size={14} className="animate-spin text-white" />
+                  <span>Restoring from File...</span>
+                </>
+              ) : (
+                <>
+                  <Upload size={14} />
+                  <span>Upload JSON Restore</span>
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -259,19 +371,20 @@ export default function DatabaseBackups() {
                   {/* Actions */}
                   <td className="py-4 px-4 text-right">
                     <div className="flex items-center justify-end gap-2.5">
-                      {/* Restore Button */}
+                      {/* Restore Button - Directly triggers browser warning alert */}
                       <button
-                        onClick={() => openRestoreModal(item)}
-                        className="text-[10px] font-black uppercase tracking-widest text-[#ce1126] bg-red-50 hover:bg-[#ce1126] hover:text-white border border-red-200 hover:border-[#ce1126] px-3 py-1 rounded transition-colors cursor-pointer"
-                        title="Restore Database from this file"
+                        onClick={() => handleRestoreClick(item)}
+                        disabled={isRestoring}
+                        className="text-[10px] font-black uppercase tracking-widest text-[#ce1126] bg-red-50 hover:bg-[#ce1126] hover:text-white border border-red-200 hover:border-[#ce1126] px-3 py-1 rounded transition-colors cursor-pointer disabled:opacity-50"
+                        title="Restore Database from this Snapshot"
                       >
-                        Restore
+                        {isRestoring ? "Restoring..." : "Restore"}
                       </button>
 
-                      {/* Download Button */}
+                      {/* Download Button - Directly downloads file to PC location */}
                       <button
                         onClick={() => handleDownload(item)}
-                        className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                        className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors cursor-pointer"
                         title="Download JSON Snapshot"
                       >
                         <Download size={15} />
@@ -280,7 +393,7 @@ export default function DatabaseBackups() {
                       {/* Delete Button */}
                       <button
                         onClick={() => handleDelete(item.id, item.filename)}
-                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors cursor-pointer"
                         title="Delete Snapshot"
                       >
                         <Trash2 size={15} />
@@ -290,163 +403,27 @@ export default function DatabaseBackups() {
                 </tr>
               ))}
 
-              {backups.length === 0 && (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={4} className="py-16 text-center text-gray-400 text-xs">
+                    <div className="flex items-center justify-center gap-2">
+                      <RefreshCw size={14} className="animate-spin text-[#ce1126]" />
+                      <span>Loading Backblaze B2 snapshots...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : backups.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="py-16 text-center text-gray-400 text-xs">
                     No database backups found on Backblaze B2.
                   </td>
                 </tr>
-              )}
+              ) : null}
             </tbody>
           </table>
         </div>
-
-        {/* Footer info bar */}
-        <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between text-xs text-gray-400 gap-3">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span className="text-[11px] font-mono text-gray-500">
-              Backblaze B2 Target Bucket: <strong className="text-gray-700 font-mono">washington-backups-secure</strong>
-            </span>
-          </div>
-
-          <button
-            onClick={handleScanStorage}
-            disabled={isScanning}
-            className="text-[11px] font-bold text-gray-500 hover:text-gray-800 flex items-center gap-1.5 transition-colors self-start sm:self-auto cursor-pointer"
-          >
-            <RefreshCw size={13} className={isScanning ? "animate-spin text-[#ce1126]" : ""} />
-            <span>{isScanning ? "Scanning Backblaze B2..." : "Rescan B2 Bucket"}</span>
-          </button>
-        </div>
-
       </div>
-
-      {/* Restore Confirmation Modal (Template Design) */}
-      {showRestoreModal && selectedBackup && (
-        <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100">
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-red-50 text-[#ce1126] flex items-center justify-center">
-                  <RotateCcw size={18} />
-                </div>
-                <h3 className="text-base font-bold text-gray-950 font-serif">
-                  Confirm Database Restore
-                </h3>
-              </div>
-              <button 
-                onClick={() => setShowRestoreModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-4">
-              <div className="bg-amber-50 border border-amber-200/80 rounded-xl p-3.5 text-xs text-amber-800 leading-relaxed flex items-start gap-2.5">
-                <AlertCircle size={16} className="text-amber-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <strong className="font-bold">Caution:</strong> Restoring this snapshot will replace current articles, user profiles, newsletter subscribers, and ads with the snapshot state.
-                </div>
-              </div>
-
-              <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 space-y-2 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-gray-500">File:</span>
-                  <span className="font-mono font-bold text-gray-800 truncate max-w-[220px]">
-                    {selectedBackup.filename}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Snapshot Date:</span>
-                  <span className="font-medium text-gray-800">{selectedBackup.date}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">File Size:</span>
-                  <span className="font-mono text-gray-800">{selectedBackup.size}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-3">
-              <button
-                onClick={() => setShowRestoreModal(false)}
-                className="px-4 py-2.5 bg-white border border-gray-200 text-gray-700 hover:bg-gray-100 text-xs font-bold uppercase tracking-wider rounded-xl transition-colors cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  setShowRestoreModal(false);
-                  showToast("info", "Restore template trigger acknowledged. Ready for Backblaze B2 backend implementation.");
-                }}
-                className="px-5 py-2.5 bg-[#ce1126] hover:bg-[#b00d1f] text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-sm transition-colors cursor-pointer"
-              >
-                Proceed With Restore
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Upload JSON Restore Modal (Template Design) */}
-      {showUploadModal && (
-        <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100">
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-gray-100 text-gray-800 flex items-center justify-center">
-                  <Upload size={18} />
-                </div>
-                <h3 className="text-base font-bold text-gray-950 font-serif">
-                  Upload Database JSON Restore
-                </h3>
-              </div>
-              <button 
-                onClick={() => setShowUploadModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-4">
-              <p className="text-xs text-gray-500 leading-relaxed">
-                Upload an existing <code>.json</code> database snapshot from your computer to restore or store in Backblaze B2.
-              </p>
-
-              <div className="border-2 border-dashed border-gray-200 hover:border-[#ce1126] rounded-xl p-6 text-center cursor-pointer transition-colors bg-gray-50/50 hover:bg-red-50/10">
-                <FileCode size={32} className="mx-auto text-gray-400 mb-2" />
-                <span className="text-xs font-bold text-gray-700 block">
-                  Click to select .JSON file
-                </span>
-                <span className="text-[10px] text-gray-400 mt-1 block">
-                  Supported format: JSON (up to 100MB)
-                </span>
-              </div>
-            </div>
-
-            <div className="p-6 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-3">
-              <button
-                onClick={() => setShowUploadModal(false)}
-                className="px-4 py-2.5 bg-white border border-gray-200 text-gray-700 hover:bg-gray-100 text-xs font-bold uppercase tracking-wider rounded-xl transition-colors cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  setShowUploadModal(false);
-                  showToast("info", "Upload template design ready for Backblaze B2 integration.");
-                }}
-                className="px-5 py-2.5 bg-[#111111] hover:bg-black text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-sm transition-colors cursor-pointer"
-              >
-                Upload & Verify
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
+

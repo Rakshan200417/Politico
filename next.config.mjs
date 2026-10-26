@@ -4,6 +4,14 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['mysql2'],
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**.backblazeb2.com',
+      },
+    ],
+  },
 };
 
 export default nextConfig;
