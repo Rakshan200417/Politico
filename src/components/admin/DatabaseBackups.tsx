@@ -54,7 +54,14 @@ export default function DatabaseBackups() {
       const res = await fetch("/api/database-backups");
       const data = await res.json();
       if (data.success && Array.isArray(data.backups)) {
-        setBackups(data.backups);
+        // Guarantee newest to oldest ordering
+        const sorted = [...data.backups].sort((a: any, b: any) => {
+          const timeA = a.date ? new Date(a.date).getTime() : 0;
+          const timeB = b.date ? new Date(b.date).getTime() : 0;
+          if (timeB !== timeA && !isNaN(timeA) && !isNaN(timeB)) return timeB - timeA;
+          return String(b.filename || '').localeCompare(String(a.filename || ''));
+        });
+        setBackups(sorted);
       } else {
         setBackups([]);
       }

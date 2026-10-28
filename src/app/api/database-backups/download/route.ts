@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getObjectFromB2 } from '@/lib/b2Storage';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 // GET: Stream or download a database backup file directly as an attachment
 export async function GET(request: Request) {

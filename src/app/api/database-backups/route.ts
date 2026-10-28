@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { listFolderFiles, deleteFromB2 } from '@/lib/b2Storage';
-import { createDatabaseBackup } from '@/lib/backupService';
-import { checkAndRunAutomated24hBackup } from '@/app/api/cron/daily-backup/route';
+import { createDatabaseBackup, checkAndRunAutomated24hBackup } from '@/lib/backupService';
 
 export const runtime = 'nodejs';
 
@@ -17,6 +16,15 @@ export async function GET() {
     }
 
     const files = await listFolderFiles('database-backups');
+
+    // Sort backups from newest to oldest by lastModified or timestamp in filename
+    files.sort((a, b) => {
+      const timeA = a.lastModified ? new Date(a.lastModified).getTime() : 0;
+      const timeB = b.lastModified ? new Date(b.lastModified).getTime() : 0;
+      if (timeB !== timeA) return timeB - timeA;
+      return b.key.localeCompare(a.key);
+    });
+
     const backups = files.map((file, idx) => {
       const parts = file.key.split('/');
       const filename = parts[parts.length - 1];
