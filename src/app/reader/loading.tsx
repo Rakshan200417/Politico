@@ -1,5 +1,5 @@
-import SkeletonLoading from "@/components/common/SkeletonLoading";
+import ReaderSkeleton from "@/components/dashboard/ReaderSkeleton";
 
 export default function Loading() {
-  return <SkeletonLoading />;
+  return <ReaderSkeleton />;
 }

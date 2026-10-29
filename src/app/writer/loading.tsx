@@ -1,5 +1,5 @@
-import SkeletonLoading from "@/components/common/SkeletonLoading";
+import DashboardSkeleton from "@/components/dashboard/DashboardSkeleton";
 
 export default function WriterLoading() {
-  return <SkeletonLoading />;
+  return <DashboardSkeleton role="writer" />;
 }

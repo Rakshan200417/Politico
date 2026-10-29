@@ -125,13 +125,18 @@ export async function POST(request: Request) {
 
     const isActiveVal = active === true || active === 1 || active === '1' || active === 'Active' ? 1 : 0;
 
-    // If this video was moved from another slot, remove it from old slot so old slot becomes empty
+    // If this video URL or title already exists in another slot, or old_slot_number was specified, remove from other slots
     if (old_slot_number !== undefined && old_slot_number !== null) {
       const oldSlotNum = parseInt(old_slot_number, 10);
       if (oldSlotNum && oldSlotNum >= 1 && oldSlotNum <= 4 && oldSlotNum !== slotNum) {
         await pool.execute('DELETE FROM shorts_reels WHERE slot_number = ?', [oldSlotNum]);
       }
     }
+    // Also automatically remove identical video_url or title from any other slot
+    await pool.execute(
+      'DELETE FROM shorts_reels WHERE (video_url = ? OR title = ?) AND slot_number != ?',
+      [video_url.trim(), title.trim(), slotNum]
+    );
 
     let finalThumbnail = thumbnail_url;
     if (finalThumbnail && typeof finalThumbnail === 'string' && finalThumbnail.startsWith('data:image/')) {

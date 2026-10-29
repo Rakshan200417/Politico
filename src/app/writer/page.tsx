@@ -17,13 +17,22 @@ import {
 } from "lucide-react";
 import WriterEditor, { ArticleData } from "@/components/writer/WriterEditor";
 import WriterPostCard from "@/components/writer/WriterPostCard";
+import DashboardSkeleton from "@/components/dashboard/DashboardSkeleton";
 
 type TabType =
   "overview" | "published" | "drafts" | "pending" | "rejected" | "trash";
 
 export default function WriterDashboard() {
+  const [pageLoading, setPageLoading] = useState(true);
   // Navigation State
   const [activeTab, setActiveTabState] = useState<TabType>("published");
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setPageLoading(false);
+    }, 400);
+    return () => clearTimeout(t);
+  }, []);
   
   const setActiveTab = (tab: TabType) => {
     setActiveTabState(tab);
@@ -372,6 +381,10 @@ export default function WriterDashboard() {
   };
 
   const displayName = user?.name || user?.email?.split("@")[0] || "Writer";
+
+  if (pageLoading) {
+    return <DashboardSkeleton role="writer" />;
+  }
 
   // If in editor view, render full-canvas WriterEditor
   if (isEditing) {

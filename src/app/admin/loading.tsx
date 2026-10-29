@@ -1,5 +1,5 @@
-import SkeletonLoading from "@/components/common/SkeletonLoading";
+import DashboardSkeleton from "@/components/dashboard/DashboardSkeleton";
 
 export default function AdminLoading() {
-  return <SkeletonLoading />;
+  return <DashboardSkeleton role="admin" />;
 }

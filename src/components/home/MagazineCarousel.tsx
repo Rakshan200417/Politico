@@ -187,6 +187,8 @@ export default function MagazineCarousel({ articles }: { articles?: any[] }) {
   const [visibleCount, setVisibleCount] = useState(3);
   const [cardWidth, setCardWidth] = useState(280);
   const wheelCooldownRef = useRef(0);
+  const touchStartXRef = useRef<number | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
   const gap = 16;
 
   // Get responsive visible count based on screen width
@@ -256,6 +258,39 @@ export default function MagazineCarousel({ articles }: { articles?: any[] }) {
           touchAction: "pan-y",
           width: "100%",
           maxWidth: "100%"
+        }}
+        onTouchStart={(e) => {
+          if (e.touches.length > 0) {
+            touchStartXRef.current = e.touches[0].clientX;
+            touchStartYRef.current = e.touches[0].clientY;
+          }
+        }}
+        onTouchMove={(e) => {
+          if (!touchStartXRef.current || !touchStartYRef.current || e.touches.length === 0) return;
+        }}
+        onTouchEnd={(e) => {
+          if (touchStartXRef.current === null || e.changedTouches.length === 0) return;
+          const endX = e.changedTouches[0].clientX;
+          const endY = e.changedTouches[0].clientY;
+          const diffX = endX - touchStartXRef.current;
+          const diffY = touchStartYRef.current !== null ? endY - touchStartYRef.current : 0;
+
+          touchStartXRef.current = null;
+          touchStartYRef.current = null;
+
+          // Threshold for swipe: 40px, and horizontal dominant
+          if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY)) {
+            let scrollAmount = 1; // 1 card at a time on mobile/tablet swipe
+            if (visibleCount >= 4) scrollAmount = 2;
+
+            if (diffX < 0) {
+              // Swiped left -> scroll next
+              setStartIndex((prev) => Math.min(prev + scrollAmount, maxIndex));
+            } else {
+              // Swiped right -> scroll prev
+              setStartIndex((prev) => Math.max(prev - scrollAmount, 0));
+            }
+          }
         }}
         onWheel={(e) => {
           const now = Date.now();

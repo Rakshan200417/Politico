@@ -36,6 +36,10 @@ import {
   User,
   MessageSquare,
   Mail,
+  Scissors,
+  Clipboard,
+  Move,
+  GripVertical,
 } from "lucide-react";
 
 export interface ArticleData {
@@ -318,6 +322,10 @@ export default function WriterEditor({
   const [toolbarPosition, setToolbarPosition] = useState({ top: 0, left: 0 });
   const [imageRect, setImageRect] = useState({ top: 0, left: 0, width: 0, height: 0 });
   const [imageRenderTick, setImageRenderTick] = useState(0);
+  const [cutImageElementHtml, setCutImageElementHtml] = useState<string | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+  const draggedFigureRef = useRef<HTMLElement | null>(null);
+  const dropTargetBlockRef = useRef<{ element: HTMLElement; position: "before" | "after" } | null>(null);
   const editorRef = useRef<HTMLDivElement>(null);
 
   // Global clipboard copy filter: ensures copying description NEVER copies images/figures
@@ -409,11 +417,9 @@ export default function WriterEditor({
       const wrapperRect = wrapper.getBoundingClientRect();
       const imgRect = selectedImageNode.getBoundingClientRect();
       if (wrapperRect) {
-        const targetEl = selectedImageNode.closest("figure") || selectedImageNode;
-        const targetRect = targetEl.getBoundingClientRect();
         setToolbarPosition({
-          top: Math.max(0, targetRect.top - wrapperRect.top - 50),
-          left: Math.max(0, Math.min(wrapperRect.width - 320, targetRect.left - wrapperRect.left + (targetRect.width / 2) - 170)),
+          top: Math.max(0, imgRect.top - wrapperRect.top - 55),
+          left: Math.max(0, Math.min(wrapperRect.width - 340, imgRect.left - wrapperRect.left + (imgRect.width / 2) - 170)),
         });
         setImageRect({
           top: imgRect.top - wrapperRect.top,
@@ -438,6 +444,36 @@ export default function WriterEditor({
     };
   }, [selectedImageNode, imageRenderTick]);
 
+  // Context menu dismiss listener
+  useEffect(() => {
+    const handleGlobalClick = () => {
+      setContextMenu(null);
+    };
+    window.addEventListener("click", handleGlobalClick);
+    return () => {
+      window.removeEventListener("click", handleGlobalClick);
+    };
+  }, []);
+
+  // Keyboard shortcut listener for Cut (Ctrl/Cmd+X) and Paste (Ctrl/Cmd+V)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "x" && selectedImageNode) {
+        e.preventDefault();
+        handleCutSelectedImage();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "v" && cutImageElementHtml) {
+        const activeEl = document.activeElement;
+        if (editorRef.current && (activeEl === editorRef.current || editorRef.current.contains(activeEl))) {
+          e.preventDefault();
+          handlePasteCutImage();
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedImageNode, cutImageElementHtml]);
+
   // Initialize editor content & embed lead image if not already in content
   useEffect(() => {
     if (editorRef.current) {
@@ -446,10 +482,16 @@ export default function WriterEditor({
       
       // If there is an image but not yet inserted as an img tag in the canvas, embed it as interactive figure
       if (initialImg && !initialHtml.includes("<img")) {
+        const hasCaption = Boolean(initialArticle?.image_caption || initialArticle?.image_credit);
         const figureHtml = `
-          <figure class="my-6 mx-auto w-full clear-both">
-            <img src="${initialImg}" alt="${initialArticle?.title || 'Article image'}" class="w-full rounded-none shadow-sm object-cover mx-auto cursor-pointer" />
-            ${(initialArticle?.image_caption || initialArticle?.image_credit) ? `<figcaption class="text-base flex justify-between items-center text-gray-500 mt-2.5 font-normal not-italic px-1"><span class="text-left font-normal not-italic">${initialArticle.image_caption || ''}</span> ${initialArticle.image_credit ? `<span class="text-right not-italic text-gray-400 text-[0.8em]">(${initialArticle.image_credit})</span>` : ''}</figcaption>` : ''}
+          <figure class="relative my-6 mx-auto w-full clear-both select-none" contenteditable="false" draggable="true" data-figure="true">
+            <img src="${initialImg}" alt="${initialArticle?.title || 'Article image'}" class="w-full object-cover mx-auto cursor-grab hover:opacity-95 transition-opacity rounded-none shadow-sm" draggable="true" />
+            ${hasCaption ? `
+              <figcaption class="text-base flex justify-between items-center text-gray-500 mt-2.5 font-normal not-italic px-1">
+                <span class="text-left font-normal not-italic">${initialArticle?.image_caption || ''}</span>
+                ${initialArticle?.image_credit ? `<span class="text-right not-italic text-gray-400 text-[0.8em]">(${initialArticle.image_credit})</span>` : ''}
+              </figcaption>
+            ` : ''}
           </figure>
           <p><br></p>
         `;
@@ -633,47 +675,53 @@ export default function WriterEditor({
     }
   };
 
+  // Helper to ensure target image figure is a direct top-level child of editor
+  const normalizeImageTarget = (node: HTMLImageElement): HTMLElement => {
+    const editor = editorRef.current;
+    let fig = (node.closest("figure") || node) as HTMLElement;
+    if (editor && fig.parentElement && fig.parentElement !== editor) {
+      // It is nested inside a <p>, <div>, etc. Lift it out to editor root right after its parent block
+      const blockParent = fig.closest("p, div, blockquote, section, article") as HTMLElement | null;
+      if (blockParent && blockParent !== editor && blockParent.parentElement) {
+        blockParent.parentElement.insertBefore(fig, blockParent.nextSibling);
+      } else {
+        editor.appendChild(fig);
+      }
+    }
+    return fig;
+  };
+
   // Move image Up by one paragraph/block
   const handleMoveImageUp = () => {
     if (!selectedImageNode || !editorRef.current) return;
-    const target = (selectedImageNode.closest("figure") || selectedImageNode) as HTMLElement;
     const editor = editorRef.current;
+    const target = normalizeImageTarget(selectedImageNode);
 
-    // Helper to find preceding paragraph/block
-    let current: Node | null = target.previousSibling;
-    let foundPrevBlock: HTMLElement | null = null;
-
-    while (current) {
-      if (current instanceof HTMLElement) {
-        // If it's a block with text or an image, or non-empty paragraph
-        const text = current.textContent?.trim() || "";
-        if (current.tagName === "P" || current.tagName === "DIV" || current.tagName === "BLOCKQUOTE" || current.tagName === "H1" || current.tagName === "H2" || current.tagName === "H3") {
-          if (text.length > 0 || current.querySelector("img")) {
-            foundPrevBlock = current;
-            break;
-          }
-        }
+    // Get all meaningful direct block children in editor
+    const blocks = Array.from(editor.children).filter((el) => {
+      if (el === target || el.id === "image-drop-indicator" || el.classList.contains("image-toolbar") || el.classList.contains("image-resizer")) {
+        return false;
       }
-      current = current.previousSibling;
+      return true;
+    }) as HTMLElement[];
+
+    const currentIndex = Array.from(editor.children).indexOf(target);
+    // Find the closest preceding block
+    let targetPrevBlock: HTMLElement | null = null;
+    for (let i = currentIndex - 1; i >= 0; i--) {
+      const child = editor.children[i] as HTMLElement;
+      if (blocks.includes(child)) {
+        targetPrevBlock = child;
+        break;
+      }
     }
 
-    if (foundPrevBlock && foundPrevBlock.parentNode) {
-      foundPrevBlock.parentNode.insertBefore(target, foundPrevBlock);
+    if (targetPrevBlock) {
+      editor.insertBefore(target, targetPrevBlock);
       setContent(editor.innerHTML);
       setImageRenderTick((t) => t + 1);
       showToast("✔ Image moved up 1 paragraph!");
     } else {
-      // Check if target is inside a container or paragraph itself
-      if (target.parentElement && target.parentElement !== editor) {
-        const blockParent = target.closest("p, div, blockquote, section") as HTMLElement | null;
-        if (blockParent && blockParent !== editor && blockParent.parentElement) {
-          blockParent.parentElement.insertBefore(target, blockParent);
-          setContent(editor.innerHTML);
-          setImageRenderTick((t) => t + 1);
-          showToast("✔ Image moved up 1 paragraph!");
-          return;
-        }
-      }
       showToast("Already at the top of content.");
     }
   };
@@ -681,48 +729,39 @@ export default function WriterEditor({
   // Move image Down by one paragraph/block
   const handleMoveImageDown = () => {
     if (!selectedImageNode || !editorRef.current) return;
-    const target = (selectedImageNode.closest("figure") || selectedImageNode) as HTMLElement;
     const editor = editorRef.current;
+    const target = normalizeImageTarget(selectedImageNode);
 
-    // Helper to find succeeding paragraph/block
-    let current: Node | null = target.nextSibling;
-    let foundNextBlock: HTMLElement | null = null;
-
-    while (current) {
-      if (current instanceof HTMLElement) {
-        const text = current.textContent?.trim() || "";
-        if (current.tagName === "P" || current.tagName === "DIV" || current.tagName === "BLOCKQUOTE" || current.tagName === "H1" || current.tagName === "H2" || current.tagName === "H3") {
-          if (text.length > 0 || current.querySelector("img")) {
-            foundNextBlock = current;
-            break;
-          }
-        }
+    // Get all meaningful direct block children in editor
+    const blocks = Array.from(editor.children).filter((el) => {
+      if (el === target || el.id === "image-drop-indicator" || el.classList.contains("image-toolbar") || el.classList.contains("image-resizer")) {
+        return false;
       }
-      current = current.nextSibling;
+      return true;
+    }) as HTMLElement[];
+
+    const currentIndex = Array.from(editor.children).indexOf(target);
+    // Find the immediate next block
+    let targetNextBlock: HTMLElement | null = null;
+    for (let i = currentIndex + 1; i < editor.children.length; i++) {
+      const child = editor.children[i] as HTMLElement;
+      if (blocks.includes(child)) {
+        targetNextBlock = child;
+        break;
+      }
     }
 
-    if (foundNextBlock && foundNextBlock.parentNode) {
-      // Place target directly AFTER foundNextBlock
-      if (foundNextBlock.nextSibling) {
-        foundNextBlock.parentNode.insertBefore(target, foundNextBlock.nextSibling);
+    if (targetNextBlock) {
+      // Place target directly AFTER targetNextBlock
+      if (targetNextBlock.nextSibling) {
+        editor.insertBefore(target, targetNextBlock.nextSibling);
       } else {
-        foundNextBlock.parentNode.appendChild(target);
+        editor.appendChild(target);
       }
       setContent(editor.innerHTML);
       setImageRenderTick((t) => t + 1);
       showToast("✔ Image moved down 1 paragraph!");
     } else {
-      // Check if target was nested inside an element that had a next sibling
-      if (target.parentElement && target.parentElement !== editor) {
-        const blockParent = target.closest("p, div, blockquote, section") as HTMLElement | null;
-        if (blockParent && blockParent !== editor && blockParent.nextSibling && blockParent.parentElement) {
-          blockParent.parentElement.insertBefore(target, blockParent.nextSibling);
-          setContent(editor.innerHTML);
-          setImageRenderTick((t) => t + 1);
-          showToast("✔ Image moved down 1 paragraph!");
-          return;
-        }
-      }
       showToast("Already at the bottom of content.");
     }
   };
@@ -852,6 +891,7 @@ export default function WriterEditor({
     }
 
     const altText = imageKeywords.join(", ") || imageCaption || "Article image";
+    const hasCaption = Boolean(imageCaption.trim() || imageCredit.trim());
 
     if (isEditingImage && selectedImageNode) {
       // REPLACE ONLY THE SELECTED IMAGE
@@ -860,13 +900,24 @@ export default function WriterEditor({
       selectedImageNode.alt = altText;
       const figure = selectedImageNode.closest("figure");
       if (figure) {
+        // If the image was wrapped in an inner div from previous overlay, unwrap it
+        const innerDiv = selectedImageNode.parentElement;
+        if (innerDiv && innerDiv !== figure && innerDiv.tagName === "DIV") {
+          figure.insertBefore(selectedImageNode, innerDiv);
+          innerDiv.remove();
+        }
+
         const existingFigCaption = figure.querySelector("figcaption");
         if (existingFigCaption) existingFigCaption.remove();
-        if (imageCaption || imageCredit) {
+
+        if (hasCaption) {
           const figcaption = document.createElement("figcaption");
           figcaption.className =
             "text-base flex justify-between items-center text-gray-500 mt-2.5 font-normal not-italic px-1";
-          figcaption.innerHTML = `<span class="text-left font-normal not-italic">${imageCaption}</span> ${imageCredit ? `<span class="text-right not-italic text-gray-400 text-[0.8em]">(${imageCredit})</span>` : ""}`;
+          figcaption.innerHTML = `
+            <span class="text-left font-normal not-italic">${imageCaption.trim()}</span>
+            ${imageCredit.trim() ? `<span class="text-right not-italic text-gray-400 text-[0.8em]">(${imageCredit.trim()})</span>` : ""}
+          `;
           figure.appendChild(figcaption);
         }
       }
@@ -879,11 +930,16 @@ export default function WriterEditor({
       setSelectedImageNode(null);
       showToast("✔ IMAGE REPLACED SUCCESSFULLY!");
     } else {
-      // INSERT A NEW IMAGE (e.g. 2nd image) INTO THE CANVAS
+      // INSERT A NEW IMAGE (e.g. 2nd, 3rd, 4th image) INTO THE CANVAS with clean previous figcaption
       const figureHtml = `
-        <figure class="my-6 mx-auto w-full clear-both">
-          <img src="${imageUrl}" alt="${altText}" class="w-full rounded-none shadow-sm object-cover mx-auto cursor-pointer" />
-          ${(imageCaption || imageCredit) ? `<figcaption class="text-base flex justify-between items-center text-gray-500 mt-2.5 font-normal not-italic px-1"><span class="text-left font-normal not-italic">${imageCaption}</span> ${imageCredit ? `<span class="text-right not-italic text-gray-400 text-[0.8em]">(${imageCredit})</span>` : ""}</figcaption>` : ""}
+        <figure class="relative my-6 mx-auto w-full clear-both select-none" contenteditable="false" draggable="true" data-figure="true">
+          <img src="${imageUrl}" alt="${altText}" class="w-full object-cover mx-auto cursor-grab hover:opacity-95 transition-opacity rounded-none shadow-sm" draggable="true" />
+          ${hasCaption ? `
+            <figcaption class="text-base flex justify-between items-center text-gray-500 mt-2.5 font-normal not-italic px-1">
+              <span class="text-left font-normal not-italic">${imageCaption.trim()}</span>
+              ${imageCredit.trim() ? `<span class="text-right not-italic text-gray-400 text-[0.8em]">(${imageCredit.trim()})</span>` : ""}
+            </figcaption>
+          ` : ""}
         </figure>
         <p><br></p>
       `;
@@ -891,8 +947,14 @@ export default function WriterEditor({
       if (editorRef.current) {
         editorRef.current.focus();
         const sel = window.getSelection();
-        if (sel && sel.rangeCount > 0 && editorRef.current.contains(sel.anchorNode)) {
-          document.execCommand("insertHTML", false, figureHtml);
+        if (sel && sel.rangeCount > 0 && sel.anchorNode && editorRef.current.contains(sel.anchorNode)) {
+          // If the selection is inside an existing paragraph, split or insert right after it so figure is a top-level block
+          const anchorBlock = (sel.anchorNode instanceof HTMLElement ? sel.anchorNode : sel.anchorNode.parentElement)?.closest("p, h1, h2, h3, blockquote, div");
+          if (anchorBlock && anchorBlock !== editorRef.current && anchorBlock.parentElement === editorRef.current) {
+            anchorBlock.insertAdjacentHTML("afterend", figureHtml);
+          } else {
+            document.execCommand("insertHTML", false, figureHtml);
+          }
         } else {
           editorRef.current.insertAdjacentHTML("beforeend", figureHtml);
         }
@@ -929,11 +991,14 @@ export default function WriterEditor({
     if (figure) {
       const figcaption = figure.querySelector("figcaption");
       if (figcaption) {
-        const leftSpan = figcaption.querySelector(".text-left");
-        const rightSpan = figcaption.querySelector(".text-right");
-        setImageCaption(leftSpan ? leftSpan.textContent || "" : figcaption.childNodes[0]?.textContent || "");
-        if (rightSpan) {
+        const leftSpan = figcaption.querySelector(".text-left, .truncate, span:first-child");
+        const rightSpan = figcaption.querySelector(".text-right, span:last-child");
+        if (leftSpan && rightSpan && leftSpan !== rightSpan) {
+          setImageCaption(leftSpan.textContent?.trim() || "");
           setImageCredit(rightSpan.textContent?.replace(/[()]/g, "").trim() || "");
+        } else {
+          setImageCaption(figcaption.textContent?.trim() || "");
+          setImageCredit("");
         }
       } else {
         setImageCaption("");
@@ -1046,6 +1111,53 @@ export default function WriterEditor({
     }
     if (editorRef.current) setContent(editorRef.current.innerHTML);
     showToast("✔ Image removed from article.");
+  };
+
+  // Cut selected image to internal buffer
+  const handleCutSelectedImage = () => {
+    if (!selectedImageNode || !editorRef.current) return;
+    const figure = selectedImageNode.closest("figure") || selectedImageNode;
+    const target = figure as HTMLElement;
+    setCutImageElementHtml(target.outerHTML);
+    target.remove();
+    setSelectedImageNode(null);
+    setContextMenu(null);
+    if (editorRef.current) setContent(editorRef.current.innerHTML);
+    setImageRenderTick((t) => t + 1);
+    showToast("✂ Image cut! Click anywhere between paragraphs and click 'PASTE CUT IMAGE'.");
+  };
+
+  // Paste cut image at caret or target position
+  const handlePasteCutImage = () => {
+    if (!cutImageElementHtml || !editorRef.current) return;
+    editorRef.current.focus();
+
+    const sel = window.getSelection();
+    let inserted = false;
+
+    if (sel && sel.rangeCount > 0 && editorRef.current.contains(sel.anchorNode)) {
+      const range = sel.getRangeAt(0);
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = cutImageElementHtml;
+      const frag = document.createDocumentFragment();
+      let node;
+      while ((node = tempDiv.firstChild)) {
+        frag.appendChild(node);
+      }
+      range.deleteContents();
+      range.insertNode(frag);
+      inserted = true;
+    }
+
+    if (!inserted) {
+      editorRef.current.insertAdjacentHTML("beforeend", cutImageElementHtml);
+    }
+
+    setCutImageElementHtml(null);
+    setContextMenu(null);
+    if (editorRef.current) setContent(editorRef.current.innerHTML);
+    setImageRenderTick((t) => t + 1);
+    showToast("✔ Image placed at your chosen spot!");
   };
 
   // Subcategory toggle
@@ -1961,9 +2073,23 @@ export default function WriterEditor({
 
             <div className="h-4 w-px bg-slate-300 mx-1" />
 
+            {cutImageElementHtml && (
+              <button
+                type="button"
+                onClick={handlePasteCutImage}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-sm animate-pulse ml-auto mr-2"
+                title="Paste cut image at your current cursor position"
+              >
+                <Clipboard size={14} />
+                <span className="text-[11px] sm:text-xs tracking-wider">
+                  PASTE CUT IMAGE
+                </span>
+              </button>
+            )}
+
             <button
               onClick={handleInsertImage}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-red-50 text-[#ce1126] hover:bg-red-100 text-xs font-bold transition border border-red-200/80 shadow-xs ml-auto"
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-red-50 text-[#ce1126] hover:bg-red-100 text-xs font-bold transition border border-red-200/80 shadow-xs ${cutImageElementHtml ? "" : "ml-auto"}`}
             >
               <ImageIcon size={14} className="text-[#ce1126]" />
               <span className="text-[11px] sm:text-xs tracking-wider">
@@ -2018,6 +2144,15 @@ export default function WriterEditor({
                   className="flex items-center gap-1.5 bg-[#ea580c] hover:bg-[#c2410c] text-white px-3 py-1.5 rounded-none text-xs font-bold transition-colors shadow-xs"
                 >
                   <Edit size={14} /> Edit Image
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleCutSelectedImage}
+                  title="Cut Image (You can paste it between any paragraphs)"
+                  className="flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-amber-300 hover:text-white px-2.5 py-1.5 rounded-none text-xs font-bold transition-colors shadow-xs"
+                >
+                  <Scissors size={14} /> Cut
                 </button>
 
                 <div className="w-px h-5 bg-slate-600 mx-1"></div>
@@ -2173,6 +2308,126 @@ export default function WriterEditor({
                   setSelectedImageNode(null);
                 }
               }}
+              onContextMenu={(e) => {
+                const target = e.target as HTMLElement;
+                const img = target.tagName === "IMG" ? (target as HTMLImageElement) : target.closest("figure")?.querySelector("img");
+                if (img) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setSelectedImageNode(img as HTMLImageElement);
+                  setContextMenu({
+                    x: Math.min(window.innerWidth - 240, Math.max(10, e.clientX)),
+                    y: Math.min(window.innerHeight - 380, Math.max(10, e.clientY)),
+                  });
+                }
+              }}
+              onDragStart={(e) => {
+                const target = e.target as HTMLElement;
+                const img = target.tagName === "IMG" ? target : target.closest("figure")?.querySelector("img");
+                if (img) {
+                  const fig = (img.closest("figure") || img) as HTMLElement;
+                  draggedFigureRef.current = fig;
+                  fig.style.opacity = "0.4";
+                  e.dataTransfer.effectAllowed = "move";
+                  e.dataTransfer.setData("text/plain", "politico-image");
+                  try {
+                    // Set drag ghost image
+                    e.dataTransfer.setDragImage(fig, 20, 20);
+                  } catch {}
+                }
+              }}
+              onDragOver={(e) => {
+                if (!draggedFigureRef.current) return;
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+
+                // Calculate drop target block
+                let targetBlock: HTMLElement | null = null;
+                const elementFromPt = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
+                if (elementFromPt && editorRef.current?.contains(elementFromPt)) {
+                  targetBlock = elementFromPt.closest("p, h1, h2, h3, blockquote, figure, div") as HTMLElement | null;
+                }
+                if (!targetBlock) {
+                  const target = e.target as HTMLElement;
+                  targetBlock = target.closest("p, h1, h2, h3, blockquote, figure, div") as HTMLElement | null;
+                }
+
+                if (targetBlock && editorRef.current && editorRef.current.contains(targetBlock) && !draggedFigureRef.current.contains(targetBlock)) {
+                  // Ensure targetBlock is a direct child of editorRef or its top-level block
+                  while (targetBlock && targetBlock.parentElement !== editorRef.current && targetBlock.parentElement) {
+                    targetBlock = targetBlock.parentElement;
+                  }
+
+                  if (targetBlock && targetBlock !== editorRef.current && targetBlock !== draggedFigureRef.current) {
+                    const rect = targetBlock.getBoundingClientRect();
+                    const position = e.clientY < rect.top + rect.height / 2 ? "before" : "after";
+                    dropTargetBlockRef.current = { element: targetBlock, position };
+
+                    let indicator = document.getElementById("image-drop-indicator");
+                    if (!indicator) {
+                      indicator = document.createElement("div");
+                      indicator.id = "image-drop-indicator";
+                      indicator.className = "h-1.5 bg-[#ce1126] rounded-full my-2 shadow-sm pointer-events-none transition-all duration-75 animate-pulse";
+                    }
+                    if (position === "before") {
+                      targetBlock.parentElement?.insertBefore(indicator, targetBlock);
+                    } else {
+                      targetBlock.parentElement?.insertBefore(indicator, targetBlock.nextSibling);
+                    }
+                  }
+                }
+              }}
+              onDragLeave={(e) => {
+                if (e.relatedTarget && !editorRef.current?.contains(e.relatedTarget as Node)) {
+                  document.getElementById("image-drop-indicator")?.remove();
+                }
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                document.getElementById("image-drop-indicator")?.remove();
+                if (draggedFigureRef.current && editorRef.current) {
+                  draggedFigureRef.current.style.opacity = "1";
+                  if (dropTargetBlockRef.current && dropTargetBlockRef.current.element.parentElement) {
+                    const { element, position } = dropTargetBlockRef.current;
+                    const parent = element.parentElement;
+                    if (parent) {
+                      if (position === "before") {
+                        parent.insertBefore(draggedFigureRef.current, element);
+                      } else {
+                        parent.insertBefore(draggedFigureRef.current, element.nextSibling);
+                      }
+                    }
+                  } else {
+                    // Fallback to caret drop position using document.caretRangeFromPoint or caretPositionFromPoint
+                    let dropRange: Range | null = null;
+                    if (document.caretRangeFromPoint) {
+                      dropRange = document.caretRangeFromPoint(e.clientX, e.clientY);
+                    }
+                    if (dropRange && editorRef.current.contains(dropRange.startContainer)) {
+                      const container = dropRange.startContainer;
+                      const block = (container instanceof HTMLElement ? container : container.parentElement)?.closest("p, h1, h2, h3, blockquote, div");
+                      if (block && block.parentElement === editorRef.current) {
+                        block.parentElement.insertBefore(draggedFigureRef.current, block.nextSibling);
+                      }
+                    }
+                  }
+
+                  setContent(editorRef.current.innerHTML);
+                  setImageRenderTick((t) => t + 1);
+                  showToast("✔ Image placed at chosen spot!");
+
+                  draggedFigureRef.current = null;
+                  dropTargetBlockRef.current = null;
+                }
+              }}
+              onDragEnd={() => {
+                document.getElementById("image-drop-indicator")?.remove();
+                if (draggedFigureRef.current) {
+                  draggedFigureRef.current.style.opacity = "1";
+                  draggedFigureRef.current = null;
+                }
+                dropTargetBlockRef.current = null;
+              }}
               onInput={() => {
                 if (editorRef.current) {
                   setContent(editorRef.current.innerHTML);
@@ -2181,6 +2436,157 @@ export default function WriterEditor({
               data-placeholder="Start writing or type / for plugins"
               className="editor-canvas w-full min-h-[400px] sm:min-h-[550px] outline-none text-base sm:text-lg leading-relaxed text-gray-800 prose max-w-none focus:ring-0 break-words [word-break:break-word] overflow-wrap-anywhere empty:before:content-[attr(data-placeholder)] empty:before:text-gray-300 empty:before:pointer-events-none"
             />
+
+            {/* Right-Click Placement & Actions Context Menu */}
+            {contextMenu && (
+              <div
+                className="fixed z-[100] bg-[#1e293b] text-white rounded-xl shadow-2xl border border-slate-700 py-1.5 w-56 text-xs font-semibold animate-in fade-in zoom-in-95 duration-100 select-none"
+                style={{ top: contextMenu.y, left: contextMenu.x }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="px-3 py-1 text-[10px] uppercase tracking-wider text-slate-400 font-bold border-b border-slate-700/80 mb-1">
+                  Image Actions
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCutSelectedImage}
+                  className="w-full flex items-center gap-2.5 px-3.5 py-2 hover:bg-slate-700 text-left transition-colors text-amber-300"
+                >
+                  <Scissors size={14} /> <span>Cut Image (Move)</span>
+                </button>
+                {cutImageElementHtml && (
+                  <button
+                    type="button"
+                    onClick={handlePasteCutImage}
+                    className="w-full flex items-center gap-2.5 px-3.5 py-2 hover:bg-slate-700 text-left transition-colors text-emerald-300"
+                  >
+                    <Clipboard size={14} /> <span>Paste Cut Image Here</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleEditSelectedImage();
+                    setContextMenu(null);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3.5 py-2 hover:bg-slate-700 text-left transition-colors"
+                >
+                  <Edit size={14} /> <span>Edit Image & Caption</span>
+                </button>
+
+                <div className="h-px bg-slate-700/80 my-1" />
+                <div className="px-3.5 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  Placement & Wrap
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleSetImageAlign("float-left");
+                    setContextMenu(null);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3.5 py-1.5 hover:bg-slate-700 text-left transition-colors"
+                >
+                  <AlignLeft size={14} /> <span>Float Left</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleSetImageAlign("mx-auto");
+                    setContextMenu(null);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3.5 py-1.5 hover:bg-slate-700 text-left transition-colors"
+                >
+                  <AlignCenter size={14} /> <span>Center (Full Width)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleSetImageAlign("float-right");
+                    setContextMenu(null);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3.5 py-1.5 hover:bg-slate-700 text-left transition-colors"
+                >
+                  <AlignRight size={14} /> <span>Float Right</span>
+                </button>
+
+                <div className="h-px bg-slate-700/80 my-1" />
+                <div className="px-3.5 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  Quick Position
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleMoveImageUp();
+                    setContextMenu(null);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3.5 py-1.5 hover:bg-slate-700 text-left transition-colors"
+                >
+                  <ChevronUp size={14} /> <span>Move Up 1 Paragraph</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleMoveImageDown();
+                    setContextMenu(null);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3.5 py-1.5 hover:bg-slate-700 text-left transition-colors"
+                >
+                  <ChevronDown size={14} /> <span>Move Down 1 Paragraph</span>
+                </button>
+
+                <div className="h-px bg-slate-700/80 my-1" />
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleDeleteSelectedImage();
+                    setContextMenu(null);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3.5 py-2 hover:bg-red-900/50 text-red-400 text-left transition-colors"
+                >
+                  <Trash2 size={14} /> <span>Delete Image</span>
+                </button>
+              </div>
+            )}
+
+            {/* Floating Cut Image Helper Pill */}
+            {cutImageElementHtml && (
+              <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#1e293b] text-white px-5 py-3 rounded-full shadow-2xl border border-slate-700 flex items-center gap-3 text-xs font-semibold animate-in slide-in-from-bottom-3 duration-200">
+                <Scissors size={15} className="text-amber-400 shrink-0" />
+                <span className="text-slate-200">Image is cut. Place cursor between paragraphs:</span>
+                <button
+                  type="button"
+                  onClick={handlePasteCutImage}
+                  className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full font-bold shadow-sm transition-colors flex items-center gap-1 shrink-0"
+                >
+                  <Clipboard size={13} />
+                  <span>Paste Here</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCutImageElementHtml(null)}
+                  className="p-1 rounded-full text-slate-400 hover:text-white transition-colors"
+                  title="Cancel cut"
+                >
+                  <X size={15} />
+                </button>
+              </div>
+            )}
+
+            <style jsx global>{`
+              .editor-canvas img,
+              .editor-canvas figure {
+                cursor: grab !important;
+                user-select: none;
+              }
+              .editor-canvas img:active,
+              .editor-canvas figure:active {
+                cursor: grabbing !important;
+              }
+              .editor-canvas figure {
+                position: relative;
+                transition: opacity 0.15s ease;
+              }
+            `}</style>
           </div>
 
           {tags.length > 0 && (

@@ -29,7 +29,7 @@ import ContactUsSubmissions from "@/components/admin/ContactUsSubmissions";
 import AdvertiseLeads from "@/components/admin/AdvertiseLeads";
 import ShortsManager from "@/components/admin/ShortsManager";
 import DatabaseBackups from "@/components/admin/DatabaseBackups";
-import SkeletonLoading from "@/components/common/SkeletonLoading";
+import DashboardSkeleton from "@/components/dashboard/DashboardSkeleton";
 
 interface AdminArticleData extends ArticleData {
   writer_name?: string;
@@ -490,7 +490,7 @@ export default function AdminDashboard() {
   });
 
   if (pageLoading) {
-    return <SkeletonLoading />;
+    return <DashboardSkeleton role="admin" />;
   }
 
   if (isEditing && editingArticle) {

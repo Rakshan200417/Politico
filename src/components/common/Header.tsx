@@ -2,14 +2,13 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { usePathname } from "next/navigation";
-import { Search, Menu, X, User, BookOpen, LogOut, PenTool, Shield } from "lucide-react";
+import { Search, Menu, X, User, BookOpen, LogOut, PenTool, Shield, ChevronDown } from "lucide-react";
 import ProfileModal from "@/components/profile/ProfileModal";
-import GlobalSearchModal from "@/components/common/GlobalSearchModal";
 
 export default function Header() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
+  const [openMobileCategories, setOpenMobileCategories] = useState<string[]>([]);
   const [isCompact, setIsCompact] = useState(false);
   const [user, setUser] = useState<{ id?: number | string; name?: string; role: string; email: string; avatar_url?: string } | null>(null);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
@@ -86,6 +85,18 @@ export default function Header() {
     setProfileMenuOpen(false);
     window.location.href = "/";
   };
+
+  const toggleMobileCategory = (catId: string) => {
+    setOpenMobileCategories((prev) =>
+      prev.includes(catId) ? prev.filter((id) => id !== catId) : [...prev, catId]
+    );
+  };
+
+  useEffect(() => {
+    if (!isMenuOpen) {
+      setOpenMobileCategories([]);
+    }
+  }, [isMenuOpen]);
 
   const navCategories = [
     { id: "world", name: "World", href: "/category/world" },
@@ -339,21 +350,15 @@ export default function Header() {
               <User className="w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7" strokeWidth={2} />
             </a>
           )}
-          <button
-            onClick={() => setSearchOpen(!searchOpen)}
-            className="p-1 text-gray-800 hover:text-[#ce1126] transition-colors"
+          <a
+            href="/search"
+            className="p-1 text-gray-800 hover:text-[#ce1126] transition-colors flex items-center justify-center"
             aria-label="Search POLITICO"
           >
             <Search className="w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7" strokeWidth={2} />
-          </button>
+          </a>
         </div>
       </div>
-
-      {/* Global Search Modal */}
-      <GlobalSearchModal
-        isOpen={searchOpen}
-        onClose={() => setSearchOpen(false)}
-      />
 
       {/* Mobile/Tablet Responsive Category Nav */}
       <nav className="lg:hidden bg-white border-b border-gray-200">
@@ -437,24 +442,51 @@ export default function Header() {
       {/* Mobile/Tablet Mega Menu Overlay Dropdown */}
       {isMenuOpen && (
         <div className="lg:hidden w-full bg-white shadow-xl max-h-[85vh] overflow-y-auto">
-          <div className="px-4 py-6 space-y-6">
+          <div className="px-4 py-4 divide-y divide-gray-100">
             {activeCategories.map((cat) => {
               const subCategories = megaMenuData[cat.id] || [];
-              if (subCategories.length === 0) return null;
+              const isOpen = openMobileCategories.includes(cat.id);
+
               return (
-                <div key={cat.name}>
-                  <a href={cat.href} className="text-[14px] font-black text-gray-900 uppercase mb-3 block">
-                    {cat.name}
-                  </a>
-                  <ul className="space-y-2 text-[14px] font-medium text-gray-700 pl-4 border-l-2 border-gray-100">
-                    {subCategories.map((sub) => (
-                      <li key={sub.name}>
-                        <a href={sub.href} className="hover:text-[#ce1126] transition-colors block">
-                          {sub.name}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
+                <div key={cat.name} className="py-2.5">
+                  {subCategories.length > 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => toggleMobileCategory(cat.id)}
+                      className="w-full flex items-center justify-between py-1.5 text-left text-[14px] font-black text-gray-900 uppercase tracking-wide hover:text-[#ce1126] transition-colors cursor-pointer select-none"
+                    >
+                      <span>{cat.name}</span>
+                      <ChevronDown
+                        className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
+                          isOpen ? "rotate-180 text-[#ce1126]" : ""
+                        }`}
+                      />
+                    </button>
+                  ) : (
+                    <a
+                      href={cat.href}
+                      className="w-full flex items-center justify-between py-1.5 text-left text-[14px] font-black text-gray-900 uppercase tracking-wide hover:text-[#ce1126] transition-colors"
+                    >
+                      <span>{cat.name}</span>
+                    </a>
+                  )}
+
+                  {isOpen && subCategories.length > 0 && (
+                    <div className="mt-2 pl-3 border-l-2 border-[#ce1126] py-1">
+                      <ul className="space-y-2 text-[14px] font-medium text-gray-700">
+                        {subCategories.map((sub) => (
+                          <li key={sub.name}>
+                            <a
+                              href={sub.href}
+                              className="hover:text-[#ce1126] transition-colors block py-0.5"
+                            >
+                              {sub.name}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               );
             })}
