@@ -18,7 +18,7 @@ import CommentsSection from "@/components/news/CommentsSection";
 import { slugify } from "@/data/newsArticles";
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const article = await getArticleBySlug(params.slug);
+  const article = await getArticleBySlug(params.slug, false);
   if (!article) {
     const mockTitle = params.slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
     return {

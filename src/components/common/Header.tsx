@@ -392,14 +392,6 @@ export default function Header() {
                   <a href="#" className="font-bold text-gray-900 hover:text-[#ce1126]">FACEBOOK</a>
                   <a href="#" className="font-bold text-gray-900 hover:text-[#ce1126]">LINKEDIN</a>
                 </div>
-                <div className="flex items-center space-x-6 font-bold text-gray-900 text-sm md:text-base">
-                  <a href="#" className="hover:text-[#ce1126] transition-colors">My Account</a>
-                  {user ? (
-                    <button onClick={handleLogout} className="hover:text-[#ce1126] uppercase transition-colors">Log Out</button>
-                  ) : (
-                    <a href="/login" className="hover:text-[#ce1126] transition-colors">Log In</a>
-                  )}
-                </div>
               </div>
             </div>
           </div>
@@ -501,14 +493,6 @@ export default function Header() {
                   <a href="#" className="font-bold text-gray-900 hover:text-[#ce1126]">FACEBOOK</a>
                   <a href="#" className="font-bold text-gray-900 hover:text-[#ce1126]">LINKEDIN</a>
                 </div>
-              </div>
-              <div className="flex space-x-6 font-bold text-gray-900 mt-4 text-sm md:text-base">
-                <a href="#" className="hover:text-[#ce1126] transition-colors">My Account</a>
-                {user ? (
-                  <button onClick={handleLogout} className="hover:text-[#ce1126] uppercase transition-colors">Log Out</button>
-                ) : (
-                  <a href="/login" className="hover:text-[#ce1126] transition-colors">Log In</a>
-                )}
               </div>
             </div>
           </div>

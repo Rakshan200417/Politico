@@ -147,7 +147,7 @@ export async function getArticlesByPlacement(placement: string, limit: number = 
   }
 }
 
-export async function getArticleBySlug(slug: string): Promise<Article | null> {
+export async function getArticleBySlug(slug: string, incrementView: boolean = true): Promise<Article | null> {
   try {
     const [rows] = await pool.query(
       "SELECT * FROM articles WHERE slug = ? LIMIT 1",
@@ -156,8 +156,10 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
     const articles = rows as Article[];
     if (articles.length > 0) {
       const art = articles[0];
-      // Increment real view count asynchronously whenever someone visits the article
-      pool.query("UPDATE articles SET views = COALESCE(views, 0) + 1 WHERE id = ?", [art.id]).catch(() => {});
+      // Increment real view count asynchronously ONLY when viewing the page (not in generateMetadata)
+      if (incrementView) {
+        pool.query("UPDATE articles SET views = COALESCE(views, 0) + 1 WHERE id = ?", [art.id]).catch(() => {});
+      }
       return art;
     }
     return null;

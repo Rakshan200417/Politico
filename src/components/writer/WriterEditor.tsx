@@ -681,14 +681,29 @@ export default function WriterEditor({
     let fig = (node.closest("figure") || node) as HTMLElement;
     if (editor && fig.parentElement && fig.parentElement !== editor) {
       // It is nested inside a <p>, <div>, etc. Lift it out to editor root right after its parent block
-      const blockParent = fig.closest("p, div, blockquote, section, article") as HTMLElement | null;
-      if (blockParent && blockParent !== editor && blockParent.parentElement) {
-        blockParent.parentElement.insertBefore(fig, blockParent.nextSibling);
+      let blockParent: HTMLElement | null = fig;
+      while (blockParent && blockParent.parentElement !== editor && blockParent.parentElement) {
+        blockParent = blockParent.parentElement;
+      }
+      if (blockParent && blockParent.parentElement === editor) {
+        editor.insertBefore(fig, blockParent.nextSibling);
       } else {
         editor.appendChild(fig);
       }
     }
     return fig;
+  };
+
+  // Helper to get all non-empty top-level paragraphs and blocks in the editor
+  const getEditorBlocks = (): HTMLElement[] => {
+    if (!editorRef.current) return [];
+    const children = Array.from(editorRef.current.children) as HTMLElement[];
+    return children.filter((el) => {
+      if (el.id === "image-drop-indicator" || el.classList.contains("image-toolbar") || el.classList.contains("image-resizer")) {
+        return false;
+      }
+      return true;
+    });
   };
 
   // Move image Up by one paragraph/block
@@ -697,27 +712,12 @@ export default function WriterEditor({
     const editor = editorRef.current;
     const target = normalizeImageTarget(selectedImageNode);
 
-    // Get all meaningful direct block children in editor
-    const blocks = Array.from(editor.children).filter((el) => {
-      if (el === target || el.id === "image-drop-indicator" || el.classList.contains("image-toolbar") || el.classList.contains("image-resizer")) {
-        return false;
-      }
-      return true;
-    }) as HTMLElement[];
+    const blocks = getEditorBlocks();
+    const currentIndex = blocks.indexOf(target);
 
-    const currentIndex = Array.from(editor.children).indexOf(target);
-    // Find the closest preceding block
-    let targetPrevBlock: HTMLElement | null = null;
-    for (let i = currentIndex - 1; i >= 0; i--) {
-      const child = editor.children[i] as HTMLElement;
-      if (blocks.includes(child)) {
-        targetPrevBlock = child;
-        break;
-      }
-    }
-
-    if (targetPrevBlock) {
-      editor.insertBefore(target, targetPrevBlock);
+    if (currentIndex > 0) {
+      const prevBlock = blocks[currentIndex - 1];
+      editor.insertBefore(target, prevBlock);
       setContent(editor.innerHTML);
       setImageRenderTick((t) => t + 1);
       showToast("✔ Image moved up 1 paragraph!");
@@ -732,29 +732,14 @@ export default function WriterEditor({
     const editor = editorRef.current;
     const target = normalizeImageTarget(selectedImageNode);
 
-    // Get all meaningful direct block children in editor
-    const blocks = Array.from(editor.children).filter((el) => {
-      if (el === target || el.id === "image-drop-indicator" || el.classList.contains("image-toolbar") || el.classList.contains("image-resizer")) {
-        return false;
-      }
-      return true;
-    }) as HTMLElement[];
+    const blocks = getEditorBlocks();
+    const currentIndex = blocks.indexOf(target);
 
-    const currentIndex = Array.from(editor.children).indexOf(target);
-    // Find the immediate next block
-    let targetNextBlock: HTMLElement | null = null;
-    for (let i = currentIndex + 1; i < editor.children.length; i++) {
-      const child = editor.children[i] as HTMLElement;
-      if (blocks.includes(child)) {
-        targetNextBlock = child;
-        break;
-      }
-    }
-
-    if (targetNextBlock) {
-      // Place target directly AFTER targetNextBlock
-      if (targetNextBlock.nextSibling) {
-        editor.insertBefore(target, targetNextBlock.nextSibling);
+    if (currentIndex >= 0 && currentIndex < blocks.length - 1) {
+      const nextBlock = blocks[currentIndex + 1];
+      // Insert after nextBlock
+      if (nextBlock.nextSibling) {
+        editor.insertBefore(target, nextBlock.nextSibling);
       } else {
         editor.appendChild(target);
       }
@@ -2330,51 +2315,64 @@ export default function WriterEditor({
                   fig.style.opacity = "0.4";
                   e.dataTransfer.effectAllowed = "move";
                   e.dataTransfer.setData("text/plain", "politico-image");
-                  try {
-                    // Set drag ghost image
-                    e.dataTransfer.setDragImage(fig, 20, 20);
-                  } catch {}
+                  e.dataTransfer.setData("application/x-politico-image", "true");
                 }
               }}
               onDragOver={(e) => {
-                if (!draggedFigureRef.current) return;
+                if (!draggedFigureRef.current || !editorRef.current) return;
                 e.preventDefault();
                 e.dataTransfer.dropEffect = "move";
 
-                // Calculate drop target block
-                let targetBlock: HTMLElement | null = null;
-                const elementFromPt = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
-                if (elementFromPt && editorRef.current?.contains(elementFromPt)) {
-                  targetBlock = elementFromPt.closest("p, h1, h2, h3, blockquote, figure, div") as HTMLElement | null;
-                }
-                if (!targetBlock) {
-                  const target = e.target as HTMLElement;
-                  targetBlock = target.closest("p, h1, h2, h3, blockquote, figure, div") as HTMLElement | null;
-                }
+                // Find candidate block under mouse or nearest block by vertical coordinate
+                const blocks = Array.from(editorRef.current.children).filter((el) => {
+                  return (
+                    el !== draggedFigureRef.current &&
+                    el.id !== "image-drop-indicator" &&
+                    !el.classList.contains("image-toolbar") &&
+                    !el.classList.contains("image-resizer")
+                  );
+                }) as HTMLElement[];
 
-                if (targetBlock && editorRef.current && editorRef.current.contains(targetBlock) && !draggedFigureRef.current.contains(targetBlock)) {
-                  // Ensure targetBlock is a direct child of editorRef or its top-level block
-                  while (targetBlock && targetBlock.parentElement !== editorRef.current && targetBlock.parentElement) {
-                    targetBlock = targetBlock.parentElement;
+                if (blocks.length === 0) return;
+
+                let chosenBlock: HTMLElement | null = null;
+                let chosenPosition: "before" | "after" = "after";
+
+                // Check which block or gap e.clientY is closest to
+                for (let i = 0; i < blocks.length; i++) {
+                  const b = blocks[i];
+                  const rect = b.getBoundingClientRect();
+                  const mid = rect.top + rect.height / 2;
+
+                  if (e.clientY <= mid) {
+                    chosenBlock = b;
+                    chosenPosition = "before";
+                    break;
+                  } else if (i === blocks.length - 1 || e.clientY <= rect.bottom + 12) {
+                    chosenBlock = b;
+                    chosenPosition = "after";
+                    if (e.clientY <= rect.bottom + 12) break;
                   }
+                }
 
-                  if (targetBlock && targetBlock !== editorRef.current && targetBlock !== draggedFigureRef.current) {
-                    const rect = targetBlock.getBoundingClientRect();
-                    const position = e.clientY < rect.top + rect.height / 2 ? "before" : "after";
-                    dropTargetBlockRef.current = { element: targetBlock, position };
+                if (!chosenBlock) {
+                  chosenBlock = blocks[blocks.length - 1];
+                  chosenPosition = "after";
+                }
 
-                    let indicator = document.getElementById("image-drop-indicator");
-                    if (!indicator) {
-                      indicator = document.createElement("div");
-                      indicator.id = "image-drop-indicator";
-                      indicator.className = "h-1.5 bg-[#ce1126] rounded-full my-2 shadow-sm pointer-events-none transition-all duration-75 animate-pulse";
-                    }
-                    if (position === "before") {
-                      targetBlock.parentElement?.insertBefore(indicator, targetBlock);
-                    } else {
-                      targetBlock.parentElement?.insertBefore(indicator, targetBlock.nextSibling);
-                    }
-                  }
+                dropTargetBlockRef.current = { element: chosenBlock, position: chosenPosition };
+
+                let indicator = document.getElementById("image-drop-indicator");
+                if (!indicator) {
+                  indicator = document.createElement("div");
+                  indicator.id = "image-drop-indicator";
+                  indicator.className = "h-1.5 bg-[#ce1126] rounded-full my-2 shadow-sm pointer-events-none transition-all duration-75 animate-pulse w-full";
+                }
+
+                if (chosenPosition === "before") {
+                  editorRef.current.insertBefore(indicator, chosenBlock);
+                } else {
+                  editorRef.current.insertBefore(indicator, chosenBlock.nextSibling);
                 }
               }}
               onDragLeave={(e) => {
@@ -2576,7 +2574,7 @@ export default function WriterEditor({
               .editor-canvas img,
               .editor-canvas figure {
                 cursor: grab !important;
-                user-select: none;
+                -webkit-user-drag: element !important;
               }
               .editor-canvas img:active,
               .editor-canvas figure:active {
