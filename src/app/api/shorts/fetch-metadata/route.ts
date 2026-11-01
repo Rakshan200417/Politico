@@ -157,6 +157,62 @@ export async function GET(request: Request) {
       }
     }
 
+    // 2. Rumble metadata via official oEmbed API
+    if (detectedPlatform === 'Rumble') {
+      try {
+        const rumbleOembedUrl = `https://rumble.com/api/Media/oembed.json?url=${encodeURIComponent(videoUrl)}`;
+        const rumbleRes = await fetch(rumbleOembedUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+          },
+        });
+        if (rumbleRes.ok) {
+          const rData = await rumbleRes.json();
+          if (rData.title) title = rData.title;
+          if (rData.thumbnail_url) thumbnail_url = rData.thumbnail_url;
+          if (rData.duration && !isNaN(Number(rData.duration))) {
+            duration = formatDurationFromSeconds(Number(rData.duration));
+          }
+        }
+      } catch (rErr) {
+        console.warn('Rumble oembed error:', rErr);
+      }
+    }
+
+    // 3. Facebook Reels metadata via official oEmbed API
+    if (detectedPlatform === 'Facebook Reels') {
+      try {
+        const fbOembedUrl = `https://www.facebook.com/plugins/video/oembed.json/?url=${encodeURIComponent(videoUrl)}`;
+        const fbRes = await fetch(fbOembedUrl, {
+          headers: {
+            'User-Agent': 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
+          },
+        });
+        if (fbRes.ok) {
+          const fbData = await fbRes.json();
+          if (fbData.title) title = fbData.title;
+          if (fbData.thumbnail_url) thumbnail_url = fbData.thumbnail_url;
+        }
+      } catch (fbErr) {
+        console.warn('Facebook oembed error:', fbErr);
+      }
+    }
+
+    // 4. Instagram Reels metadata via oEmbed / embed
+    if (detectedPlatform === 'Instagram Reels') {
+      try {
+        const igOembedUrl = `https://api.instagram.com/oembed/?url=${encodeURIComponent(videoUrl)}`;
+        const igRes = await fetch(igOembedUrl);
+        if (igRes.ok) {
+          const igData = await igRes.json();
+          if (igData.title) title = igData.title;
+          if (igData.thumbnail_url) thumbnail_url = igData.thumbnail_url;
+        }
+      } catch (igErr) {
+        console.warn('Instagram oembed error:', igErr);
+      }
+    }
+
     // 2. OpenGraph / HTML metadata scraper for Rumble, Instagram, Facebook
     if (detectedPlatform !== 'YouTube' || !title || !thumbnail_url) {
       try {
@@ -275,6 +331,24 @@ export async function GET(request: Request) {
         thumbnail_url = 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=800&auto=format&fit=crop&q=80';
       } else {
         thumbnail_url = 'https://images.unsplash.com/photo-1495020689067-958852a7765e?w=800&auto=format&fit=crop&q=80';
+      }
+    }
+
+    // Persist thumbnail directly to Backblaze B2 in the reels folder
+    if (thumbnail_url && thumbnail_url.startsWith('http') && !thumbnail_url.includes('backblazeb2.com')) {
+      try {
+        const imgRes = await fetch(thumbnail_url);
+        if (imgRes.ok) {
+          const imgBuffer = Buffer.from(await imgRes.arrayBuffer());
+          const sharp = (await import('sharp')).default;
+          const webpBuffer = await sharp(imgBuffer).webp({ quality: 85 }).toBuffer();
+          const { uploadToFolder } = await import('@/lib/b2Storage');
+          const filename = `reel_thumb_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.webp`;
+          const b2Url = await uploadToFolder('reels', filename, webpBuffer, 'image/webp');
+          thumbnail_url = b2Url;
+        }
+      } catch (uploadErr) {
+        console.warn('[fetch-metadata] Could not persist thumbnail to Backblaze B2:', uploadErr);
       }
     }
 

@@ -33,8 +33,8 @@ export async function POST(request: Request) {
     const requestedFolder = searchParams.get('type') || 'articles';
 
     // Map to the correct B2 folder matching your standard structure:
-    // ads, articles, avatars, database, database-backups, media, reels
-    const validFolders = ['ads', 'articles', 'avatars', 'database', 'database-backups', 'media', 'reels'];
+    // ads, articles, avatars, database, database-backups, media, reels, thumbnails
+    const validFolders = ['ads', 'articles', 'avatars', 'database', 'database-backups', 'media', 'reels', 'thumbnails'];
     const targetFolder = validFolders.includes(requestedFolder.toLowerCase())
       ? requestedFolder.toLowerCase()
       : 'articles';
@@ -122,9 +122,11 @@ export async function POST(request: Request) {
 
     // Upload directly to Backblaze B2 under the matching folder
     let finalUrl = `/uploads/${targetFolder}/${filename}`;
+    let isB2 = false;
     try {
       const { uploadToFolder } = await import('@/lib/b2Storage');
       finalUrl = await uploadToFolder(targetFolder, filename, webpBuffer, 'image/webp');
+      isB2 = true;
     } catch (b2Err) {
       console.error('[upload] Backblaze B2 upload failed, falling back to local file URL:', b2Err);
     }
@@ -133,7 +135,11 @@ export async function POST(request: Request) {
     return NextResponse.json({
       url: finalUrl,
       filename: originalName,
-      message: 'Image uploaded and converted to WebP successfully',
+      storage: isB2 ? 'backblaze' : 'local',
+      b2_connected: isB2,
+      message: isB2
+        ? 'Image uploaded and stored directly on Backblaze B2 Cloud'
+        : 'Image uploaded and converted to WebP successfully',
     }, { status: 200 });
   } catch (error: any) {
     console.error('Upload error:', error);

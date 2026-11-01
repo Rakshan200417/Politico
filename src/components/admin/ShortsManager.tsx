@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Play, Video as VideoIcon, ExternalLink, CheckCircle2, RefreshCw, Upload, Sparkles, Trash2, Edit3, X } from "lucide-react";
+import { Play, Video as VideoIcon, ExternalLink, CheckCircle2, RefreshCw, Upload, Sparkles, Trash2, Edit3, X, Loader2, Cloud } from "lucide-react";
 
 export interface ShortReelVideo {
   id?: number;
@@ -31,6 +31,8 @@ export default function ShortsManager() {
   const [status, setStatus] = useState<"Active" | "Inactive">("Active");
   const [isEditingId, setIsEditingId] = useState<number | null>(null);
   const [editingOriginalSlot, setEditingOriginalSlot] = useState<number | null>(null);
+  const [isAutoFetching, setIsAutoFetching] = useState(false);
+  const [autoFetchedConfirmed, setAutoFetchedConfirmed] = useState(false);
 
   useEffect(() => {
     fetchVideos();
@@ -73,8 +75,9 @@ export default function ShortsManager() {
   // Auto detect platform and fetch metadata
   const handleUrlChange = async (url: string) => {
     setVideoUrl(url);
+    setAutoFetchedConfirmed(false);
 
-    // Auto-detect platform (excluding YouTube Shorts as requested)
+    // Auto-detect platform
     let detectedPlatform = "YouTube";
     if (url.includes("rumble.com")) {
       detectedPlatform = "Rumble";
@@ -87,13 +90,15 @@ export default function ShortsManager() {
     }
     setPlatform(detectedPlatform);
 
-    // Trigger auto-fetch if valid URL
-    if (url.startsWith("http://") || url.startsWith("https://")) {
-      fetchVideoMetadata(url, true);
+    // Trigger auto-fetch if valid URL of realistic length
+    if ((url.startsWith("http://") || url.startsWith("https://")) && url.length > 20) {
+      fetchVideoMetadata(url, false);
     }
   };
 
   const fetchVideoMetadata = async (urlToFetch: string, isTyping: boolean = false) => {
+    setIsAutoFetching(true);
+    setAutoFetchedConfirmed(false);
     try {
       const res = await fetch(`/api/shorts/fetch-metadata?url=${encodeURIComponent(urlToFetch)}`);
       if (res.ok) {
@@ -103,6 +108,7 @@ export default function ShortsManager() {
           if (data.title) setTitle(data.title);
           if (data.thumbnail_url) setThumbnailUrl(data.thumbnail_url);
           if (data.duration) setDuration(data.duration);
+          setAutoFetchedConfirmed(true);
           if (!isTyping) {
             showNotification("success", "Video headline, thumbnail and duration loaded!");
           }
@@ -110,6 +116,8 @@ export default function ShortsManager() {
       }
     } catch (e) {
       console.warn("Auto-fetch error:", e);
+    } finally {
+      setIsAutoFetching(false);
     }
   };
 
@@ -120,6 +128,8 @@ export default function ShortsManager() {
       return;
     }
 
+    setIsAutoFetching(true);
+    setAutoFetchedConfirmed(false);
     try {
       showNotification("success", "Fetching video metadata...");
       const res = await fetch(`/api/shorts/fetch-metadata?url=${encodeURIComponent(videoUrl)}`);
@@ -129,23 +139,46 @@ export default function ShortsManager() {
         if (data.title) setTitle(data.title);
         if (data.thumbnail_url) setThumbnailUrl(data.thumbnail_url);
         if (data.duration) setDuration(data.duration);
-        showNotification("success", "Video headline, thumbnail and duration loaded!");
+        setAutoFetchedConfirmed(true);
+        showNotification("success", "Datas auto fetched and stored to Backblaze B2!");
       } else {
         showNotification("error", data.error || "Could not fetch metadata");
       }
     } catch (err) {
       showNotification("error", "Failed to auto-fetch video details");
+    } finally {
+      setIsAutoFetching(false);
     }
   };
 
-  // Handle custom thumbnail upload (base64)
-  const handleCustomThumbnailUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle custom thumbnail upload (uploads straight to Backblaze B2 under reels folder)
+  const handleCustomThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      showNotification("error", "Thumbnail image should be under 2MB");
+    if (file.size > 5 * 1024 * 1024) {
+      showNotification("error", "Thumbnail image should be under 5MB");
       return;
+    }
+
+    try {
+      showNotification("success", "Uploading thumbnail to Backblaze B2...");
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload?type=reels", {
+        method: "POST",
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.url) {
+          setThumbnailUrl(data.url);
+          showNotification("success", "Thumbnail stored on Backblaze B2!");
+          return;
+        }
+      }
+    } catch (uploadErr) {
+      console.warn("Upload to B2 error, falling back to local FileReader:", uploadErr);
     }
 
     const reader = new FileReader();
@@ -275,7 +308,7 @@ export default function ShortsManager() {
       {/* Toast Notification */}
       {notification && (
         <div
-          className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-xl flex items-center gap-3 text-sm font-semibold transition-all ${
+          className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-none shadow-xl flex items-center gap-3 text-sm font-semibold transition-all ${
             notification.type === "success"
               ? "bg-emerald-600 text-white shadow-emerald-500/20"
               : "bg-red-600 text-white shadow-red-500/20"
@@ -303,13 +336,13 @@ export default function ShortsManager() {
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg border border-emerald-200">
+          <span className="text-[11px] font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-none border border-emerald-200">
             HOMEPAGE FEED: {activeCount} / 4 VIDEOS ACTIVE
           </span>
           <button
             onClick={fetchVideos}
             disabled={isLoading}
-            className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-500 transition-colors"
+            className="p-2 rounded-none border border-gray-200 hover:bg-gray-50 text-gray-500 transition-colors"
             title="Refresh"
           >
             <RefreshCw size={15} className={isLoading ? "animate-spin" : ""} />
@@ -318,10 +351,10 @@ export default function ShortsManager() {
       </div>
 
       {/* Form Card: Add / Edit Short / Reel Video */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8">
+      <div className="bg-white rounded-none border border-gray-200 shadow-sm p-6 sm:p-8">
         <div className="flex items-center justify-between pb-4 border-b border-gray-100 mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-red-50 flex items-center justify-center shadow-xs border border-red-100 flex-shrink-0">
+            <div className="w-10 h-10 rounded-none bg-red-50 flex items-center justify-center shadow-xs border border-red-100 flex-shrink-0">
               <div className="w-0 h-0 border-t-[7px] border-t-transparent border-b-[7px] border-b-transparent border-l-[11px] border-l-[#ce1126] ml-1"></div>
             </div>
             <div>
@@ -359,26 +392,51 @@ export default function ShortsManager() {
               {/* Video URL & Platform */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="sm:col-span-2">
-                  <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center justify-between mb-1.5 flex-wrap gap-2">
                     <label className="text-[10px] font-bold uppercase tracking-wider text-gray-600">
                       Video URL <span className="text-red-500">*</span>
                     </label>
-                    <button
-                      type="button"
-                      onClick={handleAutoFetch}
-                      className="text-[10px] font-bold text-[#ce1126] hover:text-[#b71c1c] flex items-center gap-1 transition-colors"
-                    >
-                      <Sparkles size={12} /> Auto-Fetch Title, Image & Duration
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleAutoFetch}
+                        disabled={isAutoFetching}
+                        className="text-[10px] font-bold text-[#ce1126] hover:text-[#b71c1c] flex items-center gap-1.5 transition-colors disabled:opacity-50"
+                      >
+                        {isAutoFetching ? (
+                          <>
+                            <Loader2 size={12} className="animate-spin text-[#ce1126]" />
+                            <span>Auto-Fetching...</span>
+                          </>
+                        ) : autoFetchedConfirmed ? (
+                          <>
+                            <CheckCircle2 size={12} className="text-emerald-600" />
+                            <span className="text-emerald-600">Datas auto fetched</span>
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles size={12} />
+                            <span>Auto-Fetch Title, Image & Duration</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
-                  <input
-                    type="url"
-                    value={videoUrl}
-                    onChange={(e) => handleUrlChange(e.target.value)}
-                    placeholder="e.g. https://www.youtube.com/shorts/... or https://rumble.com/..."
-                    required
-                    className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-[#ce1126] focus:ring-2 focus:ring-red-100 transition-all font-sans"
-                  />
+                  <div className="relative">
+                    <input
+                      type="url"
+                      value={videoUrl}
+                      onChange={(e) => handleUrlChange(e.target.value)}
+                      placeholder="e.g. https://www.youtube.com/shorts/... or https://rumble.com/..."
+                      required
+                      className="w-full text-xs px-3.5 py-2.5 rounded-none border border-gray-200 focus:outline-none focus:border-[#ce1126] focus:ring-2 focus:ring-red-100 transition-all font-sans pr-10"
+                    />
+                    {isAutoFetching && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-xs text-[#ce1126]">
+                        <Loader2 size={15} className="animate-spin" />
+                      </div>
+                    )}
+                  </div>
                   <span className="text-[9px] text-gray-400 mt-1 block">
                     Supports YouTube Shorts, YouTube, Rumble videos, Instagram Reels, and Facebook Reels.
                   </span>
@@ -391,7 +449,7 @@ export default function ShortsManager() {
                   <select
                     value={platform}
                     onChange={(e) => setPlatform(e.target.value)}
-                    className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white focus:outline-none focus:border-[#ce1126] focus:ring-2 focus:ring-red-100 transition-all font-medium text-gray-800"
+                    className="w-full text-xs px-3.5 py-2.5 rounded-none border border-gray-200 bg-white focus:outline-none focus:border-[#ce1126] focus:ring-2 focus:ring-red-100 transition-all font-medium text-gray-800"
                   >
                     <option value="YouTube">YouTube</option>
                     <option value="Rumble">Rumble</option>
@@ -412,7 +470,7 @@ export default function ShortsManager() {
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. Supreme Court Hearing Highlights & Legal Analysis"
                   required
-                  className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-[#ce1126] focus:ring-2 focus:ring-red-100 transition-all font-sans"
+                  className="w-full text-xs px-3.5 py-2.5 rounded-none border border-gray-200 focus:outline-none focus:border-[#ce1126] focus:ring-2 focus:ring-red-100 transition-all font-sans"
                 />
               </div>
 
@@ -427,7 +485,7 @@ export default function ShortsManager() {
                     value={thumbnailUrl}
                     onChange={(e) => setThumbnailUrl(e.target.value)}
                     placeholder="e.g. https://images.unsplash.com/... or auto-fetched"
-                    className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-[#ce1126] focus:ring-2 focus:ring-red-100 transition-all font-sans"
+                    className="w-full text-xs px-3.5 py-2.5 rounded-none border border-gray-200 focus:outline-none focus:border-[#ce1126] focus:ring-2 focus:ring-red-100 transition-all font-sans"
                   />
                 </div>
 
@@ -436,7 +494,7 @@ export default function ShortsManager() {
                     Or Upload Custom Thumbnail
                   </label>
                   <div className="flex items-center gap-2">
-                    <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 border border-gray-200 rounded-xl text-xs font-semibold text-gray-700 bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 border border-gray-200 rounded-none text-xs font-semibold text-gray-700 bg-gray-50 hover:bg-gray-100 transition-colors">
                       <Upload size={14} /> Choose File
                       <input
                         type="file"
@@ -463,7 +521,7 @@ export default function ShortsManager() {
                     value={duration}
                     onChange={(e) => setDuration(e.target.value)}
                     placeholder="0:45"
-                    className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-[#ce1126] focus:ring-2 focus:ring-red-100 transition-all font-sans"
+                    className="w-full text-xs px-3.5 py-2.5 rounded-none border border-gray-200 focus:outline-none focus:border-[#ce1126] focus:ring-2 focus:ring-red-100 transition-all font-sans"
                   />
                 </div>
 
@@ -474,7 +532,7 @@ export default function ShortsManager() {
                   <select
                     value={targetSlot}
                     onChange={(e) => setTargetSlot(Number(e.target.value))}
-                    className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white font-semibold text-gray-800 focus:outline-none focus:border-[#ce1126] focus:ring-2 focus:ring-red-100 transition-all"
+                    className="w-full text-xs px-3.5 py-2.5 rounded-none border border-gray-200 bg-white font-semibold text-gray-800 focus:outline-none focus:border-[#ce1126] focus:ring-2 focus:ring-red-100 transition-all"
                   >
                     {[1, 2, 3, 4].map((slot) => {
                       const existing = getSlotVideo(slot);
@@ -495,7 +553,7 @@ export default function ShortsManager() {
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value as "Active" | "Inactive")}
-                    className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white font-bold text-gray-800 focus:outline-none focus:border-[#ce1126] focus:ring-2 focus:ring-red-100 transition-all"
+                    className="w-full text-xs px-3.5 py-2.5 rounded-none border border-gray-200 bg-white font-bold text-gray-800 focus:outline-none focus:border-[#ce1126] focus:ring-2 focus:ring-red-100 transition-all"
                   >
                     <option value="Active">Active (Shows on Homepage)</option>
                     <option value="Inactive">Inactive (Hidden from Homepage)</option>
@@ -504,7 +562,7 @@ export default function ShortsManager() {
               </div>
 
               {/* Warning Notice about 1 Video per Slot */}
-              <div className="bg-amber-50 border border-amber-200/80 rounded-xl p-3.5 flex items-start gap-2.5 text-amber-800">
+              <div className="bg-amber-50 border border-amber-200/80 rounded-none p-3.5 flex items-start gap-2.5 text-amber-800">
                 <span className="text-amber-500 text-sm">💡</span>
                 <p className="text-[11px] leading-relaxed">
                   <strong className="font-bold">Strict 1 Video Per Slot:</strong> Each slot (Slot #1 to #4) holds only 1 video. Slot 1 is top video and 4 is the last. If you assign a video to an already occupied slot, the previous video will automatically be replaced.
@@ -518,7 +576,7 @@ export default function ShortsManager() {
                 Live Feed Preview
               </span>
 
-              <div className="w-[190px] h-[310px] rounded-2xl bg-black overflow-hidden relative shadow-lg flex flex-col justify-end p-3.5 group border border-gray-900">
+              <div className="w-[190px] h-[310px] rounded-none bg-black overflow-hidden relative shadow-lg flex flex-col justify-end p-3.5 group border border-gray-900">
                 {thumbnailUrl ? (
                   <img
                     src={thumbnailUrl}
@@ -574,7 +632,7 @@ export default function ShortsManager() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full mt-5 py-3 px-6 bg-gradient-to-r from-[#ce1126] to-[#a00d1e] hover:from-[#b00d1f] hover:to-[#8c0a19] text-white text-xs font-bold uppercase tracking-widest rounded-xl shadow-md shadow-red-600/20 transition-all hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full mt-5 py-3 px-6 bg-gradient-to-r from-[#ce1126] to-[#a00d1e] hover:from-[#b00d1f] hover:to-[#8c0a19] text-white text-xs font-bold uppercase tracking-widest rounded-none shadow-md shadow-red-600/20 transition-all hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isSubmitting ? (
                   <>
@@ -593,7 +651,7 @@ export default function ShortsManager() {
       </div>
 
       {/* Slots Section: Current Shorts & Reels (4 Dedicated Slots) */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8">
+      <div className="bg-white rounded-none border border-gray-200 shadow-sm p-6 sm:p-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-gray-100 mb-6">
           <div>
             <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
@@ -621,7 +679,7 @@ export default function ShortsManager() {
                     setTargetSlot(slotNum);
                     window.scrollTo({ top: 300, behavior: "smooth" });
                   }}
-                  className="rounded-2xl border-2 border-dashed border-gray-200 hover:border-[#ce1126]/60 bg-gray-50/50 hover:bg-red-50/20 p-5 flex flex-col items-center justify-center min-h-[360px] text-center cursor-pointer transition-all group"
+                  className="rounded-none border-2 border-dashed border-gray-200 hover:border-[#ce1126]/60 bg-gray-50/50 hover:bg-red-50/20 p-5 flex flex-col items-center justify-center min-h-[360px] text-center cursor-pointer transition-all group"
                 >
                   <div className="w-12 h-12 rounded-full bg-gray-100 group-hover:bg-red-50 flex items-center justify-center text-gray-400 group-hover:text-[#ce1126] mb-3 transition-colors">
                     <VideoIcon size={24} />
@@ -642,7 +700,7 @@ export default function ShortsManager() {
             return (
               <div
                 key={slotNum}
-                className="bg-white rounded-2xl border border-gray-200 hover:border-gray-300 shadow-sm overflow-hidden flex flex-col justify-between transition-all group"
+                className="bg-white rounded-none border border-gray-200 hover:border-gray-300 shadow-sm overflow-hidden flex flex-col justify-between transition-all group"
               >
                 <div>
                   {/* Video Thumbnail Header */}
@@ -743,7 +801,7 @@ export default function ShortsManager() {
                             handleToggleActive(video);
                           }
                         }}
-                        className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
+                        className={`text-[10px] font-bold px-2.5 py-1 rounded-none border transition-all cursor-pointer ${
                           isActive
                             ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                             : "bg-gray-100 text-gray-500 border-gray-300"
@@ -760,13 +818,13 @@ export default function ShortsManager() {
                 <div className="p-3 bg-gray-50/70 border-t border-gray-100 flex items-center justify-between gap-2">
                   <button
                     onClick={() => handleEditSlot(video)}
-                    className="flex-1 py-1.5 px-3 text-[10px] font-bold uppercase tracking-wider text-gray-700 hover:text-[#ce1126] hover:bg-red-50 rounded-lg border border-gray-200 transition-colors flex items-center justify-center gap-1.5"
+                    className="flex-1 py-1.5 px-3 text-[10px] font-bold uppercase tracking-wider text-gray-700 hover:text-[#ce1126] hover:bg-red-50 rounded-none border border-gray-200 transition-colors flex items-center justify-center gap-1.5"
                   >
                     <Edit3 size={12} /> Edit
                   </button>
                   <button
                     onClick={() => handleDeleteSlot(slotNum)}
-                    className="py-1.5 px-3 text-[10px] font-bold uppercase tracking-wider text-red-600 hover:text-white hover:bg-red-600 rounded-lg border border-red-200 hover:border-red-600 transition-colors flex items-center justify-center gap-1.5"
+                    className="py-1.5 px-3 text-[10px] font-bold uppercase tracking-wider text-red-600 hover:text-white hover:bg-red-600 rounded-none border border-red-200 hover:border-red-600 transition-colors flex items-center justify-center gap-1.5"
                     title="Clear Slot"
                   >
                     <Trash2 size={12} /> Clear

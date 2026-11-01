@@ -118,7 +118,7 @@ export default function AdvertiseLeads() {
   });
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <div className="bg-white rounded-none shadow-sm border border-gray-200 p-6">
       <div className="mb-6">
         <h2 className="text-xl font-bold text-gray-900 mb-2">Advertise Client Leads</h2>
         <p className="text-xs text-gray-500 font-mono">
@@ -133,14 +133,14 @@ export default function AdvertiseLeads() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search name, company, message..."
-            className="w-full px-4 py-2 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-gray-400"
+            className="w-full px-4 py-2 border border-gray-200 rounded-none text-xs focus:outline-none focus:border-gray-400"
           />
         </div>
         <div>
           <select
             value={selectedService}
             onChange={(e) => setSelectedService(e.target.value)}
-            className="w-full sm:w-auto px-4 py-2 border border-gray-200 rounded-lg text-xs text-gray-600 focus:outline-none focus:border-gray-400"
+            className="w-full sm:w-auto px-4 py-2 border border-gray-200 rounded-none text-xs text-gray-600 focus:outline-none focus:border-gray-400"
           >
             <option>All Services</option>
             <option>Publish Company Article</option>
@@ -151,18 +151,18 @@ export default function AdvertiseLeads() {
         </div>
       </div>
 
-      <div className="w-full overflow-hidden">
-        <table className="w-full text-left border-collapse">
+      <div className="w-full overflow-x-auto">
+        <table className="w-full text-left border-collapse min-w-[900px]">
           <thead>
             <tr className="border-y border-gray-100 bg-gray-50/50">
-              <th className="py-3 px-3 text-[10px] font-black text-gray-400 uppercase tracking-wider whitespace-nowrap">Date</th>
-              <th className="py-3 px-3 text-[10px] font-black text-gray-400 uppercase tracking-wider">Submitter / Company</th>
-              <th className="py-3 px-3 text-[10px] font-black text-gray-400 uppercase tracking-wider">Email</th>
-              <th className="py-3 px-3 text-[10px] font-black text-gray-400 uppercase tracking-wider whitespace-nowrap">Phone / WhatsApp</th>
-              <th className="py-3 px-3 text-[10px] font-black text-gray-400 uppercase tracking-wider">Service Option</th>
-              <th className="py-3 px-3 text-[10px] font-black text-gray-400 uppercase tracking-wider">Requirements</th>
-              <th className="py-3 px-3 text-[10px] font-black text-gray-400 uppercase tracking-wider">Status</th>
-              <th className="py-3 px-3 text-[10px] font-black text-gray-400 uppercase tracking-wider text-right">Actions</th>
+              <th className="py-3 px-2 text-[10px] font-black text-gray-400 uppercase tracking-wider whitespace-nowrap">Date</th>
+              <th className="py-3 px-2 text-[10px] font-black text-gray-400 uppercase tracking-wider whitespace-nowrap">Submitter / Company</th>
+              <th className="py-3 px-2 text-[10px] font-black text-gray-400 uppercase tracking-wider whitespace-nowrap">Email</th>
+              <th className="py-3 px-2 text-[10px] font-black text-gray-400 uppercase tracking-wider whitespace-nowrap">Phone / WhatsApp</th>
+              <th className="py-3 px-2 text-[10px] font-black text-gray-400 uppercase tracking-wider whitespace-nowrap">Service Option</th>
+              <th className="py-3 px-2 text-[10px] font-black text-gray-400 uppercase tracking-wider whitespace-nowrap">Requirements</th>
+              <th className="py-3 px-2 text-[10px] font-black text-gray-400 uppercase tracking-wider whitespace-nowrap">Status</th>
+              <th className="py-3 px-2 text-[10px] font-black text-gray-400 uppercase tracking-wider text-right whitespace-nowrap">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -181,34 +181,34 @@ export default function AdvertiseLeads() {
             ) : (
               filteredLeads.map((lead) => (
                 <tr key={lead.id} className="hover:bg-gray-50/50 transition-colors group">
-                  <td className="py-3.5 px-3 text-[11px] text-gray-500 whitespace-nowrap">
+                  <td className="py-3 px-2 text-[10px] text-gray-500 whitespace-nowrap font-medium">
                     {formatDate(lead.created_at)}
                   </td>
-                  <td className="py-3.5 px-3">
-                    <div className="text-xs font-bold text-gray-900">{lead.name}</div>
-                    <div className="text-[10px] text-gray-400">{lead.company || "N/A"}</div>
+                  <td className="py-3 px-2 whitespace-nowrap">
+                    <div className="text-[11px] font-bold text-gray-900">{lead.name}</div>
+                    <div className="text-[9px] text-gray-400">{lead.company || "N/A"}</div>
                   </td>
-                  <td className="py-3.5 px-3 text-[11px] text-gray-600 break-all">
+                  <td className="py-3 px-2 text-[10px] text-gray-700 whitespace-nowrap font-mono select-all" title={lead.email}>
                     {lead.email}
                   </td>
-                  <td className="py-3.5 px-3 whitespace-nowrap">
-                    <div className="text-[10px] font-bold text-gray-600">P: {lead.phone || "-"}</div>
-                    <div className="text-[10px] font-bold text-gray-600">W: {lead.whatsapp || "-"}</div>
+                  <td className="py-3 px-2 whitespace-nowrap">
+                    <div className="text-[9px] font-bold text-gray-600">P: {lead.phone || "-"}</div>
+                    <div className="text-[9px] font-bold text-gray-600">W: {lead.whatsapp || "-"}</div>
                   </td>
-                  <td className="py-3.5 px-3">
-                    <span className="inline-block px-2.5 py-1 text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-full whitespace-nowrap">
+                  <td className="py-3 px-2 whitespace-nowrap">
+                    <span className="inline-block px-2 py-0.5 text-[9px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-none whitespace-nowrap">
                       {lead.service_option}
                     </span>
                   </td>
-                  <td className="py-3.5 px-3 text-[11px] text-gray-700 max-w-[180px] truncate" title={lead.requirements}>
+                  <td className="py-3 px-2 text-[10px] text-gray-600 max-w-[150px] truncate" title={lead.requirements}>
                     {lead.requirements}
                   </td>
-                  <td className="py-3.5 px-3">
+                  <td className="py-3 px-2 whitespace-nowrap">
                     <select
                       value={lead.status}
                       onChange={(e) => handleStatusChange(lead.id, e.target.value)}
-                      className={`text-[11px] font-bold px-2 py-1.5 rounded border focus:outline-none cursor-pointer appearance-none ${getStatusColor(lead.status)}`}
-                      style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right .5rem top 50%', backgroundSize: '.65rem auto', paddingRight: '1.5rem' }}
+                      className={`text-[10px] font-bold px-2 py-1 rounded-none border focus:outline-none cursor-pointer appearance-none ${getStatusColor(lead.status)}`}
+                      style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right .4rem top 50%', backgroundSize: '.55rem auto', paddingRight: '1.25rem' }}
                     >
                       {statusOptions.map((opt) => (
                         <option key={opt} value={opt} className="text-gray-900 bg-white">
@@ -217,21 +217,21 @@ export default function AdvertiseLeads() {
                       ))}
                     </select>
                   </td>
-                  <td className="py-4 px-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
+                  <td className="py-3 px-2 text-right whitespace-nowrap">
+                    <div className="flex items-center justify-end gap-1.5">
                       <button
                         onClick={() => setViewItem(lead)}
-                        className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                        className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-none transition-colors"
                         title="View details"
                       >
-                        <Eye size={14} />
+                        <Eye size={13} />
                       </button>
                       <button
                         onClick={() => handleDelete(lead.id)}
-                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                        className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-none transition-colors"
                         title="Delete"
                       >
-                        <Trash2 size={14} />
+                        <Trash2 size={13} />
                       </button>
                     </div>
                   </td>
@@ -245,7 +245,7 @@ export default function AdvertiseLeads() {
       {/* View Details Modal */}
       {viewItem && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border border-gray-100 animate-in fade-in zoom-in-95 duration-150">
+          <div className="bg-white rounded-none shadow-2xl max-w-lg w-full overflow-hidden border border-gray-100 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/70">
               <div className="flex items-center gap-2">
                 <FileText className="w-5 h-5 text-blue-600" />
@@ -253,7 +253,7 @@ export default function AdvertiseLeads() {
               </div>
               <button
                 onClick={() => setViewItem(null)}
-                className="text-gray-400 hover:text-gray-600 p-1 rounded-md hover:bg-gray-200 transition-colors"
+                className="text-gray-400 hover:text-gray-600 p-1 rounded-none hover:bg-gray-200 transition-colors"
               >
                 <X size={18} />
               </button>
@@ -322,7 +322,7 @@ export default function AdvertiseLeads() {
                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
                   Requirements & Brand Details
                 </span>
-                <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-800 whitespace-pre-wrap leading-relaxed text-xs">
+                <div className="p-3 bg-gray-50 border border-gray-200 rounded-none text-gray-800 whitespace-pre-wrap leading-relaxed text-xs">
                   {viewItem.requirements}
                 </div>
               </div>

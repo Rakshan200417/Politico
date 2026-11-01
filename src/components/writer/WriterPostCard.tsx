@@ -26,7 +26,7 @@ export default function WriterPostCard({
     <div className="group grid grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-gray-50 transition-colors bg-white">
       {/* Title & Summary */}
       <div className="col-span-12 md:col-span-5 lg:col-span-4 flex items-start gap-4 min-w-0">
-        <div className="w-16 h-16 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden border border-gray-200">
+        <div className="w-16 h-16 rounded-none bg-gray-100 flex-shrink-0 overflow-hidden border border-gray-200">
           {article.image ? (
             <img src={article.image} alt="" className="w-full h-full object-cover" />
           ) : (
@@ -68,7 +68,7 @@ export default function WriterPostCard({
 
       {/* Status */}
       <div className="hidden md:block col-span-2">
-        <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md border ${
+        <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-none border ${
           article.status === "published"
             ? "bg-emerald-50 text-emerald-700 border-emerald-200"
             : article.status === "pending"
@@ -105,7 +105,7 @@ export default function WriterPostCard({
               }}
               title="Move to Trash"
               aria-label="Move to Trash"
-              className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+              className="p-1.5 rounded-none text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
             >
               <Trash2 size={16} />
             </button>
@@ -118,7 +118,7 @@ export default function WriterPostCard({
                 e.stopPropagation();
                 onRestore && onRestore(article);
               }}
-              className="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold border border-emerald-200 transition-colors"
+              className="px-2.5 py-1.5 rounded-none bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold border border-emerald-200 transition-colors"
               title="Restore to Saved Drafts"
             >
               Restore
@@ -129,7 +129,7 @@ export default function WriterPostCard({
                 e.stopPropagation();
                 onPermanentDelete && onPermanentDelete(article);
               }}
-              className="px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold border border-red-200 flex items-center gap-1 transition-colors"
+              className="px-2.5 py-1.5 rounded-none bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold border border-red-200 flex items-center gap-1 transition-colors"
               title="Permanently Delete"
             >
               <Trash2 size={13} />

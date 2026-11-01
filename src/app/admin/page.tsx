@@ -537,7 +537,7 @@ export default function AdminDashboard() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search articles..."
-                className="w-full bg-white border border-gray-200 rounded-xl pl-9 pr-4 py-2 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-gray-400 shadow-sm transition"
+                className="w-full bg-white border border-gray-200 rounded-none pl-9 pr-4 py-2 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-gray-400 shadow-sm transition"
               />
             </div>
           </div>
@@ -551,7 +551,7 @@ export default function AdminDashboard() {
       {/* Analytic Cards (Always visible at the top) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
         {/* Active Reviews */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden flex items-center justify-between group">
+        <div className="bg-white rounded-none shadow-sm border border-gray-100 p-6 relative overflow-hidden flex items-center justify-between group">
           <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#8b5cf6] transition-all group-hover:w-2"></div>
           <div>
             <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Active Reviews</div>
@@ -563,7 +563,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Completed Releases */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden flex items-center justify-between group">
+        <div className="bg-white rounded-none shadow-sm border border-gray-100 p-6 relative overflow-hidden flex items-center justify-between group">
           <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#10b981] transition-all group-hover:w-2"></div>
           <div>
             <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Completed Releases</div>
@@ -575,7 +575,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Newsletter Subs */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden flex items-center justify-between group cursor-pointer" onClick={() => setActiveTab("newsletter")}>
+        <div className="bg-white rounded-none shadow-sm border border-gray-100 p-6 relative overflow-hidden flex items-center justify-between group cursor-pointer" onClick={() => setActiveTab("newsletter")}>
           <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#f97316] transition-all group-hover:w-2"></div>
           <div>
             <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Newsletter Subs</div>
@@ -589,7 +589,7 @@ export default function AdminDashboard() {
 
       {/* Main Content Area Based on Active Tab */}
       {activeTab === "overview" && (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden p-6 sm:p-8 relative">
+        <div className="bg-white rounded-none border border-gray-100 shadow-sm overflow-hidden p-6 sm:p-8 relative">
           
           {isLoading ? (
             <div className="py-24 flex flex-col items-center justify-center text-gray-400">
@@ -624,7 +624,7 @@ export default function AdminDashboard() {
                     <tr key={review.id} className="hover:bg-gray-50/50 transition-colors">
                       <td className="py-5 px-4 max-w-[320px]">
                         <div className="flex gap-4 items-start min-w-0">
-                          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg bg-gray-200 flex-shrink-0 overflow-hidden relative">
+                          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-none bg-gray-200 flex-shrink-0 overflow-hidden relative">
                             {review.image ? (
                               <img src={review.image} alt={review.title} className="w-full h-full object-cover" />
                             ) : (
@@ -668,7 +668,7 @@ export default function AdminDashboard() {
                       <td className="py-5 px-4 text-right">
                         <button 
                           onClick={() => handleOpenArticle(review)}
-                          className="bg-[#ce1126] hover:bg-[#b00d1f] text-white text-[10px] font-bold uppercase tracking-widest px-5 py-2.5 rounded-lg shadow-sm transition-colors focus:ring-2 focus:ring-[#ce1126] focus:ring-offset-1"
+                          className="bg-[#ce1126] hover:bg-[#b00d1f] text-white text-[10px] font-bold uppercase tracking-widest px-5 py-2.5 rounded-none shadow-sm transition-colors focus:ring-2 focus:ring-[#ce1126] focus:ring-offset-1"
                         >
                           OPEN
                         </button>
@@ -684,7 +684,7 @@ export default function AdminDashboard() {
 
       {/* Newsletter Tab */}
       {activeTab === "newsletter" && (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden p-6 sm:p-8 relative">
+        <div className="bg-white rounded-none border border-gray-100 shadow-sm overflow-hidden p-6 sm:p-8 relative">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6 border-b border-gray-100 pb-6">
             <div>
               <h2 className="text-xl sm:text-2xl font-black text-gray-950 tracking-tight">
@@ -799,7 +799,7 @@ export default function AdminDashboard() {
       {/* Placeholders for other tabs */}
 
       {activeTab === "published" && (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden p-6 sm:p-8 relative">
+        <div className="bg-white rounded-none border border-gray-100 shadow-sm overflow-hidden p-6 sm:p-8 relative">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6 pb-6">
             <div>
               <h2 className="text-xl sm:text-2xl font-black text-gray-950 tracking-tight">
@@ -819,13 +819,13 @@ export default function AdminDashboard() {
             </div>
           </div>
           
-          <div className="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-100 flex flex-wrap items-center gap-4">
+          <div className="bg-gray-50 rounded-none p-4 mb-6 border border-gray-100 flex flex-wrap items-center gap-4">
             <div className="flex flex-col gap-1.5 flex-1 min-w-[150px]">
               <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Filter by Category</label>
               <select 
                 value={publishedCategoryFilter}
                 onChange={(e) => setPublishedCategoryFilter(e.target.value)}
-                className="w-full bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 py-2 px-3 focus:outline-none"
+                className="w-full bg-white border border-gray-200 rounded-none text-xs font-semibold text-gray-700 py-2 px-3 focus:outline-none"
               >
                 <option value="All Categories">All Categories</option>
                 {menubarCategoryOptions.map((cat) => (
@@ -840,7 +840,7 @@ export default function AdminDashboard() {
               <select 
                 value={publishedPlacementFilter}
                 onChange={(e) => setPublishedPlacementFilter(e.target.value)}
-                className="w-full bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 py-2 px-3 focus:outline-none"
+                className="w-full bg-white border border-gray-200 rounded-none text-xs font-semibold text-gray-700 py-2 px-3 focus:outline-none"
               >
                 <option value="All Placements">All Placements</option>
                 <option value="None">None</option>
@@ -860,7 +860,7 @@ export default function AdminDashboard() {
                 value={publishedSearchQuery}
                 onChange={(e) => setPublishedSearchQuery(e.target.value)}
                 placeholder="Search title, author..." 
-                className="w-full bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 py-2 px-3 focus:outline-none placeholder-gray-400" 
+                className="w-full bg-white border border-gray-200 rounded-none text-xs font-semibold text-gray-700 py-2 px-3 focus:outline-none placeholder-gray-400" 
               />
             </div>
             <div className="flex items-end pb-0.5">
@@ -870,7 +870,7 @@ export default function AdminDashboard() {
                   setPublishedPlacementFilter("All Placements");
                   setPublishedSearchQuery("");
                 }}
-                className="text-xs font-bold text-[#2563eb] hover:bg-blue-50 px-4 py-2 rounded-lg transition-colors bg-white border border-gray-200"
+                className="text-xs font-bold text-[#2563eb] hover:bg-blue-50 px-4 py-2 rounded-none transition-colors bg-white border border-gray-200"
               >
                 Clear Filters
               </button>
@@ -971,7 +971,7 @@ export default function AdminDashboard() {
 
       {/* Users Tab */}
       {activeTab === "users" && (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden p-6 sm:p-8 relative">
+        <div className="bg-white rounded-none border border-gray-100 shadow-sm overflow-hidden p-6 sm:p-8 relative">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6 border-b border-gray-100 pb-6">
             <div>
               <h2 className="text-xl sm:text-2xl font-black text-gray-950 tracking-tight">
@@ -1168,7 +1168,7 @@ export default function AdminDashboard() {
       {/* User Modals */}
       {(userModalState === "add" || userModalState === "edit") && (
         <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-[400px] overflow-hidden">
+          <div className="bg-white rounded-none shadow-2xl w-full max-w-[400px] overflow-hidden">
             <div className="flex items-center justify-between p-5 border-b border-gray-100">
               <h3 className="text-lg font-bold text-[#ce1126] flex items-center gap-2">
                 <UserPlus size={20} />
@@ -1185,7 +1185,7 @@ export default function AdminDashboard() {
                   type="text" 
                   value={userForm.name} 
                   onChange={e => setUserForm({...userForm, name: e.target.value})}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#ce1126] focus:border-transparent transition-all"
+                  className="w-full border border-gray-200 rounded-none px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#ce1126] focus:border-transparent transition-all"
                   placeholder="e.g. Richard Hendricks"
                   required
                 />
@@ -1197,7 +1197,7 @@ export default function AdminDashboard() {
                   value={userForm.email}
                   disabled={userModalState === "edit"}
                   onChange={e => setUserForm({...userForm, email: e.target.value})}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#ce1126] focus:border-transparent transition-all disabled:bg-gray-50 disabled:text-gray-500"
+                  className="w-full border border-gray-200 rounded-none px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#ce1126] focus:border-transparent transition-all disabled:bg-gray-50 disabled:text-gray-500"
                   placeholder="e.g. richard@washington.com"
                   required
                 />
@@ -1208,7 +1208,7 @@ export default function AdminDashboard() {
                   type="password" 
                   value={userForm.password}
                   onChange={e => setUserForm({...userForm, password: e.target.value})}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#ce1126] focus:border-transparent transition-all"
+                  className="w-full border border-gray-200 rounded-none px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#ce1126] focus:border-transparent transition-all"
                   placeholder={userModalState === "edit" ? "Leave blank to keep unchanged" : "Create user passcode"}
                   required={userModalState === "add"}
                 />
@@ -1218,7 +1218,7 @@ export default function AdminDashboard() {
                 <select 
                   value={userForm.role}
                   onChange={e => setUserForm({...userForm, role: e.target.value})}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#ce1126] focus:border-transparent transition-all bg-white"
+                  className="w-full border border-gray-200 rounded-none px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#ce1126] focus:border-transparent transition-all bg-white"
                 >
                   <option value="reader">Reader</option>
                   <option value="writer">Writer</option>
@@ -1229,13 +1229,13 @@ export default function AdminDashboard() {
                 <button 
                   type="button" 
                   onClick={() => setUserModalState("closed")}
-                  className="flex-1 py-3 bg-gray-50 hover:bg-gray-100 text-gray-700 text-[11px] font-bold uppercase tracking-widest rounded-lg transition-colors"
+                  className="flex-1 py-3 bg-gray-50 hover:bg-gray-100 text-gray-700 text-[11px] font-bold uppercase tracking-widest rounded-none transition-colors"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
-                  className="flex-1 py-3 bg-[#ce1126] hover:bg-[#a00d1d] text-white text-[11px] font-bold uppercase tracking-widest rounded-lg transition-colors"
+                  className="flex-1 py-3 bg-[#ce1126] hover:bg-[#a00d1d] text-white text-[11px] font-bold uppercase tracking-widest rounded-none transition-colors"
                 >
                   {userModalState === "add" ? "Create User" : "Update User"}
                 </button>
@@ -1247,7 +1247,7 @@ export default function AdminDashboard() {
 
       {userModalState === "view" && selectedSystemUser && (
         <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-[420px] overflow-hidden relative">
+          <div className="bg-white rounded-none shadow-2xl w-full max-w-[420px] overflow-hidden relative">
             <div className="h-1 bg-gradient-to-r from-blue-600 via-purple-600 to-red-600"></div>
             <div className="p-6">
               <div className="flex justify-between items-start mb-6">
@@ -1261,7 +1261,7 @@ export default function AdminDashboard() {
               </div>
               
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border border-gray-100 shadow-sm bg-gradient-to-br from-indigo-900 to-purple-900 flex items-center justify-center relative">
+                <div className="w-16 h-16 rounded-none overflow-hidden flex-shrink-0 border border-gray-100 shadow-sm bg-gradient-to-br from-indigo-900 to-purple-900 flex items-center justify-center relative">
                   {selectedSystemUser.avatar_url ? (
                     <img 
                       src={selectedSystemUser.avatar_url} 
@@ -1314,7 +1314,7 @@ export default function AdminDashboard() {
                 
                 <div>
                   <label className="block text-[9px] font-bold uppercase tracking-widest text-gray-500 mb-1">Bio</label>
-                  <div className="bg-gray-50 p-4 rounded-lg text-xs text-gray-700 leading-relaxed font-sans border border-gray-100 whitespace-pre-wrap">
+                  <div className="bg-gray-50 p-4 rounded-none text-xs text-gray-700 leading-relaxed font-sans border border-gray-100 whitespace-pre-wrap">
                     {selectedSystemUser.bio && selectedSystemUser.bio.trim() 
                       ? selectedSystemUser.bio 
                       : `${selectedSystemUser.role.charAt(0).toUpperCase() + selectedSystemUser.role.slice(1)} account on POLITICO.`}
@@ -1342,7 +1342,7 @@ export default function AdminDashboard() {
               <div className="mt-8">
                 <button 
                   onClick={() => setUserModalState("closed")}
-                  className="w-full py-3 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 text-[11px] font-bold uppercase tracking-widest rounded-lg transition-colors"
+                  className="w-full py-3 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 text-[11px] font-bold uppercase tracking-widest rounded-none transition-colors"
                 >
                   Close
                 </button>

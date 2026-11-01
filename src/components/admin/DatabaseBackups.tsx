@@ -247,7 +247,7 @@ export default function DatabaseBackups() {
       {/* Toast Notification */}
       {notification && (
         <div
-          className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-xl flex items-center gap-3 text-sm font-semibold transition-all ${
+          className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-none shadow-xl flex items-center gap-3 text-sm font-semibold transition-all ${
             notification.type === "success"
               ? "bg-emerald-600 text-white shadow-emerald-500/20"
               : notification.type === "info"
@@ -267,7 +267,7 @@ export default function DatabaseBackups() {
       )}
 
       {/* Main Container */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
+      <div className="bg-white rounded-none border border-gray-100 shadow-sm p-6 sm:p-8">
         
         {/* Header with Title and Action Buttons */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-gray-100">
@@ -290,7 +290,7 @@ export default function DatabaseBackups() {
             <button
               onClick={handleCreateB2Backup}
               disabled={isCreatingBackup || isRestoring || isUploading}
-              className="px-4 py-2.5 bg-white border border-[#ce1126] text-[#ce1126] hover:bg-red-50 text-[11px] font-bold uppercase tracking-wider rounded-xl flex items-center gap-2 transition-all shadow-xs disabled:opacity-50 cursor-pointer"
+              className="px-4 py-2.5 bg-white border border-[#ce1126] text-[#ce1126] hover:bg-red-50 text-[11px] font-bold uppercase tracking-wider rounded-none flex items-center gap-2 transition-all shadow-xs disabled:opacity-50 cursor-pointer"
             >
               {isCreatingBackup ? (
                 <>
@@ -309,7 +309,7 @@ export default function DatabaseBackups() {
             <button
               onClick={handleUploadButtonClick}
               disabled={isUploading || isRestoring || isCreatingBackup}
-              className="px-4 py-2.5 bg-[#111111] hover:bg-black text-white text-[11px] font-bold uppercase tracking-wider rounded-xl flex items-center gap-2 transition-all shadow-sm cursor-pointer disabled:opacity-50"
+              className="px-4 py-2.5 bg-[#111111] hover:bg-black text-white text-[11px] font-bold uppercase tracking-wider rounded-none flex items-center gap-2 transition-all shadow-sm cursor-pointer disabled:opacity-50"
             >
               {isUploading ? (
                 <>

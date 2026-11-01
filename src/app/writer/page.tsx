@@ -447,7 +447,7 @@ export default function WriterDashboard() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search articles..."
-              className="w-full bg-white border border-gray-200 rounded-xl pl-9 pr-4 py-2 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-gray-400 shadow-2xs transition"
+              className="w-full bg-white border border-gray-200 rounded-none pl-9 pr-4 py-2 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-gray-400 shadow-2xs transition"
             />
           </div>
         </div>
@@ -455,7 +455,7 @@ export default function WriterDashboard() {
         <div className="flex items-center gap-3 mt-1 sm:mt-0">
           <button
             onClick={handleCreateNewPost}
-            className="bg-[#ce1126] hover:bg-[#b00d1f] text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center gap-2"
+            className="bg-[#ce1126] hover:bg-[#b00d1f] text-white px-5 py-2.5 rounded-none text-xs font-black uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center gap-2"
           >
             <PlusCircle size={16} /> + Create New Post
           </button>
@@ -467,7 +467,7 @@ export default function WriterDashboard() {
         {/* Published */}
         <div
           onClick={() => setActiveTab("published")}
-          className="bg-white p-5 rounded-2xl border border-gray-200 shadow-xs hover:border-[#2563eb] cursor-pointer transition-all"
+          className="bg-white p-5 rounded-none border border-gray-200 shadow-xs hover:border-[#2563eb] cursor-pointer transition-all"
         >
           <div className="text-xs font-bold text-gray-500 uppercase tracking-wider">
             Published
@@ -481,7 +481,7 @@ export default function WriterDashboard() {
         {/* Saved Drafts */}
         <div
           onClick={() => setActiveTab("drafts")}
-          className="bg-white p-5 rounded-2xl border border-gray-200 shadow-xs hover:border-[#2563eb] cursor-pointer transition-all"
+          className="bg-white p-5 rounded-none border border-gray-200 shadow-xs hover:border-[#2563eb] cursor-pointer transition-all"
         >
           <div className="text-xs font-bold text-gray-500 uppercase tracking-wider">
             Saved Drafts
@@ -495,7 +495,7 @@ export default function WriterDashboard() {
         {/* Pending Review */}
         <div
           onClick={() => setActiveTab("pending")}
-          className="bg-white p-5 rounded-2xl border border-gray-200 shadow-xs hover:border-[#2563eb] cursor-pointer transition-all"
+          className="bg-white p-5 rounded-none border border-gray-200 shadow-xs hover:border-[#2563eb] cursor-pointer transition-all"
         >
           <div className="text-xs font-bold text-gray-500 uppercase tracking-wider">
             Pending Review
@@ -511,7 +511,7 @@ export default function WriterDashboard() {
         {/* Rejected */}
         <div
           onClick={() => setActiveTab("rejected")}
-          className="bg-white p-5 rounded-2xl border border-gray-200 shadow-xs hover:border-[#2563eb] cursor-pointer transition-all"
+          className="bg-white p-5 rounded-none border border-gray-200 shadow-xs hover:border-[#2563eb] cursor-pointer transition-all"
         >
           <div className="text-xs font-bold text-gray-500 uppercase tracking-wider">
             Rejected
@@ -535,13 +535,13 @@ export default function WriterDashboard() {
         </div>
       ) : displayedArticles.length === 0 ? (
         /* Empty State */
-        <div className="border border-gray-200 rounded-2xl bg-white p-12 sm:p-16 flex flex-col items-center justify-center text-center shadow-xs">
+        <div className="border border-gray-200 rounded-none bg-white p-12 sm:p-16 flex flex-col items-center justify-center text-center shadow-xs">
           <div className="relative w-40 h-32 mb-6 flex items-center justify-center select-none pointer-events-none">
-            <div className="absolute top-2 left-6 w-9 h-9 bg-[#1e293b] rounded-xl transform -rotate-12" />
+            <div className="absolute top-2 left-6 w-9 h-9 bg-[#1e293b] rounded-none transform -rotate-12" />
             <div className="absolute bottom-2 left-8 w-14 h-7 bg-[#eab308] rounded-b-full transform -rotate-6" />
             <div className="absolute top-14 right-6 w-5 h-5 bg-[#14b8a6] rounded-full" />
             <div className="absolute top-4 right-8 w-8 h-14 border-t-4 border-r-4 border-pink-300 rounded-tr-full transform rotate-12 opacity-80" />
-            <div className="relative z-10 w-14 h-14 bg-[#2563eb] rounded-2xl flex items-center justify-center text-white shadow-lg transform rotate-3">
+            <div className="relative z-10 w-14 h-14 bg-[#2563eb] rounded-none flex items-center justify-center text-white shadow-lg transform rotate-3">
               <Plus size={26} strokeWidth={3} />
             </div>
           </div>
@@ -561,7 +561,7 @@ export default function WriterDashboard() {
         </div>
       ) : (
         /* Table Layout */
-        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+        <div className="bg-white rounded-none border border-gray-200 overflow-hidden shadow-sm">
           {/* Table Header */}
           <div className="grid grid-cols-12 gap-4 px-6 py-3 border-b border-gray-100 bg-gray-50 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
             <div className="col-span-12 md:col-span-5 lg:col-span-4">

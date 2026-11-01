@@ -1,18 +1,28 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand, ListObjectsV2Command, GetObjectCommand } from '@aws-sdk/client-s3';
 import { Readable } from 'stream';
 
-const endpoint = process.env.B2_ENDPOINT?.startsWith('http')
-  ? process.env.B2_ENDPOINT
-  : `https://${process.env.B2_ENDPOINT || 's3.us-east-005.backblazeb2.com'}`;
+export function getS3Client() {
+  const endpoint = process.env.B2_ENDPOINT?.startsWith('http')
+    ? process.env.B2_ENDPOINT
+    : `https://${process.env.B2_ENDPOINT || 's3.us-east-005.backblazeb2.com'}`;
 
-export const s3Client = new S3Client({
-  endpoint,
-  region: process.env.B2_REGION || 'us-east-005',
-  credentials: {
-    accessKeyId: process.env.B2_KEY_ID || '',
-    secretAccessKey: process.env.B2_APPLICATION_KEY || '',
+  return new S3Client({
+    endpoint,
+    region: process.env.B2_REGION || 'us-east-005',
+    credentials: {
+      accessKeyId: process.env.B2_KEY_ID || '',
+      secretAccessKey: process.env.B2_APPLICATION_KEY || '',
+    },
+    forcePathStyle: true,
+  });
+}
+
+export const s3Client = new Proxy({} as S3Client, {
+  get(_target, prop) {
+    const client = getS3Client();
+    const val = (client as any)[prop];
+    return typeof val === 'function' ? val.bind(client) : val;
   },
-  forcePathStyle: true,
 });
 
 export const B2_BUCKET = process.env.B2_BUCKET_NAME || 'Politico';
@@ -28,6 +38,7 @@ export const B2_FOLDERS = {
   DATABASE_BACKUPS: 'database-backups',
   MEDIA: 'media',
   REELS: 'reels',
+  THUMBNAILS: 'thumbnails',
 } as const;
 
 export type B2Folder = typeof B2_FOLDERS[keyof typeof B2_FOLDERS];

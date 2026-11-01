@@ -116,7 +116,7 @@ export default function ContactUsSubmissions() {
   });
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <div className="bg-white rounded-none shadow-sm border border-gray-200 p-6">
       <div className="mb-6">
         <h2 className="text-xl font-bold text-gray-900 mb-2">Contact Us Submissions</h2>
         <p className="text-xs text-gray-500 font-mono">
@@ -131,14 +131,14 @@ export default function ContactUsSubmissions() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search name, email, message..."
-            className="w-full px-4 py-2 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-gray-400"
+            className="w-full px-4 py-2 border border-gray-200 rounded-none text-xs focus:outline-none focus:border-gray-400"
           />
         </div>
         <div>
           <select
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
-            className="w-full sm:w-auto px-4 py-2 border border-gray-200 rounded-lg text-xs text-gray-600 focus:outline-none focus:border-gray-400"
+            className="w-full sm:w-auto px-4 py-2 border border-gray-200 rounded-none text-xs text-gray-600 focus:outline-none focus:border-gray-400"
           >
             <option>All Inquiry Types</option>
             <option>Business / Advertising</option>
@@ -194,7 +194,7 @@ export default function ContactUsSubmissions() {
                     )}
                   </td>
                   <td className="py-3 px-3 whitespace-nowrap">
-                    <span className="inline-block px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-gray-600 bg-gray-100 rounded-md">
+                    <span className="inline-block px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-gray-600 bg-gray-100 rounded-none">
                       {sub.inquiry_type}
                     </span>
                   </td>
@@ -245,7 +245,7 @@ export default function ContactUsSubmissions() {
       {/* View Details Modal */}
       {viewItem && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border border-gray-100 animate-in fade-in zoom-in-95 duration-150">
+          <div className="bg-white rounded-none shadow-2xl max-w-lg w-full overflow-hidden border border-gray-100 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/70">
               <div className="flex items-center gap-2">
                 <FileText className="w-5 h-5 text-blue-600" />
@@ -253,7 +253,7 @@ export default function ContactUsSubmissions() {
               </div>
               <button
                 onClick={() => setViewItem(null)}
-                className="text-gray-400 hover:text-gray-600 p-1 rounded-md hover:bg-gray-200 transition-colors"
+                className="text-gray-400 hover:text-gray-600 p-1 rounded-none hover:bg-gray-200 transition-colors"
               >
                 <X size={18} />
               </button>
@@ -322,7 +322,7 @@ export default function ContactUsSubmissions() {
                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
                   Query Message
                 </span>
-                <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-800 whitespace-pre-wrap leading-relaxed text-xs">
+                <div className="p-3 bg-gray-50 border border-gray-200 rounded-none text-gray-800 whitespace-pre-wrap leading-relaxed text-xs">
                   {viewItem.message}
                 </div>
               </div>

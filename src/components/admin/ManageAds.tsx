@@ -113,7 +113,7 @@ export default function ManageAds() {
   });
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+    <div className="bg-white rounded-none shadow-sm border border-gray-100 p-6 md:p-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-gray-100 mb-6">
         <div>
@@ -128,7 +128,7 @@ export default function ManageAds() {
         <button
           onClick={fetchAds}
           disabled={isLoading}
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 transition-colors self-start sm:self-auto"
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-none border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 transition-colors self-start sm:self-auto"
         >
           <RefreshCw size={13} className={isLoading ? "animate-spin" : ""} />
           Refresh
@@ -164,7 +164,7 @@ export default function ManageAds() {
           </span>
         </div>
       ) : filteredAds.length === 0 ? (
-        <div className="py-16 text-center text-sm text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+        <div className="py-16 text-center text-sm text-gray-400 bg-gray-50 rounded-none border border-dashed border-gray-200">
           No ad slots configured for this filter.
         </div>
       ) : (
@@ -177,7 +177,7 @@ export default function ManageAds() {
             return (
               <div
                 key={ad.id}
-                className="border border-gray-200 hover:border-gray-300 transition-all rounded-xl p-5 sm:p-6 bg-white shadow-xs flex flex-col lg:flex-row gap-6 lg:gap-8 relative"
+                className="border border-gray-200 hover:border-gray-300 transition-all rounded-none p-5 sm:p-6 bg-white shadow-xs flex flex-col lg:flex-row gap-6 lg:gap-8 relative"
               >
                 {/* Visual Preview / Upload Box */}
                 <div className="w-full lg:w-[360px] flex-shrink-0 flex flex-col">
@@ -198,7 +198,7 @@ export default function ManageAds() {
                         : isBanner
                         ? "h-[110px]"
                         : "h-[150px]"
-                    } bg-[#f9fafb] rounded-lg border-2 border-dashed border-gray-200 hover:border-[#ce1126] transition-colors overflow-hidden flex flex-col items-center justify-center relative cursor-pointer group`}
+                    } bg-[#f9fafb] rounded-none border-2 border-dashed border-gray-200 hover:border-[#ce1126] transition-colors overflow-hidden flex flex-col items-center justify-center relative cursor-pointer group`}
                   >
                     {ad.image ? (
                       <img
@@ -265,7 +265,7 @@ export default function ManageAds() {
                       </div>
 
                       {/* Active Toggle Switch */}
-                      <div className="flex items-center gap-2.5 self-start sm:self-auto bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200">
+                      <div className="flex items-center gap-2.5 self-start sm:self-auto bg-gray-50 px-3 py-1.5 rounded-none border border-gray-200">
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input
                             type="checkbox"
@@ -293,7 +293,7 @@ export default function ManageAds() {
                         </label>
                         <select
                           disabled
-                          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs bg-gray-50 text-gray-600 cursor-not-allowed font-medium"
+                          className="w-full border border-gray-200 rounded-none px-3 py-2 text-xs bg-gray-50 text-gray-600 cursor-not-allowed font-medium"
                         >
                           <option>{ad.action_type || "External Link (URL)"}</option>
                         </select>
@@ -336,7 +336,7 @@ export default function ManageAds() {
                               handleUpdateAd(ad.id, { link: ad.link });
                             }}
                             placeholder="https://sponsor-landing-page.com"
-                            className="w-full border border-gray-200 rounded-lg pl-8 pr-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#ce1126] focus:border-[#ce1126] transition-all font-mono"
+                            className="w-full border border-gray-200 rounded-none pl-8 pr-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#ce1126] focus:border-[#ce1126] transition-all font-mono"
                           />
                         </div>
                         <p className="text-[10px] text-gray-400 mt-1">

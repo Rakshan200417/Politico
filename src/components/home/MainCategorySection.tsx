@@ -29,7 +29,7 @@ export default async function MainCategorySection({ category, count = 4 }: { cat
   const sideArticles = isWorld ? articles : articles.slice(1, count);
 
   return (
-    <div className="w-full mb-10 border-t border-gray-200 pt-8 first:border-t-0 first:pt-0">
+    <div className="w-full mb-10 last:mb-0 border-t border-gray-200 pt-8 first:border-t-0 first:pt-0">
       <div className="flex items-center gap-2 pb-2 mb-3 border-b border-[#d9d9d9]">
         <span className="w-2.5 h-2.5 rounded-full border-2 border-[#d32f2f] bg-transparent inline-block"></span>
         <h2 className="text-[10px] font-extrabold tracking-[0.12em] text-[#222222] uppercase font-sans">

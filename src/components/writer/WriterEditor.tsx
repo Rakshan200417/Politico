@@ -24,6 +24,7 @@ import {
   ChevronRight,
   X,
   CheckCircle,
+  Cloud,
   Loader2,
   Plus,
   Settings,
@@ -694,9 +695,29 @@ export default function WriterEditor({
     return fig;
   };
 
+  // Normalize any bare text nodes in editor into <p> paragraphs
+  const normalizeEditorBlocks = () => {
+    if (!editorRef.current) return;
+    const editor = editorRef.current;
+    const nodes = Array.from(editor.childNodes);
+    for (const node of nodes) {
+      if (
+        node.nodeType === Node.TEXT_NODE &&
+        node.textContent &&
+        node.textContent.trim().length > 0
+      ) {
+        const p = document.createElement("p");
+        p.className = "mb-4";
+        editor.insertBefore(p, node);
+        p.appendChild(node);
+      }
+    }
+  };
+
   // Helper to get all non-empty top-level paragraphs and blocks in the editor
   const getEditorBlocks = (): HTMLElement[] => {
     if (!editorRef.current) return [];
+    normalizeEditorBlocks();
     const children = Array.from(editorRef.current.children) as HTMLElement[];
     return children.filter((el) => {
       if (el.id === "image-drop-indicator" || el.classList.contains("image-toolbar") || el.classList.contains("image-resizer")) {
@@ -757,12 +778,18 @@ export default function WriterEditor({
     const range = selection.getRangeAt(0);
 
     const url = prompt("Enter the destination link URL (https://...):");
-
     selection.removeAllRanges();
     selection.addRange(range);
 
     if (url) {
       handleFormat("createLink", url);
+      if (editorRef.current) {
+        editorRef.current.querySelectorAll("a").forEach((a) => {
+          a.setAttribute("target", "_blank");
+          a.setAttribute("rel", "noopener noreferrer");
+        });
+        setContent(editorRef.current.innerHTML);
+      }
     }
   };
 
@@ -819,8 +846,13 @@ export default function WriterEditor({
           seo_keywords: imageKeywords.join(", "),
         },
       ]);
-      setUploadSuccessMessage(`FILE "${file.name.toUpperCase()}" UPLOADED SUCCESSFULLY!`);
-      showToast("✔ IMAGE UPLOADED (READY TO INSERT/REPLACE)");
+      const isB2 = serverUrl.includes("backblazeb2.com") || data.b2_connected;
+      setUploadSuccessMessage(
+        isB2
+          ? `FILE "${file.name.toUpperCase()}" STORED IN BACKBLAZE B2 CLOUD!`
+          : `FILE "${file.name.toUpperCase()}" UPLOADED SUCCESSFULLY!`
+      );
+      showToast(isB2 ? "✔ IMAGE STORED TO BACKBLAZE B2" : "✔ IMAGE UPLOADED");
     } catch (err: any) {
       console.warn("Server upload error, falling back to FileReader:", err);
       try {
@@ -1342,17 +1374,17 @@ export default function WriterEditor({
 
   const headerTrackerTitle = title.trim()
     ? title.toUpperCase()
-    : "NEW BUSINESS HEADLINE";
+    : "NEW ARTICLE HEADLINE";
 
   // Render Settings Panel (shared by desktop card and mobile drawer)
   const renderSettingsContent = () => (
     <div className="space-y-6">
       {/* DETAILS vs SEO Tab Switcher */}
-      <div className="bg-gray-100 p-1 rounded-xl grid grid-cols-2 gap-1">
+      <div className="bg-gray-100 p-1 rounded-none grid grid-cols-2 gap-1">
         <button
           type="button"
           onClick={() => setSidebarTab("details")}
-          className={`py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition ${
+          className={`py-2 text-xs font-bold uppercase tracking-wider rounded-none transition ${
             sidebarTab === "details"
               ? "bg-white text-gray-900 shadow-xs"
               : "text-gray-500 hover:text-gray-900"
@@ -1363,7 +1395,7 @@ export default function WriterEditor({
         <button
           type="button"
           onClick={() => setSidebarTab("seo")}
-          className={`py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition ${
+          className={`py-2 text-xs font-bold uppercase tracking-wider rounded-none transition ${
             sidebarTab === "seo"
               ? "bg-white text-gray-900 shadow-xs"
               : "text-gray-500 hover:text-gray-900"
@@ -1385,7 +1417,7 @@ export default function WriterEditor({
               <button
                 type="button"
                 onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
-                className="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs font-bold text-gray-900 focus:outline-none focus:border-gray-500 transition flex items-center justify-between"
+                className="w-full bg-white border border-gray-300 rounded-none px-3.5 py-2.5 text-xs font-bold text-gray-900 focus:outline-none focus:border-gray-500 transition flex items-center justify-between"
               >
                 <span>{category}</span>
                 <ChevronDown size={14} className="text-gray-400" />
@@ -1397,20 +1429,7 @@ export default function WriterEditor({
                     className="fixed inset-0 z-40" 
                     onClick={() => setIsCategoryDropdownOpen(false)}
                   ></div>
-                  <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg py-1 max-h-60 overflow-y-auto">
-                    {/* 1. Business */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setCategory("Business");
-                        setIsCategoryDropdownOpen(false);
-                        setSelectedSubcategories([]);
-                      }}
-                      className={`w-full text-left px-4 py-2 text-xs transition-colors ${category === "Business" ? "bg-red-50 text-[#ce1126] font-bold" : "text-gray-700 hover:bg-gray-50 font-medium"}`}
-                    >
-                      Business
-                    </button>
-
+                  <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-none shadow-lg py-1 max-h-60 overflow-y-auto">
                     {/* 2. World (Click to expand accordion showing regions) */}
                     <div>
                       <div 
@@ -1494,7 +1513,7 @@ export default function WriterEditor({
               </label>
             </div>
 
-            <div className="border border-gray-300 rounded-xl p-3 bg-white space-y-4 max-h-[300px] overflow-y-auto custom-scrollbar">
+            <div className="border border-gray-300 rounded-none p-3 bg-white space-y-4 max-h-[300px] overflow-y-auto custom-scrollbar">
               {/* General, Main Section & Specific Subcategories (Excluding World) */}
               <div className="grid grid-cols-2 gap-2 text-xs">
                 {[
@@ -1583,7 +1602,7 @@ export default function WriterEditor({
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={handleTagKeyDown}
               placeholder="e.g. BreakingNews, Football, WorldCup2026"
-              className="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-black transition"
+              className="w-full bg-white border border-gray-300 rounded-none px-3.5 py-2.5 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-black transition"
             />
             <p className="text-[9px] font-mono text-gray-400 mt-1 uppercase tracking-wider">
               PRESS ENTER OR COMMA TO ADD • CLICK TAG TO REMOVE • {tags.length}{" "}
@@ -1619,7 +1638,7 @@ export default function WriterEditor({
               type="text"
               value={readDuration}
               onChange={(e) => setReadDuration(e.target.value)}
-              className="w-full bg-gray-50 border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs font-bold text-gray-800 focus:outline-none"
+              className="w-full bg-gray-50 border border-gray-300 rounded-none px-3.5 py-2.5 text-xs font-bold text-gray-800 focus:outline-none"
             />
           </div>
 
@@ -1633,7 +1652,7 @@ export default function WriterEditor({
                 <select
                   value={homepagePlacement}
                   onChange={(e) => setHomepagePlacement(e.target.value)}
-                  className="w-full bg-white border border-[#f5dca3] rounded-xl px-3.5 py-3 text-[13px] font-semibold text-gray-800 focus:outline-none appearance-none shadow-sm"
+                  className="w-full bg-white border border-[#f5dca3] rounded-none px-3.5 py-3 text-[13px] font-semibold text-gray-800 focus:outline-none appearance-none shadow-sm"
                 >
                   <option value="None">None (category & search only)</option>
                   <option value="Home - Latest News">Home - Latest News</option>
@@ -1648,7 +1667,7 @@ export default function WriterEditor({
               </div>
               
               {homepagePlacement.includes("Latest News") && (
-                <div className="mt-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                <div className="mt-3 bg-gray-50 p-3 rounded-none border border-gray-200">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input 
                       type="checkbox" 
@@ -1668,7 +1687,7 @@ export default function WriterEditor({
           )}
 
           {/* Targeted Email Distribution */}
-          <div className="bg-[#f2f8fc] border border-[#d6e5f3] rounded-xl p-4">
+          <div className="bg-[#f2f8fc] border border-[#d6e5f3] rounded-none p-4">
             <div className="flex items-center gap-2 mb-2">
               <Mail size={14} className="text-[#003da5]" />
               <label className="block text-[11px] font-black uppercase tracking-wider text-[#003da5]">
@@ -1678,7 +1697,7 @@ export default function WriterEditor({
             <p className="text-[11px] text-gray-500 mb-4 font-mono leading-relaxed">
               Add specific VIP, partner, or client emails to receive this story upon publication.
             </p>
-            <div className="flex items-center bg-white border border-[#b8d1ea] rounded-xl px-3 py-2.5 shadow-sm">
+            <div className="flex items-center bg-white border border-[#b8d1ea] rounded-none px-3 py-2.5 shadow-sm">
               <Mail size={14} className="text-[#003da5] mr-2" />
               <span className="text-xs font-bold text-[#003da5] mr-2">Mail Box</span>
               <input
@@ -1699,7 +1718,7 @@ export default function WriterEditor({
             <button
               type="button"
               onClick={handleAutoGenerateSEO}
-              className="w-full py-3 px-4 rounded-xl bg-[#ce1126] hover:bg-[#a00c1c] text-white text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-[0.99]"
+              className="w-full py-3 px-4 rounded-none bg-[#ce1126] hover:bg-[#a00c1c] text-white text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-[0.99]"
             >
               <Sparkles size={16} />
               <span>AUTO-GENERATE SEO</span>
@@ -1723,7 +1742,7 @@ export default function WriterEditor({
                 setIsCardSummaryAuto(false);
               }}
               placeholder="Concise 1-2 sentence preview details."
-              className="w-full bg-white border border-gray-300 rounded-xl p-3 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-black transition resize-y"
+              className="w-full bg-white border border-gray-300 rounded-none p-3 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-black transition resize-y"
             />
           </div>
 
@@ -1740,7 +1759,7 @@ export default function WriterEditor({
                 setIsFocusKeywordAuto(false);
               }}
               placeholder="e.g. Vexillum Minerals"
-              className="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-black transition"
+              className="w-full bg-white border border-gray-300 rounded-none px-3.5 py-2.5 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-black transition"
             />
             {focusKeyword.trim() && (
               <div className="mt-2 space-y-1.5 text-[10px] font-medium font-mono">
@@ -1808,7 +1827,7 @@ export default function WriterEditor({
                 setIsMetaDescriptionAuto(false);
               }}
               placeholder="Discover why... — the sentence shown under the title in Google."
-              className="w-full bg-white border border-gray-300 rounded-xl p-3 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-black transition resize-y"
+              className="w-full bg-white border border-gray-300 rounded-none p-3 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-black transition resize-y"
             />
           </div>
 
@@ -1817,7 +1836,7 @@ export default function WriterEditor({
             <label className="block text-[11px] font-black uppercase tracking-wider text-gray-500 mb-2 flex items-center gap-1.5">
               <span>🔍 PREVIEW IN SEARCH RESULTS</span>
             </label>
-            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-xs">
+            <div className="bg-white border border-gray-200 rounded-none p-4 shadow-xs">
               <div className="flex items-center gap-2 mb-1.5">
                 <div className="w-6 h-6 rounded-full bg-black text-white text-[10px] font-black flex items-center justify-center">
                   P
@@ -1862,7 +1881,7 @@ export default function WriterEditor({
               e.stopPropagation();
               onCancel();
             }}
-            className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors flex-shrink-0 cursor-pointer"
+            className="p-1.5 rounded-none text-gray-400 hover:text-white hover:bg-white/10 transition-colors flex-shrink-0 cursor-pointer"
             title="Back / Cancel"
           >
             <ArrowLeft size={18} strokeWidth={2.5} />
@@ -1883,7 +1902,7 @@ export default function WriterEditor({
           {/* Preview Button (Eye) */}
           <button
             onClick={() => setPreviewOpen(true)}
-            className="flex items-center justify-center gap-1.5 p-2 sm:px-3 sm:py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-gray-300 bg-[#1e2532] hover:bg-[#2d3748] border border-gray-700 transition shadow-sm"
+            className="flex items-center justify-center gap-1.5 p-2 sm:px-3 sm:py-2 rounded-none text-xs font-bold uppercase tracking-wider text-gray-300 bg-[#1e2532] hover:bg-[#2d3748] border border-gray-700 transition shadow-sm"
             title="Preview Story"
           >
             <Eye size={16} />
@@ -1896,7 +1915,7 @@ export default function WriterEditor({
               <button
                 disabled={isSavingDraft || isSubmitting}
                 onClick={() => saveArticle("rejected")}
-                className="flex items-center justify-center gap-1.5 p-2 sm:px-3.5 sm:py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-red-700 hover:bg-red-800 disabled:opacity-70 transition shadow-sm"
+                className="flex items-center justify-center gap-1.5 p-2 sm:px-3.5 sm:py-2 rounded-none text-xs font-bold uppercase tracking-wider text-white bg-red-700 hover:bg-red-800 disabled:opacity-70 transition shadow-sm"
                 title="Reject Article"
               >
                 {isSavingDraft ? (
@@ -1911,7 +1930,7 @@ export default function WriterEditor({
               <button
                 disabled={isSavingDraft || isSubmitting}
                 onClick={() => saveArticle("published")}
-                className="flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider text-white bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-75 transition shadow-sm"
+                className="flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-none text-xs font-black uppercase tracking-wider text-white bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-75 transition shadow-sm"
               >
                 {isSubmitting ? (
                   <Loader2 size={14} className="animate-spin text-white" />
@@ -1927,7 +1946,7 @@ export default function WriterEditor({
               <button
                 disabled={isSavingDraft || isSubmitting}
                 onClick={() => saveArticle("draft")}
-                className="flex items-center justify-center gap-1.5 p-2 sm:px-3.5 sm:py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-gray-300 bg-[#1e2532] hover:bg-[#2d3748] border border-gray-700 disabled:opacity-70 transition shadow-sm"
+                className="flex items-center justify-center gap-1.5 p-2 sm:px-3.5 sm:py-2 rounded-none text-xs font-bold uppercase tracking-wider text-gray-300 bg-[#1e2532] hover:bg-[#2d3748] border border-gray-700 disabled:opacity-70 transition shadow-sm"
                 title="Save Draft"
               >
                 {isSavingDraft ? (
@@ -1947,7 +1966,7 @@ export default function WriterEditor({
               <button
                 disabled={isSavingDraft || isSubmitting}
                 onClick={() => saveArticle("pending")}
-                className="flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider text-white bg-[#ce1126] hover:bg-[#a00c1c] active:scale-[0.98] disabled:opacity-75 transition shadow-sm"
+                className="flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-none text-xs font-black uppercase tracking-wider text-white bg-[#ce1126] hover:bg-[#a00c1c] active:scale-[0.98] disabled:opacity-75 transition shadow-sm"
               >
                 {isSubmitting ? (
                   <>
@@ -1979,14 +1998,14 @@ export default function WriterEditor({
             <button
               onClick={() => handleFormat("undo")}
               title="Undo"
-              className="p-1.5 rounded-lg hover:bg-white text-slate-600 hover:text-black transition"
+              className="p-1.5 rounded-none hover:bg-white text-slate-600 hover:text-black transition"
             >
               <Undo size={16} />
             </button>
             <button
               onClick={() => handleFormat("redo")}
               title="Redo"
-              className="p-1.5 rounded-lg hover:bg-white text-slate-600 hover:text-black transition"
+              className="p-1.5 rounded-none hover:bg-white text-slate-600 hover:text-black transition"
             >
               <Redo size={16} />
             </button>
@@ -1996,21 +2015,21 @@ export default function WriterEditor({
             <button
               onClick={() => handleFormat("bold")}
               title="Bold"
-              className="p-1.5 rounded-lg hover:bg-white text-slate-700 hover:text-black font-black transition"
+              className="p-1.5 rounded-none hover:bg-white text-slate-700 hover:text-black font-black transition"
             >
               <Bold size={16} />
             </button>
             <button
               onClick={() => handleFormat("italic")}
               title="Italic"
-              className="p-1.5 rounded-lg hover:bg-white text-slate-700 hover:text-black italic transition"
+              className="p-1.5 rounded-none hover:bg-white text-slate-700 hover:text-black italic transition"
             >
               <Italic size={16} />
             </button>
             <button
               onClick={() => handleFormat("underline")}
               title="Underline"
-              className="p-1.5 rounded-lg hover:bg-white text-slate-700 hover:text-black underline transition"
+              className="p-1.5 rounded-none hover:bg-white text-slate-700 hover:text-black underline transition"
             >
               <Underline size={16} />
             </button>
@@ -2020,21 +2039,21 @@ export default function WriterEditor({
             <button
               onClick={handleInsertLink}
               title="Insert Link"
-              className="p-1.5 rounded-lg hover:bg-white text-slate-700 hover:text-black transition"
+              className="p-1.5 rounded-none hover:bg-white text-slate-700 hover:text-black transition"
             >
               <Link2 size={16} />
             </button>
             <button
               onClick={() => handleFormat("insertUnorderedList")}
               title="Bullet List"
-              className="p-1.5 rounded-lg hover:bg-white text-slate-700 hover:text-black transition"
+              className="p-1.5 rounded-none hover:bg-white text-slate-700 hover:text-black transition"
             >
               <List size={16} />
             </button>
             <button
               onClick={() => handleFormat("insertOrderedList")}
               title="Numbered List"
-              className="p-1.5 rounded-lg hover:bg-white text-slate-700 hover:text-black transition"
+              className="p-1.5 rounded-none hover:bg-white text-slate-700 hover:text-black transition"
             >
               <ListOrdered size={16} />
             </button>
@@ -2323,6 +2342,9 @@ export default function WriterEditor({
                 e.preventDefault();
                 e.dataTransfer.dropEffect = "move";
 
+                // 1. Normalize any bare text nodes into paragraph elements
+                normalizeEditorBlocks();
+
                 // Find candidate block under mouse or nearest block by vertical coordinate
                 const blocks = Array.from(editorRef.current.children).filter((el) => {
                   return (
@@ -2338,20 +2360,42 @@ export default function WriterEditor({
                 let chosenBlock: HTMLElement | null = null;
                 let chosenPosition: "before" | "after" = "after";
 
-                // Check which block or gap e.clientY is closest to
-                for (let i = 0; i < blocks.length; i++) {
-                  const b = blocks[i];
-                  const rect = b.getBoundingClientRect();
-                  const mid = rect.top + rect.height / 2;
+                // Check exact element under mouse first
+                const elUnderMouse = document.elementFromPoint(e.clientX, e.clientY);
+                if (elUnderMouse && editorRef.current.contains(elUnderMouse)) {
+                  let candidate: HTMLElement | null = elUnderMouse as HTMLElement;
+                  while (candidate && candidate.parentElement !== editorRef.current) {
+                    candidate = candidate.parentElement;
+                  }
+                  if (
+                    candidate &&
+                    candidate !== draggedFigureRef.current &&
+                    candidate.id !== "image-drop-indicator" &&
+                    !candidate.classList.contains("image-toolbar") &&
+                    !candidate.classList.contains("image-resizer")
+                  ) {
+                    chosenBlock = candidate;
+                    const r = candidate.getBoundingClientRect();
+                    chosenPosition = e.clientY <= (r.top + r.height / 2) ? "before" : "after";
+                  }
+                }
 
-                  if (e.clientY <= mid) {
-                    chosenBlock = b;
-                    chosenPosition = "before";
-                    break;
-                  } else if (i === blocks.length - 1 || e.clientY <= rect.bottom + 12) {
-                    chosenBlock = b;
-                    chosenPosition = "after";
-                    if (e.clientY <= rect.bottom + 12) break;
+                // If not directly on a block, calculate nearest block via vertical distance
+                if (!chosenBlock) {
+                  for (let i = 0; i < blocks.length; i++) {
+                    const b = blocks[i];
+                    const rect = b.getBoundingClientRect();
+                    const mid = rect.top + rect.height / 2;
+
+                    if (e.clientY <= mid) {
+                      chosenBlock = b;
+                      chosenPosition = "before";
+                      break;
+                    } else if (i === blocks.length - 1 || e.clientY <= rect.bottom + 12) {
+                      chosenBlock = b;
+                      chosenPosition = "after";
+                      if (e.clientY <= rect.bottom + 12) break;
+                    }
                   }
                 }
 
@@ -2438,7 +2482,7 @@ export default function WriterEditor({
             {/* Right-Click Placement & Actions Context Menu */}
             {contextMenu && (
               <div
-                className="fixed z-[100] bg-[#1e293b] text-white rounded-xl shadow-2xl border border-slate-700 py-1.5 w-56 text-xs font-semibold animate-in fade-in zoom-in-95 duration-100 select-none"
+                className="fixed z-[100] bg-[#1e293b] text-white rounded-none shadow-2xl border border-slate-700 py-1.5 w-56 text-xs font-semibold animate-in fade-in zoom-in-95 duration-100 select-none"
                 style={{ top: contextMenu.y, left: contextMenu.x }}
                 onClick={(e) => e.stopPropagation()}
               >
@@ -2617,7 +2661,7 @@ export default function WriterEditor({
 
       {/* Floating Bottom-Right Toast Alert (Screenshot 3) */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#0f172a] text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-slate-700 animate-in fade-in slide-in-from-bottom-5 duration-300">
+        <div className="fixed bottom-6 right-6 z-50 bg-[#0f172a] text-white px-5 py-3 rounded-none shadow-2xl flex items-center gap-3 border border-slate-700 animate-in fade-in slide-in-from-bottom-5 duration-300">
           <CheckCircle size={18} className="text-emerald-400 flex-shrink-0" />
           <span className="text-xs font-black tracking-wider uppercase">
             {toastMessage}
@@ -2634,11 +2678,11 @@ export default function WriterEditor({
       {/* Insert Article Image Modal (Screenshots 1 & 2) */}
       {imageModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-gray-100 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-none max-w-xl w-full shadow-2xl border border-gray-100 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             {/* Modal Header */}
             <div className="h-14 px-6 border-b border-gray-200 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-red-50 text-[#ce1126] flex items-center justify-center">
+                <div className="w-7 h-7 rounded-none bg-red-50 text-[#ce1126] flex items-center justify-center">
                   <ImageIcon size={16} />
                 </div>
                 <h3 className="text-sm font-black text-gray-900 tracking-tight">
@@ -2647,7 +2691,7 @@ export default function WriterEditor({
               </div>
               <button
                 onClick={() => setImageModalOpen(false)}
-                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition"
+                className="p-1.5 rounded-none text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition"
               >
                 <X size={18} />
               </button>
@@ -2665,7 +2709,7 @@ export default function WriterEditor({
                   value={imageUrl}
                   onChange={(e) => setImageUrl(e.target.value)}
                   placeholder="https://images.unsplash.com/photo-..."
-                  className="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-black transition font-mono"
+                  className="w-full bg-white border border-gray-300 rounded-none px-3.5 py-2.5 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-black transition font-mono"
                 />
               </div>
 
@@ -2684,12 +2728,12 @@ export default function WriterEditor({
                 <label className="block text-[10px] font-black uppercase tracking-wider text-gray-400 mb-1.5">
                   CHOOSE COMPUTER FILE
                 </label>
-                <div className="border-2 border-dashed border-gray-300 hover:border-gray-400 rounded-xl p-3.5 bg-gray-50/50 transition">
+                <div className="border-2 border-dashed border-gray-300 hover:border-gray-400 rounded-none p-3.5 bg-gray-50/50 transition">
                   <input
                     type="file"
                     accept="image/*"
                     onChange={handleFileUpload}
-                    className="text-xs text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-gray-200 file:text-gray-800 hover:file:bg-gray-300 cursor-pointer w-full"
+                    className="text-xs text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-none file:border-0 file:text-xs file:font-bold file:bg-gray-200 file:text-gray-800 hover:file:bg-gray-300 cursor-pointer w-full"
                   />
                   {isUploadingImage && (
                     <div className="flex items-center gap-2 text-xs text-[#ce1126] font-bold mt-2">
@@ -2707,16 +2751,27 @@ export default function WriterEditor({
                     </div>
                   )}
                   {imageUrl && (
-                    <div className="mt-2.5 flex items-center gap-2 p-2 bg-blue-50/60 rounded-lg border border-blue-100 text-[11px] text-blue-700 font-mono truncate">
-                      <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
-                      <span className="truncate">{imageUrl}</span>
+                    <div className="mt-2.5 p-2.5 bg-emerald-50/80 rounded border border-emerald-200 text-xs">
+                      <div className="flex items-center justify-between gap-2 mb-1.5">
+                        <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-800 uppercase tracking-wide">
+                          <Cloud size={14} className="text-emerald-600" />
+                          BACKBLAZE B2 CLOUD STORAGE CONFIRMED
+                        </span>
+                        <span className="text-[9px] font-black bg-emerald-600 text-white px-2 py-0.5 rounded uppercase tracking-wider">
+                          CONNECTED
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[11px] font-mono text-emerald-900 bg-white/90 p-1.5 rounded border border-emerald-100 break-all">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
+                        <span className="truncate">{imageUrl}</span>
+                      </div>
                     </div>
                   )}
                 </div>
               </div>
 
               {/* Image SEO Keywords (Max 4 Keywords) */}
-              <div className="bg-red-50/50 border border-red-200/80 rounded-xl p-3.5">
+              <div className="bg-red-50/50 border border-red-200/80 rounded-none p-3.5">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-gray-900">
                     <Sparkles size={14} className="text-[#ce1126]" />
@@ -2733,7 +2788,7 @@ export default function WriterEditor({
                   onChange={(e) => setImageKeywordInput(e.target.value)}
                   onKeyDown={handleImageKeywordKeyDown}
                   placeholder="e.g. Donald Trump, White House, Election 2026"
-                  className="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-red-600 transition"
+                  className="w-full bg-white border border-gray-300 rounded-none px-3.5 py-2 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-red-600 transition"
                 />
                 <p className="text-[10px] text-gray-500 mt-1.5 flex items-center gap-1">
                   <span>⚡</span>
@@ -2772,7 +2827,7 @@ export default function WriterEditor({
                   value={imageCaption}
                   onChange={(e) => setImageCaption(e.target.value)}
                   placeholder="Brief description (e.g. President speaking with reporters outside Capitol)"
-                  className="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-black transition"
+                  className="w-full bg-white border border-gray-300 rounded-none px-3.5 py-2.5 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-black transition"
                 />
               </div>
 
@@ -2786,7 +2841,7 @@ export default function WriterEditor({
                   value={imageCredit}
                   onChange={(e) => setImageCredit(e.target.value)}
                   placeholder="e.g. Reuters, AP Photo, Getty Images"
-                  className="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-black transition"
+                  className="w-full bg-white border border-gray-300 rounded-none px-3.5 py-2.5 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-black transition"
                 />
               </div>
             </div>
@@ -2805,7 +2860,7 @@ export default function WriterEditor({
                 type="button"
                 onClick={handleConfirmInsertImage}
                 disabled={!imageUrl.trim() || isUploadingImage}
-                className="px-5 py-2.5 rounded-xl bg-[#ce1126] hover:bg-[#a00c1c] active:scale-[0.98] disabled:opacity-50 text-white text-xs font-black uppercase tracking-wider shadow-sm transition flex items-center gap-1.5 cursor-pointer"
+                className="px-5 py-2.5 rounded-none bg-[#ce1126] hover:bg-[#a00c1c] active:scale-[0.98] disabled:opacity-50 text-white text-xs font-black uppercase tracking-wider shadow-sm transition flex items-center gap-1.5 cursor-pointer"
               >
                 {isEditingImage ? (
                   <>
