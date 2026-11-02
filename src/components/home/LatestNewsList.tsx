@@ -1,15 +1,6 @@
 import React from "react";
 import { slugify } from "@/data/newsArticles";
 
-interface LatestNewsItem {
-  id: string;
-  title: string;
-  time?: string;
-  isRedTime?: boolean;
-  isSponsored?: boolean;
-  sponsor?: string;
-}
-
 import { getArticlesByPlacement, getLatestPublishedArticles } from "@/lib/articleService";
 import { formatPublishDate } from "@/utils/dateFormatter";
 

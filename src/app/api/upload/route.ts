@@ -40,7 +40,6 @@ export async function POST(request: Request) {
       : 'articles';
 
     let buffer: Buffer;
-    let extension = '.png';
     let originalName = '';
     let caption = '';
     let credit = '';
@@ -72,14 +71,10 @@ export async function POST(request: Request) {
       }
 
       originalName = name || 'image';
-      if (name) {
-        extension = path.extname(name) || '.png';
-      }
 
       // Handle data URL format: data:image/jpeg;base64,...
       const match = image.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
       if (match) {
-        extension = `.${match[1].replace('+xml', '')}`;
         buffer = Buffer.from(match[2], 'base64');
       } else {
         buffer = Buffer.from(image, 'base64');
@@ -98,7 +93,6 @@ export async function POST(request: Request) {
       }
 
       originalName = file.name;
-      extension = path.extname(file.name) || '.png';
       const bytes = await file.arrayBuffer();
       buffer = Buffer.from(bytes);
     }
@@ -135,6 +129,10 @@ export async function POST(request: Request) {
     return NextResponse.json({
       url: finalUrl,
       filename: originalName,
+      caption,
+      credit,
+      seo_keywords: seoKeywords,
+      uploader_email: uploaderEmail,
       storage: isB2 ? 'backblaze' : 'local',
       b2_connected: isB2,
       message: isB2

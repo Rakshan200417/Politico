@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import pool from '@/lib/db';
 import { listFolderFiles, deleteFromB2 } from '@/lib/b2Storage';
 import { createDatabaseBackup, checkAndRunAutomated24hBackup } from '@/lib/backupService';
 

@@ -63,7 +63,7 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     await ensureAdvertiseTable();
     const [rows]: any = await pool.execute('SELECT * FROM advertise_leads ORDER BY created_at DESC');

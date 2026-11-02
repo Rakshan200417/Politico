@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Play, Video as VideoIcon, ExternalLink, CheckCircle2, RefreshCw, Upload, Sparkles, Trash2, Edit3, X, Loader2, Cloud } from "lucide-react";
+import { Play, Video as VideoIcon, ExternalLink, CheckCircle2, RefreshCw, Upload, Sparkles, Trash2, Edit3, X, Loader2 } from "lucide-react";
 
 export interface ShortReelVideo {
   id?: number;
@@ -65,34 +65,30 @@ export default function ShortsManager() {
     }
   };
 
-  // Helper to extract YouTube video ID
-  const extractYouTubeId = (url: string) => {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-    const match = url.match(regExp);
-    return match && match[2].length === 11 ? match[2] : null;
-  };
-
   // Auto detect platform and fetch metadata
   const handleUrlChange = async (url: string) => {
-    setVideoUrl(url);
+    // Sanitize any messy prefix from user pasting over existing text (e.g. gs-you-like-with-facehttps://...)
+    const match = url.match(/https?:\/\/[^\s"']+/i);
+    const cleanUrl = match ? match[0] : url;
+    setVideoUrl(cleanUrl);
     setAutoFetchedConfirmed(false);
 
     // Auto-detect platform
     let detectedPlatform = "YouTube";
-    if (url.includes("rumble.com")) {
+    if (cleanUrl.includes("rumble.com")) {
       detectedPlatform = "Rumble";
-    } else if (url.includes("instagram.com")) {
+    } else if (cleanUrl.includes("instagram.com")) {
       detectedPlatform = "Instagram Reels";
-    } else if (url.includes("facebook.com") || url.includes("fb.watch")) {
+    } else if (cleanUrl.includes("facebook.com") || cleanUrl.includes("fb.watch")) {
       detectedPlatform = "Facebook Reels";
-    } else if (url.includes("youtube.com") || url.includes("youtu.be")) {
+    } else if (cleanUrl.includes("youtube.com") || cleanUrl.includes("youtu.be")) {
       detectedPlatform = "YouTube";
     }
     setPlatform(detectedPlatform);
 
     // Trigger auto-fetch if valid URL of realistic length
-    if ((url.startsWith("http://") || url.startsWith("https://")) && url.length > 20) {
-      fetchVideoMetadata(url, false);
+    if ((cleanUrl.startsWith("http://") || cleanUrl.startsWith("https://")) && cleanUrl.length > 20) {
+      fetchVideoMetadata(cleanUrl, false);
     }
   };
 

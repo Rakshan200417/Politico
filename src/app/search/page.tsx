@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useMemo, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
 import SaveShareButtons from "@/components/common/SaveShareButtons";
@@ -30,7 +30,7 @@ function getAuthorSlug(name: string): string {
 
 function SearchPageContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
+  // const router = useRouter();
 
   const initialQ = searchParams.get("q") || "";
 

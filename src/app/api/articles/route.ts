@@ -462,7 +462,6 @@ export async function DELETE(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-    const email = searchParams.get('email');
     const action = searchParams.get('action') || 'trash'; // 'trash' = soft delete, 'permanent' = hard delete
 
     if (!id) {

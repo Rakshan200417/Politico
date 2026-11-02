@@ -14,7 +14,6 @@ import {
   Video,
   CheckCircle2,
   Inbox,
-  Settings,
   Search,
   Loader2,
   Trash2,
@@ -399,7 +398,7 @@ export default function AdminDashboard() {
     setIsEditing(true);
   };
 
-  const handleEditorSaveSuccess = (savedArticle: ArticleData, action: "draft" | "pending" | "trash" | "published" | "rejected") => {
+  const handleEditorSaveSuccess = (_savedArticle: ArticleData, _action: "draft" | "pending" | "trash" | "published" | "rejected") => {
     setIsEditing(false);
     setEditingArticle(null);
     // Reload articles to reflect the status change

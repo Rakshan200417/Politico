@@ -3,14 +3,12 @@
 import React, { useState, useEffect, useMemo } from "react";
 import DashboardShell, { NavItem } from "@/components/dashboard/DashboardShell";
 import {
-  BarChart3,
   FileText,
   Clock,
   CheckCircle2,
   XCircle,
   Trash2,
   PlusCircle,
-  Sparkles,
   Search,
   Plus,
   Loader2,

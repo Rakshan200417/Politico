@@ -20,10 +20,10 @@ interface LegalPageLayoutProps {
 }
 
 export default function LegalPageLayout({
-  pageTitle,
+  pageTitle: _pageTitle,
   sidebarTitle,
   sidebarIcon,
-  lastUpdated = "November 2026",
+  lastUpdated: _lastUpdated = "November 2026",
   sections,
 }: LegalPageLayoutProps) {
   const [activeSection, setActiveSection] = useState<string>(

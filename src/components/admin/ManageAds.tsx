@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Link2, Eye, EyeOff, Image as ImageIcon, ExternalLink, RefreshCw, CheckCircle2 } from "lucide-react";
+import { Link2, Image as ImageIcon, ExternalLink, RefreshCw, CheckCircle2 } from "lucide-react";
 
 export interface AdSlot {
   id: number;

@@ -2,7 +2,6 @@ import React from "react";
 import { slugify } from "@/data/newsArticles";
 
 export default function TopSidebarWidgets() {
-  const leadHeadline = "Supreme Court allows Trump's ballroom construction, but Roberts says project is 'likely unlawful'";
   const stories = [
     {
       tag: "Exclusive",

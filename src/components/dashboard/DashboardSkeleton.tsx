@@ -2,7 +2,7 @@
 
 import React from "react";
 
-export default function DashboardSkeleton({ role = "admin" }: { role?: "admin" | "writer" }) {
+export default function DashboardSkeleton({ role: _role = "admin" }: { role?: "admin" | "writer" }) {
   return (
     <div className="min-h-screen bg-[#f8fafc] flex flex-col font-sans select-none pointer-events-none">
       {/* Dashboard Top Header Bar */}

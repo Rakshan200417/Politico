@@ -1,7 +1,6 @@
 export const dynamic = 'force-dynamic';
 
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
 import CategoryPage from "@/components/category/CategoryPage";

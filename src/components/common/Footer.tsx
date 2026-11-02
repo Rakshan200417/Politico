@@ -1,5 +1,5 @@
 import React from "react";
-import { Facebook, Linkedin, Instagram, Mail, Play } from "lucide-react";
+import { Linkedin, Mail, Play } from "lucide-react";
 
 export default function Footer({ className = "" }: { className?: string }) {
   const currentYear = new Date().getFullYear();
@@ -13,7 +13,7 @@ export default function Footer({ className = "" }: { className?: string }) {
     { label: "Cookie Policy", href: "/cookies" },
     { label: "Editorial Policy", href: "/editorial-policy" },
     { label: "Advertise with us", href: "/advertise" },
-    { label: "RSS Feed", href: "/rss" },
+    { label: "RSS Feed", href: "/rss.xml" },
   ];
 
   // 2nd line: Social media icons from user reference image
@@ -21,7 +21,11 @@ export default function Footer({ className = "" }: { className?: string }) {
     {
       name: "Facebook",
       href: "https://facebook.com",
-      icon: <Facebook size={16} className="text-gray-400 group-hover:text-[#1877f2] transition-colors" />,
+      icon: (
+        <svg className="w-4 h-4 text-gray-400 group-hover:text-[#1877f2] transition-colors fill-current" viewBox="0 0 24 24">
+          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+        </svg>
+      ),
     },
     {
       name: "LinkedIn",
@@ -31,7 +35,13 @@ export default function Footer({ className = "" }: { className?: string }) {
     {
       name: "Instagram",
       href: "https://instagram.com",
-      icon: <Instagram size={16} className="text-gray-400 group-hover:text-[#e4405f] transition-colors" />,
+      icon: (
+        <svg className="w-4 h-4 text-gray-400 group-hover:text-[#e4405f] transition-colors fill-none stroke-current stroke-2" viewBox="0 0 24 24">
+          <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+          <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+        </svg>
+      ),
     },
     {
       name: "Rumble",
@@ -56,7 +66,12 @@ export default function Footer({ className = "" }: { className?: string }) {
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[12px] font-semibold text-gray-300">
           {navLinks.map((link, idx) => (
             <React.Fragment key={link.label}>
-              <a href={link.href} className="hover:text-white transition hover:underline">
+              <a
+                href={link.href}
+                target={link.href.includes("rss") ? "_blank" : undefined}
+                rel={link.href.includes("rss") ? "noopener noreferrer" : undefined}
+                className="hover:text-white transition hover:underline"
+              >
                 {link.label}
               </a>
               {idx < navLinks.length - 1 && (

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { ArrowLeft, ChevronDown, BookOpen, User, LogOut, PenTool } from "lucide-react";
+import { ArrowLeft, ChevronDown, User, LogOut } from "lucide-react";
 import ProfileModal from "@/components/profile/ProfileModal";
 
 interface DashboardHeaderProps {
@@ -63,20 +63,6 @@ export default function DashboardHeader({ title, backHref = "/" }: DashboardHead
 
   const displayName = user?.name || user?.email?.split("@")[0] || "User";
   const initialLetter = (displayName[0] || user?.email?.[0] || "U").toUpperCase();
-
-  const dashboardLabel =
-    user?.role === "admin"
-      ? "Admin Dashboard"
-      : user?.role === "writer"
-      ? "Author Workspace"
-      : "Readers Dashboard";
-
-  const dashboardHref =
-    user?.role === "admin"
-      ? "/admin"
-      : user?.role === "writer"
-      ? "/writer"
-      : "/reader";
 
   return (
     <header className="w-full bg-white border-b border-gray-200/80 sticky top-0 z-40">

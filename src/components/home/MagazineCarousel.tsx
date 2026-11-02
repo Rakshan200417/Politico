@@ -234,7 +234,6 @@ export default function MagazineCarousel({ articles }: { articles?: any[] }) {
   const clampedStartIndex = Math.min(Math.max(0, startIndex), maxIndex);
   
   // Calculate the actual visible scroll width for the viewport
-  const totalScrollWidth = totalCards * (cardWidth + gap);
   // Use clamped index for offset to prevent over-scrolling
   const offset = clampedStartIndex * (cardWidth + gap);
   const pageStep = visibleCount >= 4 ? 4 : visibleCount;

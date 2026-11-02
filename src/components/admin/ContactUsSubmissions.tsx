@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Eye, Trash2, X, Mail, Phone, Building2, Calendar, FileText } from "lucide-react";
+import { Eye, Trash2, X, FileText } from "lucide-react";
 
 interface ContactSubmission {
   id: number;

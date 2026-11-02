@@ -2,20 +2,14 @@
 
 import React, { useState, useRef } from "react";
 import { 
-  Database, 
-  Cloud, 
   Upload, 
   Download, 
-  RotateCcw, 
   Trash2, 
   CheckCircle2, 
   AlertCircle, 
   RefreshCw, 
   HardDrive, 
-  ShieldCheck,
   FileCode,
-  X,
-  Clock,
   Sparkles
 } from "lucide-react";
 

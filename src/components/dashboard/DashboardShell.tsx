@@ -8,10 +8,7 @@ import {
   LogOut,
   ChevronDown,
   User as UserIcon,
-  BookOpen,
-  PenTool,
-  Shield,
-} from "lucide-react";
+  } from "lucide-react";
 import ProfileModal from "@/components/profile/ProfileModal";
 
 export interface NavItem {

@@ -18,30 +18,23 @@ import {
   Undo,
   Redo,
   Sparkles,
-  ChevronLeft,
   ChevronDown,
   ChevronUp,
-  ChevronRight,
   X,
   CheckCircle,
   Cloud,
   Loader2,
   Plus,
-  Settings,
   AlignLeft,
   AlignCenter,
   AlignRight,
-  Maximize2,
   Trash2,
   Edit,
   User,
-  MessageSquare,
   Mail,
   Scissors,
   Clipboard,
-  Move,
-  GripVertical,
-} from "lucide-react";
+  } from "lucide-react";
 
 export interface ArticleData {
   id?: number;
@@ -282,12 +275,10 @@ export default function WriterEditor({
 
   // UI States
   const [sidebarTab, setSidebarTab] = useState<"details" | "seo">("details");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [mobileSettingsOpen, setMobileSettingsOpen] = useState(false);
 
   // Image Modal States (Screenshots 1 & 2)
   const [imageModalOpen, setImageModalOpen] = useState(false);
@@ -297,7 +288,6 @@ export default function WriterEditor({
   const [imageCredit, setImageCredit] = useState("");
   const [imageKeywords, setImageKeywords] = useState<string[]>([]);
   const [imageKeywordInput, setImageKeywordInput] = useState("");
-  const [uploadedFileName, setUploadedFileName] = useState("");
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [uploadSuccessMessage, setUploadSuccessMessage] = useState<
     string | null
@@ -391,9 +381,9 @@ export default function WriterEditor({
             .replace(/<figure[^>]*>[\s\S]*?<\/figure>/gi, "");
           const plainText = e.clipboardData?.getData("text/plain") || "";
           if (cleanHtml.trim()) {
-            document.execCommand("insertHTML", false, cleanHtml);
+            (document as any).execCommand("insertHTML", false, cleanHtml);
           } else if (plainText.trim()) {
-            document.execCommand("insertText", false, plainText);
+            (document as any).execCommand("insertText", false, plainText);
           }
         }
       }
@@ -571,7 +561,7 @@ export default function WriterEditor({
     if (editorRef.current) {
       editorRef.current.focus();
     }
-    document.execCommand(command, false, value);
+    (document as any).execCommand(command, false, value);
     if (editorRef.current) {
       setContent(editorRef.current.innerHTML);
     }
@@ -583,7 +573,7 @@ export default function WriterEditor({
     if (!selection || selection.rangeCount === 0) {
       if (editorRef.current) {
         editorRef.current.focus();
-        document.execCommand("formatBlock", false, "<blockquote>");
+        (document as any).execCommand("formatBlock", false, "<blockquote>");
         setContent(editorRef.current.innerHTML);
       }
       return;
@@ -595,9 +585,8 @@ export default function WriterEditor({
 
     if (existingBlockquote && editorRef.current?.contains(existingBlockquote)) {
       // Revert to normal paragraph
-      let unwrapped = false;
       try {
-        unwrapped = document.execCommand("formatBlock", false, "<p>");
+        (document as any).execCommand("formatBlock", false, "<p>");
       } catch {}
 
       // Robust DOM fallback: if execCommand didn't replace the blockquote, replace it directly
@@ -615,10 +604,10 @@ export default function WriterEditor({
     } else {
       // Format as blockquote
       try {
-        document.execCommand("formatBlock", false, "<blockquote>");
+        (document as any).execCommand("formatBlock", false, "<blockquote>");
       } catch {
         try {
-          document.execCommand("formatBlock", false, "blockquote");
+          (document as any).execCommand("formatBlock", false, "blockquote");
         } catch {}
       }
 
@@ -667,9 +656,9 @@ export default function WriterEditor({
 
     if (existingPre && editorRef.current?.contains(existingPre)) {
       // Revert to normal paragraph
-      document.execCommand("formatBlock", false, "p");
+      (document as any).execCommand("formatBlock", false, "p");
     } else {
-      document.execCommand("formatBlock", false, "pre");
+      (document as any).execCommand("formatBlock", false, "pre");
     }
     if (editorRef.current) {
       setContent(editorRef.current.innerHTML);
@@ -801,8 +790,7 @@ export default function WriterEditor({
     setImageCredit("");
     setImageKeywords([]);
     setImageKeywordInput("");
-    setUploadedFileName("");
-    setUploadSuccessMessage(null);
+setUploadSuccessMessage(null);
     setImageModalOpen(true);
   };
 
@@ -810,9 +798,7 @@ export default function WriterEditor({
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    setUploadedFileName(file.name);
-    setIsUploadingImage(true);
+setIsUploadingImage(true);
     setUploadSuccessMessage(null);
 
     try {
@@ -970,7 +956,7 @@ export default function WriterEditor({
           if (anchorBlock && anchorBlock !== editorRef.current && anchorBlock.parentElement === editorRef.current) {
             anchorBlock.insertAdjacentHTML("afterend", figureHtml);
           } else {
-            document.execCommand("insertHTML", false, figureHtml);
+            (document as any).execCommand("insertHTML", false, figureHtml);
           }
         } else {
           editorRef.current.insertAdjacentHTML("beforeend", figureHtml);
@@ -993,8 +979,7 @@ export default function WriterEditor({
     setImageCredit("");
     setImageKeywords([]);
     setImageKeywordInput("");
-    setUploadedFileName("");
-    setUploadSuccessMessage(null);
+setUploadSuccessMessage(null);
   };
 
   const handleEditSelectedImage = () => {
@@ -1025,8 +1010,7 @@ export default function WriterEditor({
       setImageCaption("");
       setImageCredit("");
     }
-    setUploadedFileName("");
-    setUploadSuccessMessage(null);
+setUploadSuccessMessage(null);
     setImageModalOpen(true);
   };
 
@@ -2442,8 +2426,8 @@ export default function WriterEditor({
                   } else {
                     // Fallback to caret drop position using document.caretRangeFromPoint or caretPositionFromPoint
                     let dropRange: Range | null = null;
-                    if (document.caretRangeFromPoint) {
-                      dropRange = document.caretRangeFromPoint(e.clientX, e.clientY);
+                    if ("caretRangeFromPoint" in document) {
+                      dropRange = (document as any).caretRangeFromPoint(e.clientX, e.clientY);
                     }
                     if (dropRange && editorRef.current.contains(dropRange.startContainer)) {
                       const container = dropRange.startContainer;

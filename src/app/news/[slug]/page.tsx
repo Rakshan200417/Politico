@@ -1,19 +1,10 @@
 import React from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
-import { notFound } from "next/navigation";
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
 import BackButton from "@/components/common/BackButton";
-import SaveShareButtons from "@/components/common/SaveShareButtons";
 import AdvertisementSlot from "@/components/common/AdvertisementSlot";
 import { getArticleBySlug, getLatestPublishedArticles, getAuthorProfile, getAuthorProfileByName } from "@/lib/articleService";
-import {
-  Clock,
-  Calendar,
-  ArrowRight,
-  ExternalLink,
-} from "lucide-react";
 import CommentsSection from "@/components/news/CommentsSection";
 import { slugify } from "@/data/newsArticles";
 

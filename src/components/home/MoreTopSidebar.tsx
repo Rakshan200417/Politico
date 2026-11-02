@@ -2,7 +2,6 @@ import React from "react";
 import { slugify } from "@/data/newsArticles";
 
 export default function MoreTopSidebar() {
-  const podcastTitle = "CAN AMERICA'S OIL AND GAS INDUSTRY ACTUALLY POWER AI?";
   return (
     <aside className="w-full font-sans pl-0 xl:pl-2">
       <div className="space-y-5 border-l border-gray-200 pl-4">
