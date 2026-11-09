@@ -26,14 +26,14 @@ export default async function Home() {
       <Header />
 
       <div
-        className="w-full flex-1 relative flex flex-col items-center bg-[#f3eadd]"
+        className="w-full flex-1 relative flex flex-col items-center bg-[#f3eadd] pb-10 lg:pb-16"
       >
         {/* ── Top Banner Advertisement (In the Grey Gap) ── */}
         <div className="w-full max-w-[970px] mx-auto mt-6 hidden lg:block">
           <AdvertisementSlot variant="banner" dimensions="970 x 250" className="!my-0" />
         </div>
 
-        <main id="newsfeed" className="flex-1 max-w-[1440px] w-[98%] xl:w-[95%] 2xl:w-[1440px] mx-auto mt-6 lg:mt-10 px-4 lg:px-8 pt-6 lg:pt-8 pb-0 space-y-6 bg-white shadow-2xl">
+        <main id="newsfeed" className="flex-1 max-w-[1440px] w-[98%] xl:w-[95%] 2xl:w-[1440px] mx-auto mt-6 lg:mt-10 mb-10 lg:mb-14 px-4 lg:px-8 pt-6 lg:pt-8 pb-16 lg:pb-20 space-y-6 bg-white shadow-2xl">
           {/* ── TOP FOLD (Spans all the way down until the Carousel) ── */}
           <div className="grid grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)_320px] gap-4 divide-y lg:divide-y-0 lg:divide-x divide-gray-200">
             {/* Left Column: Latest News Sidebar (Sticky down across both rows until Carousel) */}
@@ -118,7 +118,7 @@ export default async function Home() {
               <LeftCategorySection category="Companies" />
               
               {/* Sticky Block for Left Column */}
-              <div className="flex-1 space-y-6 w-full tall-sticky self-start pt-6 lg:pt-8 border-t border-gray-100 lg:border-t-0 mt-6 lg:mt-0">
+              <div className="flex-1 space-y-6 w-full tall-sticky self-start pt-6 lg:pt-8 pb-10 border-t border-gray-100 lg:border-t-0 mt-6 lg:mt-0">
                 <div className="group cursor-pointer">
                   <a href={`/news/${slugify("Poll: Trump's MAGA voters would stick by a candidate through the most serious of scandals")}`} className="block">
                     <div className="w-full aspect-[4/3] bg-gray-200 mb-2 overflow-hidden">
@@ -131,7 +131,7 @@ export default async function Home() {
                   </a>
                 </div>
               
-                <div className="space-y-6 lg:sticky lg:top-[calc(100vh-620px)] tall-static flex flex-col items-center">
+                <div className="space-y-6 lg:sticky lg:top-[calc(100vh-620px)] tall-static flex flex-col items-center pb-8">
                   {[2, 3].map((i) => (
                     <div key={i} className="w-full flex justify-center">
                       <AdvertisementSlot variant="square" dimensions="300 x 250" label={`Ad 0${i}`} className="!my-0" />
@@ -142,7 +142,7 @@ export default async function Home() {
             </div>
 
             {/* Center Column: DYNAMIC CATEGORIES */}
-            <div className="flex flex-col lg:px-6 border-l border-r border-gray-200 h-full">
+            <div className="flex flex-col lg:px-6 border-l border-r border-gray-200 h-full pb-10">
               <MainCategorySection category="Technology" />
               <MainCategorySection category="Leadership Strategies" />
               <MainCategorySection category="Economy" />
@@ -168,10 +168,10 @@ export default async function Home() {
                 <RightListCategorySection category="Interview" />
               </div>
               {/* Sticky Block Right */}
-              <div className="flex-1 w-full space-y-6 tall-sticky self-start mt-4 lg:mt-6 border-t border-gray-100 lg:border-t-0 pt-4 lg:pt-0">
+              <div className="flex-1 w-full space-y-6 tall-sticky self-start mt-4 lg:mt-6 pb-10 border-t border-gray-100 lg:border-t-0 pt-4 lg:pt-0">
                 <HomeVideoSection />
                 
-                <div className="space-y-6 lg:sticky lg:top-[calc(100vh-620px)] tall-static flex flex-col items-center">
+                <div className="space-y-6 lg:sticky lg:top-[calc(100vh-620px)] tall-static flex flex-col items-center pb-8">
                   {[4, 5].map((i) => (
                     <div key={i} className="w-full flex justify-center">
                       <AdvertisementSlot variant="square" dimensions="300 x 250" label={`Ad 0${i}`} className="!my-0" />
