@@ -40,7 +40,7 @@ export default function MoreTopSidebar() {
 
                 <div className="flex-1 min-w-0">
                   <div className="mb-1 text-[9px] font-black uppercase tracking-[0.18em] text-[#111111] font-sans">
-                    POLITICO Energy
+                    Florida 24 Energy
                   </div>
                   <div className="text-[12px] font-medium leading-snug text-[#111111] font-sans">
                     EQT CEO Toby Rice on the future of natural gas...

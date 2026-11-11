@@ -287,7 +287,7 @@ export async function POST(request: Request) {
   } catch (error: any) {
     console.error('[POST /api/articles Error]:', error);
     try {
-      require('fs').appendFileSync('C:/Users/EX BOOK/Desktop/Jadetimes Internship/Politico/db_error.log', new Date().toISOString() + ' ' + error.message + '\n');
+      require('fs').appendFileSync('db_error.log', new Date().toISOString() + ' ' + error.message + '\n');
     } catch (e) {}
     return NextResponse.json(
       { error: 'Failed to create article in database', details: error.message },

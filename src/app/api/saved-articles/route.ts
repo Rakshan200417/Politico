@@ -85,7 +85,7 @@ export async function POST(request: Request) {
           deck || '',
           image || '',
           category || 'General',
-          byline || 'POLITICO',
+          byline || 'Florida 24',
           read_time || '3 min read',
         ]
       );

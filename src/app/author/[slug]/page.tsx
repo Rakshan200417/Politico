@@ -15,8 +15,8 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     .join(' ');
   
   return {
-    title: `${authorName} - POLITICO`,
-    description: `Articles by ${authorName} on POLITICO`,
+    title: `${authorName} - Florida 24`,
+    description: `Articles by ${authorName} on Florida 24`,
   };
 }
 

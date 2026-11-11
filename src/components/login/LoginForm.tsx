@@ -74,27 +74,23 @@ export default function LoginForm() {
         className="absolute top-6 left-6 text-gray-600 hover:text-gray-900 transition-colors flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider z-20"
       >
         <ArrowLeft size={16} strokeWidth={2.2} />
-        Back to POLITICO
+        Back to Florida 24
       </a>
 
       {/* Main Split Authentication Card */}
       <div className="w-full max-w-[860px] bg-white rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] overflow-hidden grid grid-cols-1 md:grid-cols-2 relative z-10 min-h-[540px]">
-        {/* Left Column: Signature Red Brand Panel with Logo */}
-        <div className="bg-[#ce1126] flex flex-col items-center justify-center p-10 text-white relative select-none">
+        {/* Left Column: Signature Brand Panel with Logo */}
+        <div className="bg-[#10141e] flex flex-col items-center justify-center p-10 text-white relative select-none border-b md:border-b-0 md:border-r border-gray-800">
           <div className="flex flex-col items-center justify-center text-center">
-            {/* P Letter Logo with Background */}
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white shadow-[0_14px_35px_rgba(0,0,0,0.25)] flex items-center justify-center mb-4 transition-all duration-300 hover:scale-105 hover:shadow-[0_18px_40px_rgba(0,0,0,0.3)]">
-              <span className="text-[#ce1126] font-black text-5xl sm:text-6xl tracking-tighter leading-none select-none pl-0.5">
-                P
-              </span>
+            {/* Florida 24 Icon */}
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white/10 shadow-[0_14px_35px_rgba(0,0,0,0.35)] flex items-center justify-center mb-5 transition-all duration-300 hover:scale-105 p-2">
+              <img src="/icon.png" alt="Florida 24" className="w-full h-full object-contain" />
             </div>
 
-            {/* POLITICO Brand Wordmark */}
-            <span className="text-[34px] md:text-[40px] font-black tracking-[-0.04em] text-white uppercase leading-none">
-              POLITICO
-            </span>
-            <p className="text-white/80 text-[11px] font-medium tracking-widest uppercase mt-2">
-              Politics &bull; Policy &bull; Power
+            {/* Florida 24 Brand Logo */}
+            <img src="/images/footer-logo.svg" alt="Florida 24" className="h-9 sm:h-11 w-auto object-contain" />
+            <p className="text-white/70 text-[11px] font-medium tracking-widest uppercase mt-3">
+              Florida 24 News Network
             </p>
           </div>
         </div>
@@ -104,11 +100,11 @@ export default function LoginForm() {
           <div>
             {/* Header */}
             <div className="text-center mb-6">
-              <h1 className="text-xl sm:text-2xl font-black text-[#ce1126] uppercase tracking-wider">
+              <h1 className="text-xl sm:text-2xl font-black text-gray-950 uppercase tracking-wider">
                 SIGN IN
               </h1>
               <p className="text-gray-400 text-xs mt-1.5">
-                Sign in to your POLITICO account to access breaking news, analysis, and newsletters
+                Sign in to your Florida 24 account to access breaking news, analysis, and newsletters
               </p>
             </div>
 

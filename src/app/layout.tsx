@@ -2,13 +2,19 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Politics, Policy, Political News - POLITICO",
+  title: "Florida 24 | Florida 24 News Network LLC",
   description:
-    "Nobody covers politics, policy, and political news like POLITICO. We keep you informed with breaking news, analysis, and insights.",
+    "Florida 24 News Network brings you breaking news, analysis, politics, business, and investigative coverage across Florida and beyond.",
   icons: {
-    icon: "/icon.png?v=2",
-    shortcut: "/icon.png?v=2",
-    apple: "/icon.png?v=2",
+    icon: "/icon.png?v=3",
+    shortcut: "/icon.png?v=3",
+    apple: "/icon.png?v=3",
+  },
+  openGraph: {
+    title: "Florida 24 | Florida 24 News Network LLC",
+    description:
+      "Florida 24 News Network brings you breaking news, analysis, politics, business, and investigative coverage across Florida and beyond.",
+    images: ["/images/site-thumbnail.jpg"],
   },
 };
 
@@ -23,8 +29,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" type="image/png" href="/icon.png?v=2" />
-        <link rel="shortcut icon" href="/icon.png?v=2" />
+        <link rel="icon" type="image/png" href="/icon.png?v=3" />
+        <link rel="shortcut icon" href="/icon.png?v=3" />
+        <link rel="apple-touch-icon" href="/icon.png?v=3" />
       </head>
       <body className="min-h-screen bg-white flex flex-col text-slate-900">
         <GlobalArticleLinkHandler />

@@ -101,7 +101,7 @@ function resolveCategoryName(slug: string): string {
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const formattedName = resolveCategoryName(params.slug);
   return {
-    title: `${formattedName} News, Analysis and Updates - POLITICO`,
+    title: `${formattedName} News, Analysis and Updates - Florida 24`,
     description: `Latest news and updates about ${formattedName}.`,
   };
 }
@@ -134,9 +134,9 @@ export default async function CategoryRoute({ params, searchParams }: { params: 
     const mockArticles = Array.from({ length: 3 }).map((_, i) => ({
       id: 9000 + i,
       slug: `mock-${params.slug}-${i}`,
-      title: `${categoryName} Update: Major Developments By POLITICO Staff Part ${i + 1}`,
+      title: `${categoryName} Update: Major Developments By Florida 24 Staff Part ${i + 1}`,
       deck: `This is a comprehensive overview of the latest events in ${categoryName}, bringing you the details that matter most.`,
-      writer_name: 'POLITICO STAFF',
+      writer_name: 'FLORIDA 24 STAFF',
       image: `https://picsum.photos/seed/${params.slug}${i}/800/600`
     })) as any;
     initialArticles = mockArticles;
@@ -170,7 +170,7 @@ export default async function CategoryRoute({ params, searchParams }: { params: 
       slug: `mock-${params.slug}-more-${idx + 1}`,
       title: t,
       deck: `Detailed reporting and exclusive industry perspectives on key developments in ${categoryName}.`,
-      writer_name: 'POLITICO STAFF',
+      writer_name: 'FLORIDA 24 STAFF',
       image: `https://picsum.photos/seed/${params.slug}-more-${idx}/800/600`,
       created_at: new Date(Date.now() - (idx + 1) * 7200000).toISOString()
     })) as any;
@@ -184,7 +184,7 @@ export default async function CategoryRoute({ params, searchParams }: { params: 
     return {
       title: article.title,
       deck: article.deck,
-      byline: article.writer_name || 'POLITICO STAFF',
+      byline: article.writer_name || 'FLORIDA 24 STAFF',
       image: article.image || `https://picsum.photos/seed/${article.id}/800/600`,
       slug: article.slug,
       date: formatPublishDate(article.updated_at || article.created_at),

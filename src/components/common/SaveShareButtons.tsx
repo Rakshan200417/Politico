@@ -65,7 +65,7 @@ export default function SaveShareButtons({
 
     // Fast check local storage cache first
     try {
-      const cacheKey = `politico_saved_${activeUser.email}`;
+      const cacheKey = `florida24_saved_${activeUser.email}`;
       const cached = localStorage.getItem(cacheKey);
       if (cached) {
         const list = JSON.parse(cached);
@@ -83,7 +83,7 @@ export default function SaveShareButtons({
           const found = data.articles.some((a: any) => a.slug === articleSlug);
           setIsSaved(found);
           try {
-            localStorage.setItem(`politico_saved_${activeUser.email}`, JSON.stringify(data.articles));
+            localStorage.setItem(`florida24_saved_${activeUser.email}`, JSON.stringify(data.articles));
           } catch {}
         }
       })
@@ -159,13 +159,13 @@ export default function SaveShareButtons({
             deck: deck || "",
             image: image || "",
             category: category || "News",
-            byline: byline || "POLITICO",
+            byline: byline || "Florida 24",
             read_time: readTime || "3 min read",
           }),
         });
 
         // Update local cache
-        const cacheKey = `politico_saved_${user.email}`;
+        const cacheKey = `florida24_saved_${user.email}`;
         const existing = JSON.parse(localStorage.getItem(cacheKey) || "[]");
         const filtered = existing.filter((item: any) => item.slug !== articleSlug);
         filtered.unshift({
@@ -174,7 +174,7 @@ export default function SaveShareButtons({
           deck: deck || "",
           image: image || "",
           category: category || "News",
-          byline: byline || "POLITICO",
+          byline: byline || "Florida 24",
           read_time: readTime || "3 min read",
           created_at: new Date().toISOString(),
         });
@@ -191,7 +191,7 @@ export default function SaveShareButtons({
         );
 
         // Update local cache
-        const cacheKey = `politico_saved_${user.email}`;
+        const cacheKey = `florida24_saved_${user.email}`;
         const existing = JSON.parse(localStorage.getItem(cacheKey) || "[]");
         const filtered = existing.filter((item: any) => item.slug !== articleSlug);
         localStorage.setItem(cacheKey, JSON.stringify(filtered));
@@ -217,7 +217,7 @@ export default function SaveShareButtons({
       (typeof window !== "undefined"
         ? `${window.location.origin}/news/${articleSlug}`
         : "");
-    const shareTitle = title || (typeof document !== "undefined" ? document.title : "POLITICO");
+    const shareTitle = title || (typeof document !== "undefined" ? document.title : "Florida 24");
 
     if (typeof navigator !== "undefined" && navigator.share) {
       try {

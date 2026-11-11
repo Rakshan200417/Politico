@@ -210,17 +210,22 @@ export default function Header() {
           </button>
         </div>
 
-        {/* Center POLITICO Brand Logo */}
+        {/* Center Florida 24 Brand Logo */}
         <div className="flex-1 flex justify-center items-center pointer-events-none absolute left-0 right-0">
-          <a href="/" className="pointer-events-auto">
-            <span
-              className={`font-black tracking-[-0.04em] text-[#d71920] uppercase leading-none transition-all duration-200 ease-out ${isCompact
-                ? "text-[26px] md:text-[28px] font-medium"
-                : "text-[34px] sm:text-[38px] md:text-[40px] min-[1280px]:text-[56px] font-bold"
-                }`}
-            >
-              POLITICO
-            </span>
+          <a href="/" className="pointer-events-auto flex items-center justify-center py-1" aria-label="Florida 24 Home">
+            {isCompact ? (
+              <img
+                src="/images/scroll-logo.svg"
+                alt="Florida 24"
+                className="h-6 sm:h-7 md:h-8 w-auto object-contain transition-all duration-200"
+              />
+            ) : (
+              <img
+                src="/images/logo.svg"
+                alt="Florida 24 News Network"
+                className="h-8 sm:h-10 md:h-11 min-[1280px]:h-13 w-auto object-contain transition-all duration-200"
+              />
+            )}
           </a>
         </div>
 
@@ -353,7 +358,7 @@ export default function Header() {
           <a
             href="/search"
             className="p-1 text-gray-800 hover:text-[#ce1126] transition-colors flex items-center justify-center"
-            aria-label="Search POLITICO"
+            aria-label="Search Florida 24"
           >
             <Search className="w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7" strokeWidth={2} />
           </a>

@@ -127,15 +127,17 @@ export default function DashboardShell({
         <div>
           {/* Sidebar Brand Header */}
           <div className="h-16 lg:h-20 px-6 lg:px-7 border-b border-gray-800 flex items-center justify-between">
-            <a href="/" className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#ce1126] flex items-center justify-center text-white font-black text-xl shadow-sm select-none">
-                P
-              </div>
+            <a href="/" className="flex items-center gap-3" aria-label="Florida 24 Home">
+              <img
+                src="/icon.png"
+                alt="Florida 24"
+                className="w-9 h-9 rounded-xl object-contain shadow-sm select-none"
+              />
               <div className="flex flex-col">
-                <span className="font-black text-xl tracking-tight text-white leading-none">
-                  POLITICO
+                <span className="font-black text-lg tracking-tight text-white leading-none">
+                  Florida 24
                 </span>
-                <span className="text-[10px] font-bold text-[#ce1126] tracking-wider uppercase mt-1">
+                <span className="text-[10px] font-bold text-[#fccc0d] tracking-wider uppercase mt-1">
                   {portalBadge}
                 </span>
               </div>

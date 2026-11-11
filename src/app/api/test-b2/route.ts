@@ -11,7 +11,7 @@ export async function GET() {
   };
 
   const testKey = `test_ping_${Date.now()}.txt`;
-  const testBuffer = Buffer.from(`Politico Backend Self-Test at ${new Date().toISOString()}`);
+  const testBuffer = Buffer.from(`Florida 24 Backend Self-Test at ${new Date().toISOString()}`);
 
   try {
     // 1. Upload Test

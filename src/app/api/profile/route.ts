@@ -32,7 +32,7 @@ export async function GET(request: Request) {
             user_id: userRows[0].id,
             email: userRows[0].email,
             full_name: userRows[0].name || userRows[0].email.split('@')[0],
-            bio: 'POLITICO subscriber.',
+            bio: 'Florida 24 subscriber.',
             linkedin_profile: '',
             avatar_url: '',
             role: userRows[0].role || 'reader',
@@ -47,7 +47,7 @@ export async function GET(request: Request) {
         profile: {
           email,
           full_name: email.split('@')[0],
-          bio: 'POLITICO reader.',
+          bio: 'Florida 24 reader.',
           linkedin_profile: '',
           avatar_url: '',
         },

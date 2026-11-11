@@ -1822,21 +1822,19 @@ setUploadSuccessMessage(null);
             </label>
             <div className="bg-white border border-gray-200 rounded-none p-4 shadow-xs">
               <div className="flex items-center gap-2 mb-1.5">
-                <div className="w-6 h-6 rounded-full bg-black text-white text-[10px] font-black flex items-center justify-center">
-                  P
-                </div>
+                <img src="/icon.png" alt="Florida 24" className="w-6 h-6 rounded-full object-contain" />
                 <div className="flex flex-col leading-tight">
                   <span className="text-xs font-bold text-gray-900">
-                    POLITICO
+                    Florida 24
                   </span>
                   <span className="text-[10px] text-gray-500 truncate max-w-[240px]">
-                    www.politico.com &gt; article &gt;{" "}
+                    www.florida24.com &gt; article &gt;{" "}
                     {initialArticle?.slug || "story"}
                   </span>
                 </div>
               </div>
               <div className="text-sm font-bold text-[#1a0dab] hover:underline cursor-pointer leading-snug line-clamp-2 mt-1">
-                {title.trim() ? title : "Your Article Title"} | POLITICO
+                {title.trim() ? title : "Your Article Title"} | Florida 24
               </div>
               <p className="text-xs text-gray-600 line-clamp-3 mt-1.5 leading-relaxed">
                 {metaDescription.trim()
@@ -2317,8 +2315,8 @@ setUploadSuccessMessage(null);
                   draggedFigureRef.current = fig;
                   fig.style.opacity = "0.4";
                   e.dataTransfer.effectAllowed = "move";
-                  e.dataTransfer.setData("text/plain", "politico-image");
-                  e.dataTransfer.setData("application/x-politico-image", "true");
+                  e.dataTransfer.setData("text/plain", "florida24-image");
+                  e.dataTransfer.setData("application/x-florida24-image", "true");
                 }
               }}
               onDragOver={(e) => {

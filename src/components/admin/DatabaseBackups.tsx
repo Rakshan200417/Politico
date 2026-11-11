@@ -97,7 +97,7 @@ export default function DatabaseBackups() {
       const res = await fetch(downloadUrl);
       if (!res.ok) {
         // Fallback to direct download using blob if endpoint failed
-        const fallbackUrl = (backup as any).url || `https://Politico.s3.us-east-005.backblazeb2.com/database-backups/${backup.filename}`;
+        const fallbackUrl = (backup as any).url || `${process.env.NEXT_PUBLIC_B2_PUBLIC_URL || 'https://Politico.s3.us-east-005.backblazeb2.com'}/database-backups/${backup.filename}`;
         const blobRes = await fetch(fallbackUrl);
         const blob = await blobRes.blob();
         const blobUrl = window.URL.createObjectURL(blob);

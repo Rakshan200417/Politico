@@ -78,7 +78,7 @@ export default function WriterDashboard() {
     } else {
       const fallbackUser = {
         name: "Rakshan Writer",
-        email: "writer@politico.com",
+        email: "writer@florida24.com",
         role: "writer",
       };
       setUser(fallbackUser);
@@ -394,7 +394,7 @@ export default function WriterDashboard() {
           setEditingArticle(null);
         }}
         onSaveSuccess={handleSaveSuccess}
-        userEmail={user?.email || "writer@politico.com"}
+        userEmail={user?.email || "writer@florida24.com"}
         userName={displayName}
       />
     );
@@ -473,7 +473,7 @@ export default function WriterDashboard() {
           <div className="text-2xl sm:text-3xl font-black text-emerald-600 mt-2">
             {publishedArticles.length}
           </div>
-          <div className="text-[11px] text-gray-400 mt-1">Live on POLITICO</div>
+          <div className="text-[11px] text-gray-400 mt-1">Live on Florida 24</div>
         </div>
 
         {/* Saved Drafts */}

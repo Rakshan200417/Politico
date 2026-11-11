@@ -14,7 +14,7 @@ export default function NewsletterSuccessPage() {
             You are signed up successfully!
           </h1>
           <p className="text-gray-600 text-lg mb-10 leading-relaxed">
-            Thank you for subscribing to our newsletters. The best of POLITICO will be delivered straight to your inbox soon.
+            Thank you for subscribing to our newsletters. The best of Florida 24 will be delivered straight to your inbox soon.
           </p>
           <a 
             href="/"

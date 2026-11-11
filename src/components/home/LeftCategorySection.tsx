@@ -6,7 +6,7 @@ export default async function LeftCategorySection({ category, count = 3 }: { cat
 
   if (!articles || articles.length === 0) {
     const mockList = [
-      { id: 901, slug: 'mock-1', title: `${category} initiatives spark debate in Congress`, writer_name: 'POLITICO STAFF', image: `https://picsum.photos/seed/${category}left1/800/600` },
+      { id: 901, slug: 'mock-1', title: `${category} initiatives spark debate in Congress`, writer_name: 'FLORIDA 24 STAFF', image: `https://picsum.photos/seed/${category}left1/800/600` },
       { id: 902, slug: 'mock-2', title: `New bill introduced regarding ${category}`, writer_name: 'JOHN DOE', image: `https://picsum.photos/seed/${category}left2/800/600` },
       { id: 903, slug: 'mock-3', title: `State-level ${category} reforms take shape`, writer_name: 'JANE SMITH', image: `https://picsum.photos/seed/${category}left3/800/600` }
     ];

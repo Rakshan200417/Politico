@@ -13,16 +13,16 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   if (!article) {
     const mockTitle = params.slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
     return {
-      title: `${mockTitle} - POLITICO`,
+      title: `${mockTitle} - Florida 24`,
       description: "Mock article for demonstration"
     };
   }
   
   return {
-    title: `${article.title} - POLITICO`,
+    title: `${article.title} - Florida 24`,
     description: article.deck,
     openGraph: {
-      title: `${article.title} - POLITICO`,
+      title: `${article.title} - Florida 24`,
       description: article.deck,
       images: [article.image],
     },
@@ -95,7 +95,7 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
       slug: "senate-advances-bipartisan-legislation",
       title: "Senate Committee Approves High-Stakes Regulatory Overhaul After Marathon Hearing",
       deck: "Key lawmakers on both sides of the aisle reached an accord setting new guidelines for cross-border investments.",
-      writer_name: "POLITICO STAFF",
+      writer_name: "FLORIDA 24 STAFF",
       image: "https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=800&q=80"
     },
     {
@@ -295,7 +295,7 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
               <div className="mb-6 flex items-center gap-2 border-b border-[#d9d9d9] pb-2">
                 <span className="h-2 w-2 rounded-full border border-[#d71920]" />
                 <h2 className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#222]">
-                  MORE POLITICO STORIES
+                  MORE FLORIDA 24 STORIES
                 </h2>
               </div>
 

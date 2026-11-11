@@ -1,8 +1,8 @@
 import LoginForm from "@/components/login/LoginForm";
 
 export const metadata = {
-  title: "Log in | POLITICO",
-  description: "Log in to your POLITICO account.",
+  title: "Log in | Florida 24",
+  description: "Log in to your Florida 24 account.",
 };
 
 export default function LoginPage() {

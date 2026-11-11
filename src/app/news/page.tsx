@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import NewsArticlePage from "./[slug]/page";
 
 export const metadata: Metadata = {
-  title: "Top News & Analysis - POLITICO",
-  description: "Read the latest authoritative political journalism, breaking news, and policy reporting from POLITICO.",
+  title: "Top News & Analysis - Florida 24",
+  description: "Read the latest authoritative journalism, breaking news, and reporting from Florida 24.",
 };
 
 export default function NewsIndexPage() {

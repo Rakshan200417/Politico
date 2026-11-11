@@ -186,8 +186,8 @@ export default function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModal
             <span className="flex items-center gap-1"><kbd className="bg-white border border-gray-200 rounded px-1.5 py-0.5 text-[10px] font-sans shadow-sm text-gray-600">Enter</kbd> to search</span>
             <span className="flex items-center gap-1"><kbd className="bg-white border border-gray-200 rounded px-1.5 py-0.5 text-[10px] font-sans shadow-sm text-gray-600">Esc</kbd> to close</span>
           </div>
-          <div className="text-xs font-black text-[#24427c]">
-            POLITICO
+          <div className="flex items-center">
+            <img src="/images/logo.svg" alt="Florida 24" className="h-4 w-auto object-contain" />
           </div>
         </div>
       </div>

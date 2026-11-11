@@ -31,7 +31,7 @@ export default function ReaderDashboard() {
 
   const loadSavedArticles = useCallback(async (userEmail: string) => {
     // 1. Fast load from local storage cache
-    const cacheKey = `politico_saved_${userEmail}`;
+    const cacheKey = `florida24_saved_${userEmail}`;
     try {
       const cached = localStorage.getItem(cacheKey);
       if (cached) {
@@ -112,7 +112,7 @@ export default function ReaderDashboard() {
 
     // Update local cache
     try {
-      localStorage.setItem(`politico_saved_${user.email}`, JSON.stringify(updated));
+      localStorage.setItem(`florida24_saved_${user.email}`, JSON.stringify(updated));
     } catch {}
 
     // Call DELETE API to remove from MySQL database
@@ -245,7 +245,7 @@ export default function ReaderDashboard() {
                     {/* Bottom Metadata Row */}
                     <div className="mt-auto pt-2.5 border-t border-gray-100 flex items-center justify-between text-[10px] text-gray-400 font-medium font-sans">
                       <span className="truncate max-w-[130px] uppercase font-bold text-gray-500">
-                        {item.byline || "POLITICO"}
+                        {item.byline || "Florida 24"}
                       </span>
                       <span className="flex items-center gap-1 font-mono text-gray-400">
                         <Clock size={11} />

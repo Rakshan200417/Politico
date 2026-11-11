@@ -4,8 +4,8 @@ import { Scale } from "lucide-react";
 import LegalPageLayout, { LegalSection } from "@/components/legal/LegalPageLayout";
 
 export const metadata: Metadata = {
-  title: "Terms & Conditions - POLITICO",
-  description: "Read the Terms and Conditions governing your access and use of POLITICO's website, publications, and digital services.",
+  title: "Terms & Conditions - Florida 24",
+  description: "Read the Terms and Conditions governing your access and use of Florida 24's website, publications, and digital services.",
 };
 
 const termsSections: LegalSection[] = [
@@ -16,13 +16,13 @@ const termsSections: LegalSection[] = [
     content: (
       <>
         <p>
-          Welcome to <strong>POLITICO</strong> (&quot;POLITICO&quot;, &quot;we&quot;, &quot;our&quot;, or &quot;us&quot;). These Terms and Conditions (&quot;Terms&quot;) govern your access to and use of the POLITICO website, mobile services, digital publications, and all related platforms (collectively, the &quot;Platform&quot;).
+          Welcome to <strong>Florida 24</strong> (&quot;Florida 24&quot;, &quot;Florida 24 News Network LLC&quot;, &quot;we&quot;, &quot;our&quot;, or &quot;us&quot;). These Terms and Conditions (&quot;Terms&quot;) govern your access to and use of the Florida 24 website, mobile services, digital publications, and all related platforms (collectively, the &quot;Platform&quot;).
         </p>
         <p>
           By accessing, browsing, submitting content, or using any part of our Platform, you agree to comply with these Terms. If you do not agree with these Terms, please discontinue use of the Platform immediately.
         </p>
         <p>
-          POLITICO reserves the right to update or modify these Terms at any time. Continued use of the Platform following any updates constitutes acceptance of the revised Terms.
+          Florida 24 reserves the right to update or modify these Terms at any time. Continued use of the Platform following any updates constitutes acceptance of the revised Terms.
         </p>
       </>
     ),
@@ -44,7 +44,7 @@ const termsSections: LegalSection[] = [
     content: (
       <>
         <p>
-          POLITICO is an independent digital news and media platform providing breaking news, politics, policy, business, technology, world news, opinion articles, press releases, sponsored content, and multimedia publications.
+          Florida 24 is an independent digital news and media platform providing breaking news, politics, policy, business, technology, world news, opinion articles, press releases, sponsored content, and multimedia publications.
         </p>
         <p>
           Our editorial team reserves the right to determine which content is published, promoted, or removed on our Platform.
@@ -68,7 +68,7 @@ const termsSections: LegalSection[] = [
     title: "4. User Content",
     content: (
       <p>
-        Users may submit articles, comments, feedback, or multimedia. By submitting content, you grant POLITICO a worldwide, non-exclusive, royalty-free, perpetual license to publish, display, distribute, reproduce, and adapt that content across our channels.
+        Users may submit articles, comments, feedback, or multimedia. By submitting content, you grant Florida 24 a worldwide, non-exclusive, royalty-free, perpetual license to publish, display, distribute, reproduce, and adapt that content across our channels.
       </p>
     ),
   },
@@ -78,7 +78,7 @@ const termsSections: LegalSection[] = [
     title: "5. Editorial Independence",
     content: (
       <p>
-        POLITICO maintains complete editorial independence. Advertisers, corporate sponsors, political organizations, and business partners have no influence over our editorial decision-making or investigative coverage.
+        Florida 24 maintains complete editorial independence. Advertisers, corporate sponsors, political organizations, and business partners have no influence over our editorial decision-making or investigative coverage.
       </p>
     ),
   },
@@ -88,7 +88,7 @@ const termsSections: LegalSection[] = [
     title: "6. Intellectual Property",
     content: (
       <p>
-        All articles, photographs, illustrations, audio, video clips, logos, trademarks, and code on POLITICO are protected by copyright, trademark, and other applicable intellectual property laws. Unauthorized reproduction or scraping is prohibited.
+        All articles, photographs, illustrations, audio, video clips, logos, trademarks, and code on Florida 24 are protected by copyright, trademark, and other applicable intellectual property laws. Unauthorized reproduction or scraping is prohibited.
       </p>
     ),
   },
@@ -98,7 +98,7 @@ const termsSections: LegalSection[] = [
     title: "7. Sponsored Content & Ads",
     content: (
       <p>
-        Sponsored articles and advertisements are distinctly labeled. POLITICO does not endorse sponsored claims, products, or services advertised by third parties on our Platform.
+        Sponsored articles and advertisements are distinctly labeled. Florida 24 does not endorse sponsored claims, products, or services advertised by third parties on our Platform.
       </p>
     ),
   },
@@ -108,7 +108,7 @@ const termsSections: LegalSection[] = [
     title: "8. Third-Party Links",
     content: (
       <p>
-        Our articles and platform may contain hyperlinks to external third-party websites. POLITICO does not control and is not responsible for the content, privacy practices, or accuracy of third-party platforms.
+        Our articles and platform may contain hyperlinks to external third-party websites. Florida 24 does not control and is not responsible for the content, privacy practices, or accuracy of third-party platforms.
       </p>
     ),
   },
@@ -148,7 +148,7 @@ const termsSections: LegalSection[] = [
     title: "12. Limitation of Liability",
     content: (
       <p>
-        To the fullest extent permitted by applicable law, POLITICO, its affiliates, directors, officers, and employees shall not be liable for any indirect, incidental, special, punitive, or consequential damages arising from your use of the Platform.
+        To the fullest extent permitted by applicable law, Florida 24 News Network LLC, its affiliates, directors, officers, and employees shall not be liable for any indirect, incidental, special, punitive, or consequential damages arising from your use of the Platform.
       </p>
     ),
   },
@@ -158,7 +158,7 @@ const termsSections: LegalSection[] = [
     title: "13. Indemnification",
     content: (
       <p>
-        You agree to defend, indemnify, and hold harmless POLITICO and its officers, employees, and agents from any claims, damages, liabilities, and expenses resulting from your violation of these Terms or your use of the Platform.
+        You agree to defend, indemnify, and hold harmless Florida 24 News Network LLC and its officers, employees, and agents from any claims, damages, liabilities, and expenses resulting from your violation of these Terms or your use of the Platform.
       </p>
     ),
   },

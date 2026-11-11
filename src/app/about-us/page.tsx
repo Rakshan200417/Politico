@@ -4,8 +4,8 @@ import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
 
 export const metadata: Metadata = {
-  title: "About Us - POLITICO",
-  description: "POLITICO illuminates the forces shaping global power. Learn about our mission, our journalists, and our editorial standards.",
+  title: "About Us - Florida 24",
+  description: "Florida 24 News Network illuminates the forces shaping news, policy, business, and community. Learn about our mission and editorial standards.",
 };
 
 export default function AboutUsPage() {
@@ -20,23 +20,23 @@ export default function AboutUsPage() {
 
         <div className="space-y-6 text-gray-800 text-base sm:text-lg leading-relaxed font-normal">
           <p>
-            POLITICO illuminates the forces shaping global power. Since 2007, we have delivered intelligence that anticipates tomorrow&apos;s headlines, not reports on yesterday&apos;s news. As politics has increasingly become the defining force of our era, our work has never been more vital.
+            Florida 24 News Network LLC illuminates the forces shaping news, policy, business, and community. We deliver fast, accurate, and in-depth intelligence that anticipates tomorrow&apos;s headlines, not merely reports on yesterday&apos;s news.
           </p>
 
           <p>
-            Cabinet secretaries and Ministers start their mornings with our analysis. CEOs shape strategy around our reporting. Advocacy leaders rely on our insights to move policy. We deliver the straightforward facts and clear-eyed analysis they need to navigate the most complex political landscape of our lifetimes.
+            Community leaders, entrepreneurs, executives, and citizens rely on Florida 24 every day. CEOs shape strategy around our reporting. Policy and advocacy leaders rely on our insights to understand local and national developments. We deliver the straightforward facts and clear-eyed analysis needed to navigate today&apos;s rapidly evolving landscape.
           </p>
 
           <p>
-            Our 1,100+ publishing professionals across the world&apos;s key democratic capitals—Washington, Brussels, London, Paris, Berlin, Sacramento, and New York—form the world&apos;s premier politics and policy newsroom. We tell the story of how power really works by explaining who wields it and how they plan to exercise it, connecting dots others miss and delivering scoops from sources others don&apos;t even know exist.
+            Our dedicated team of publishing professionals, journalists, and editors form an agile, premier modern newsroom. We tell the authentic stories of how decisions are made, explaining what matters and delivering timely scoops and balanced reporting from trusted sources.
           </p>
 
           <p>
-            Innovation has always been a core tenet of our story. At launch, we bet that depth would trump scale, that talent would trump traffic, and that politics would become central to modern life. In 2011, we made another bet and launched POLITICO Pro to help decision-makers understand the business of government, transforming both how they shape government action and the business of journalism itself.
+            Innovation is at the core of our mission. Florida 24 embraces digital-first storytelling, robust investigative standards, and comprehensive multimedia reporting to deliver value directly to our readers across Florida and beyond.
           </p>
 
           <p>
-            These bets have made POLITICO the most successful digital news startup of its generation and an indispensable source of nonpartisan journalism for leaders across the globe. Today, our mission remains unchanged: to provide authoritative, indispensable journalism about the personalities and policies that shape our world.
+            Today, our mission remains steadfast: Florida 24 News Network LLC is committed to providing authoritative, indispensable journalism that keeps our readers informed, empowered, and ahead of the curve.
           </p>
         </div>
       </main>

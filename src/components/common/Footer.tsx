@@ -62,6 +62,17 @@ export default function Footer({ className = "" }: { className?: string }) {
   return (
     <footer className={`w-full bg-[#10141e] text-white py-8 font-sans border-t-2 border-[#d32f2f] ${className}`}>
       <div className="max-w-[1400px] mx-auto px-4 space-y-5">
+        {/* Brand Logo */}
+        <div className="pt-1">
+          <a href="/" className="inline-block" aria-label="Florida 24 Home">
+            <img
+              src="/images/footer-logo.svg"
+              alt="Florida 24 News Network"
+              className="h-8 md:h-9 w-auto object-contain"
+            />
+          </a>
+        </div>
+
         {/* 1st Line: Headings */}
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[12px] font-semibold text-gray-300">
           {navLinks.map((link, idx) => (
@@ -99,7 +110,7 @@ export default function Footer({ className = "" }: { className?: string }) {
 
         {/* Copyright */}
         <div className="pt-4 border-t border-gray-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between text-[11px] text-gray-400 gap-2">
-          <p>© {currentYear} POLITICO LLC. All rights reserved.</p>
+          <p>© {currentYear} Florida 24 News Network LLC. All rights reserved.</p>
         </div>
       </div>
     </footer>

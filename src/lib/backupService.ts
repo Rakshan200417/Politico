@@ -259,7 +259,7 @@ export async function createDatabaseBackup(prefix: 'manual' | 'auto_daily' = 'ma
     backupDate: new Date().toISOString(),
     timestamp: new Date().toISOString(),
     type: prefix === 'auto_daily' ? 'automated_24h_snapshot' : 'manual_snapshot',
-    database: process.env.DB_NAME || 'politico_db',
+    database: process.env.DB_NAME || 'Florida24',
     // 1. Users, 2. Articles, 3. Newsletter, 4. Submissions, 5. Ads, 6. Contact, 7. Advertise leads, 8. Shorts & reels
     data: {
       users: formattedUsers,

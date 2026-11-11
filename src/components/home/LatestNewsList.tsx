@@ -42,7 +42,7 @@ export default async function LatestNewsList() {
       slug: slugify(mockTitles[mockIndex]),
       is_sponsored: mockIndex === 3,
       tags: '[]',
-      writer_name: mockIndex === 3 ? "Fresenius Medical Care" : "Politico Staff"
+      writer_name: mockIndex === 3 ? "Fresenius Medical Care" : "Florida 24 Staff"
     } as any);
     mockIndex++;
   }

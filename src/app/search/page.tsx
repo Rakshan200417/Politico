@@ -205,7 +205,7 @@ function SearchPageContent() {
         {/* Search Header Banner */}
         <div className="bg-white rounded-none shadow-sm border border-gray-200/80 p-6 sm:p-8 mb-8">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#1e1e1e] tracking-tight uppercase mb-2">
-            Search POLITICO
+            Search Florida 24
           </h1>
           <p className="text-sm text-gray-500 mb-6 font-medium">
             Find breaking political news, in-depth investigations, policy insights, and authors.
@@ -335,7 +335,7 @@ function SearchPageContent() {
                             </div>
                             <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">
                               {author.bio ||
-                                "A dedicated journalist delivering accurate, timely, and impactful news and political insights on POLITICO."}
+                                "A dedicated journalist delivering accurate, timely, and impactful news and insights on Florida 24."}
                             </p>
                           </div>
                         </a>

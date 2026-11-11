@@ -369,7 +369,7 @@ export default function AdminDashboard() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `politico_subscribers_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute("download", `florida24_subscribers_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -501,7 +501,7 @@ export default function AdminDashboard() {
           setEditingArticle(null);
         }}
         onSaveSuccess={handleEditorSaveSuccess}
-        userEmail={user?.email || "admin@politico.com"}
+        userEmail={user?.email || "admin@florida24.com"}
         userName={displayName}
         isAdminMode={true}
       />
@@ -1316,7 +1316,7 @@ export default function AdminDashboard() {
                   <div className="bg-gray-50 p-4 rounded-none text-xs text-gray-700 leading-relaxed font-sans border border-gray-100 whitespace-pre-wrap">
                     {selectedSystemUser.bio && selectedSystemUser.bio.trim() 
                       ? selectedSystemUser.bio 
-                      : `${selectedSystemUser.role.charAt(0).toUpperCase() + selectedSystemUser.role.slice(1)} account on POLITICO.`}
+                      : `${selectedSystemUser.role.charAt(0).toUpperCase() + selectedSystemUser.role.slice(1)} account on Florida 24.`}
                   </div>
                 </div>
 

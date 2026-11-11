@@ -47,7 +47,7 @@ export async function GET(request: Request) {
           enclosureTag = `\n<enclosure url="${imgUrl}" length="0" type="${mimeType}"/>`;
         }
 
-        const authorName = article.writer_name || 'Washington Global Times Editorial';
+        const authorName = article.writer_name || 'Florida 24 Editorial';
         const categoryName = article.category || 'General';
 
         return `<item>
@@ -73,14 +73,14 @@ export async function GET(request: Request) {
     const rssXml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
 <channel>
-<title>Washington Global Times</title>
+<title>Florida 24</title>
 <link>${baseUrl}</link>
-<description>Latest news, politics, business, technology, sports and health updates from Washington Global Times.</description>
+<description>Latest news, politics, business, technology, sports and health updates from Florida 24 News Network LLC.</description>
 <language>en-us</language>
 <atom:link href="${baseUrl}/rss.xml" rel="self" type="application/rss+xml"/>
 <image>
-<url>${baseUrl}/logo.svg</url>
-<title>Washington Global Times</title>
+<url>${baseUrl}/images/logo.svg</url>
+<title>Florida 24</title>
 <link>${baseUrl}</link>
 </image>
 ${itemsXml}

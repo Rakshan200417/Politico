@@ -157,11 +157,11 @@ export default function NewslettersPage() {
         <div className="max-w-4xl mx-auto px-4 lg:px-8 mt-12">
           <div className="text-center mb-12">
             <h2 className="text-2xl md:text-3xl font-serif font-medium text-[#111827] mb-6 leading-relaxed">
-              Let the best of POLITICO news come to you.
+              Let the best of Florida 24 news come to you.
             </h2>
             <p className="text-[13px] text-gray-600 max-w-2xl mx-auto leading-relaxed">
               Select any of the free newsletters below. Then, enter your email address and click "Sign Up." <br className="hidden md:block" />
-              Your newsletter subscriptions with us are subject to POLITICO's <a href="#" className="text-[#ce1126] hover:underline">Terms and Conditions</a> and <a href="#" className="text-[#ce1126] hover:underline">Privacy Policy</a>.
+              Your newsletter subscriptions with us are subject to Florida 24's <a href="/terms" className="text-[#ce1126] hover:underline">Terms and Conditions</a> and <a href="/privacy" className="text-[#ce1126] hover:underline">Privacy Policy</a>.
             </p>
             <button
               onClick={handleSelectAll}

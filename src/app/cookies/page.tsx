@@ -4,8 +4,8 @@ import { Cookie } from "lucide-react";
 import LegalPageLayout, { LegalSection } from "@/components/legal/LegalPageLayout";
 
 export const metadata: Metadata = {
-  title: "Cookie Policy - POLITICO",
-  description: "Understand how POLITICO uses cookies and tracking technologies to deliver and improve our digital news services.",
+  title: "Cookie Policy - Florida 24",
+  description: "Understand how Florida 24 uses cookies and tracking technologies to deliver and improve our digital news services.",
 };
 
 const cookieSections: LegalSection[] = [
@@ -16,7 +16,7 @@ const cookieSections: LegalSection[] = [
     content: (
       <>
         <p>
-          This Cookie Policy explains how <strong>POLITICO</strong> (&quot;POLITICO&quot;, &quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) uses cookies and similar tracking technologies when you visit our website and use our online services.
+          This Cookie Policy explains how <strong>Florida 24</strong> (&quot;Florida 24&quot;, &quot;Florida 24 News Network LLC&quot;, &quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) uses cookies and similar tracking technologies when you visit our website and use our online services.
         </p>
         <p>
           By continuing to use our website, you consent to our use of cookies as described in this Cookie Policy, unless you disable them through your browser settings.
@@ -119,7 +119,7 @@ const cookieSections: LegalSection[] = [
     title: "6. Contact Us",
     content: (
       <p>
-        If you have questions about our use of cookies or tracking technologies, please contact our privacy compliance team at <span className="text-[#ce1126] font-bold">cookies@politico.com</span> or via our <a href="/contact-us" className="text-[#ce1126] font-bold hover:underline">Contact Us</a> page.
+        If you have questions about our use of cookies or tracking technologies, please contact our privacy compliance team at <span className="text-[#ce1126] font-bold">cookies@florida24.com</span> or via our <a href="/contact-us" className="text-[#ce1126] font-bold hover:underline">Contact Us</a> page.
       </p>
     ),
   },

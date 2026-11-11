@@ -12,7 +12,7 @@ const pool =
     port: Number(process.env.DB_PORT) || 3306,
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '', // Default XAMPP password is empty
-    database: process.env.DB_NAME || 'politico_db', // Ensure this matches what you created in phpMyAdmin
+    database: process.env.DB_NAME || 'Florida24', // Ensure this matches what you created in phpMyAdmin
     waitForConnections: true,
     connectionLimit: 10,
     maxIdle: 10,

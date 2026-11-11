@@ -106,7 +106,7 @@ export default async function Home() {
             </div>
           </div>
 
-          {/* ── POLITICO MAGAZINE Carousel ── */}
+          {/* ── FLORIDA 24 MAGAZINE Carousel ── */}
           <div className="w-full border-t border-b border-gray-200 py-4">
             <MagazineCarousel articles={spotlightArticles} />
           </div>

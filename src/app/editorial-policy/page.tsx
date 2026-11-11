@@ -4,8 +4,8 @@ import { FileText } from "lucide-react";
 import LegalPageLayout, { LegalSection } from "@/components/legal/LegalPageLayout";
 
 export const metadata: Metadata = {
-  title: "Editorial Policy - POLITICO",
-  description: "Learn about POLITICO's editorial standards, journalistic ethics, verification practices, and independence guidelines.",
+  title: "Editorial Policy - Florida 24",
+  description: "Learn about Florida 24's editorial standards, journalistic ethics, verification practices, and independence guidelines.",
 };
 
 const editorialSections: LegalSection[] = [
@@ -15,7 +15,7 @@ const editorialSections: LegalSection[] = [
     title: "Our Commitment",
     content: (
       <p>
-        <strong>POLITICO</strong> is committed to the highest standards of editorial integrity, transparency, accountability, and ethical journalism. Every article, investigation, opinion piece, and multimedia publication is produced under rigorous editorial oversight to ensure that our readers receive trustworthy, accurate, and nonpartisan information.
+        <strong>Florida 24</strong> is committed to the highest standards of editorial integrity, transparency, accountability, and ethical journalism. Every article, investigation, opinion piece, and multimedia publication is produced under rigorous editorial oversight to ensure that our readers receive trustworthy, accurate, and nonpartisan information.
       </p>
     ),
   },
@@ -47,7 +47,7 @@ const editorialSections: LegalSection[] = [
     title: "2. Editorial Independence",
     content: (
       <p>
-        POLITICO maintains complete editorial independence. Editorial decisions are never influenced by advertisers, sponsors, political organizations, government agencies, business partners, financial contributors, or individuals seeking favorable coverage. Our journalists and editors are expected to make decisions solely in the public interest.
+        Florida 24 maintains complete editorial independence. Editorial decisions are never influenced by advertisers, sponsors, political organizations, government agencies, business partners, financial contributors, or individuals seeking favorable coverage. Our journalists and editors are expected to make decisions solely in the public interest.
       </p>
     ),
   },
@@ -77,7 +77,7 @@ const editorialSections: LegalSection[] = [
     title: "5. Original Journalism",
     content: (
       <p>
-        POLITICO values deeply reported, original journalism. Plagiarism, copying, or fabrication in any form is strictly prohibited and grounds for immediate termination.
+        Florida 24 values deeply reported, original journalism. Plagiarism, copying, or fabrication in any form is strictly prohibited and grounds for immediate termination.
       </p>
     ),
   },
@@ -187,7 +187,7 @@ const editorialSections: LegalSection[] = [
     title: "16. Community Standards",
     content: (
       <p>
-        Readers, commenters, and contributors must adhere to civil discourse and respectful engagement across all POLITICO discussion forums.
+        Readers, commenters, and contributors must adhere to civil discourse and respectful engagement across all Florida 24 discussion forums.
       </p>
     ),
   },

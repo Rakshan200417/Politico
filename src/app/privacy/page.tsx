@@ -4,8 +4,8 @@ import { Shield } from "lucide-react";
 import LegalPageLayout, { LegalSection } from "@/components/legal/LegalPageLayout";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy - POLITICO",
-  description: "Learn how POLITICO collects, protects, uses, and respects your personal information and privacy rights.",
+  title: "Privacy Policy - Florida 24",
+  description: "Learn how Florida 24 collects, protects, uses, and respects your personal information and privacy rights.",
 };
 
 const privacySections: LegalSection[] = [
@@ -16,10 +16,10 @@ const privacySections: LegalSection[] = [
     content: (
       <>
         <p>
-          <strong>POLITICO</strong> (&quot;POLITICO&quot;, &quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) respects your privacy and is committed to protecting your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website, use our services, subscribe to our newsletters, submit content, or otherwise interact with our Platform.
+          <strong>Florida 24</strong> (&quot;Florida 24&quot;, &quot;Florida 24 News Network LLC&quot;, &quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) respects your privacy and is committed to protecting your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website, use our services, subscribe to our newsletters, submit content, or otherwise interact with our Platform.
         </p>
         <p>
-          By using the POLITICO Platform, you agree to the practices described in this Privacy Policy.
+          By using the Florida 24 Platform, you agree to the practices described in this Privacy Policy.
         </p>
       </>
     ),
@@ -81,7 +81,7 @@ const privacySections: LegalSection[] = [
     title: "5. Sharing of Information",
     content: (
       <p>
-        We do not sell your personal information. We may share data with trusted service providers who assist in our operations, when required by law or legal process, or to protect the safety and rights of POLITICO and our users.
+        We do not sell your personal information. We may share data with trusted service providers who assist in our operations, when required by law or legal process, or to protect the safety and rights of Florida 24 and our users.
       </p>
     ),
   },
@@ -161,7 +161,7 @@ const privacySections: LegalSection[] = [
     title: "13. Contact Us",
     content: (
       <p>
-        If you have questions, comments, or requests regarding this Privacy Policy or your personal data, please contact our privacy compliance team at <span className="text-[#ce1126] font-bold">privacy@politico.com</span> or via our <a href="/contact-us" className="text-[#ce1126] font-bold hover:underline">Contact Us</a> page.
+        If you have questions, comments, or requests regarding this Privacy Policy or your personal data, please contact our privacy compliance team at <span className="text-[#ce1126] font-bold">privacy@florida24.com</span> or via our <a href="/contact-us" className="text-[#ce1126] font-bold hover:underline">Contact Us</a> page.
       </p>
     ),
   },
