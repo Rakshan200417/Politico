@@ -230,7 +230,7 @@ export default function Header() {
         </div>
 
         {/* Right Actions: NEWSLETTER SIGNUP | Login Icon | Search Icon */}
-        <div className="flex items-center justify-end gap-4 text-[10px] font-bold uppercase tracking-wide text-gray-800 flex-1 flex-shrink-0 min-w-max relative z-10">
+        <div className="flex items-center justify-end gap-2 sm:gap-4 text-[10px] font-bold uppercase tracking-wide text-gray-800 flex-1 flex-shrink-0 min-w-max relative z-10">
           <a
             href="/newsletters"
             className={`transition-all duration-300 ease-out bg-[#ce1126] text-white px-4 py-2 hover:bg-[#a00c1c] hidden sm:inline whitespace-nowrap ${isCompact ? "opacity-0 pointer-events-none" : "opacity-100"
@@ -349,8 +349,8 @@ export default function Header() {
           ) : (
             <a
               href="/login"
-              className={`transition-all duration-300 ease-out text-gray-800 hover:text-[#ce1126] hidden sm:inline ${isCompact ? "opacity-0 pointer-events-none" : "opacity-100"
-                }`}
+              className="p-1 text-gray-800 hover:text-[#ce1126] transition-colors flex items-center justify-center"
+              aria-label="Sign in / Profile"
             >
               <User className="w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7" strokeWidth={2} />
             </a>
@@ -440,6 +440,45 @@ export default function Header() {
       {isMenuOpen && (
         <div className="lg:hidden w-full bg-white shadow-xl max-h-[85vh] overflow-y-auto">
           <div className="px-4 py-4 divide-y divide-gray-100">
+            {/* Mobile Drawer Account / Profile Section */}
+            <div className="pb-3">
+              {user ? (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-[#b01753] text-white font-bold text-xs flex items-center justify-center overflow-hidden">
+                      {user.avatar_url ? (
+                        <img src={user.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                      ) : (
+                        (user.name?.[0] || user.email[0] || "U").toUpperCase()
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-bold text-gray-900 text-xs truncate">
+                        {user.name || user.email}
+                      </div>
+                      <div className="text-[10px] text-gray-400 capitalize">
+                        {user.role} Account
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="text-xs font-bold text-red-600 hover:underline"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <a
+                  href="/login"
+                  className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#10141e] text-white text-xs font-bold uppercase tracking-wider rounded-none hover:bg-black transition-colors"
+                >
+                  <User size={15} />
+                  <span>Sign In / Profile</span>
+                </a>
+              )}
+            </div>
+
             {activeCategories.map((cat) => {
               const subCategories = megaMenuData[cat.id] || [];
               const isOpen = openMobileCategories.includes(cat.id);
